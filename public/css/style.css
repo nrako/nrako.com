@@ -1,0 +1,49 @@
+* {
+  position: relative;
+}
+body {
+  background-color: #e3e2dd;
+}
+.main {
+  background-color: #fff;
+  margin-bottom: 100px !important;
+  padding-top: 20px;
+}
+@media (min-width: 980px) {
+  .container-fluid {
+    width: 800px;
+    margin: auto;
+  }
+  section:first-child {
+    padding-top: 40px;
+  }
+  #flashmsgs .alert {
+    width: 700px;
+    margin: 4px auto;
+  }
+}
+.form-contact textarea {
+  height: 150px;
+}
+.form-actions {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  padding: 10px;
+}
+footer {
+  height: 200px;
+}
+.strikethrough {
+  text-transform: line-trough;
+}
+#flashmsgs {
+  position: fixed;
+  top: 44px;
+  left: 0;
+  right: 0;
+  z-index: 1020;
+}
+.socialnetworks {
+  text-align: center;
+}
