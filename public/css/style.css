@@ -47,3 +47,8 @@ footer {
 .socialnetworks {
   text-align: center;
 }
+.alert .close {
+  position: absolute;
+  top: 1px;
+  right: 5px;
+}

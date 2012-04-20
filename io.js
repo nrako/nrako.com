@@ -36,7 +36,8 @@ exports.run = function run(server, sessionStore) {
     });
 
     exports.flashMsg = function (type, msg) {
-      sio.sockets.in(data.sessionID).emit('flashmsg', {guid: (+new Date()), type: type, msg: msg});
+      sio.sockets.in(data.sessionID)
+        .emit('flashmsg', {guid: (+new Date()), type: type, msg: msg});
     }
   });
 
@@ -51,7 +52,7 @@ exports.run = function run(server, sessionStore) {
 
   sio.sockets.on('connection', function ioOnConnection (socket) {
     var hs = socket.handshake;
-    console.log('A socket with sessionID ' + hs.sessionID + ' connected!');
+    //console.log('A socket with sessionID ' + hs.sessionID + ' connected!');
 
     socket.join(hs.sessionID);
 
@@ -70,10 +71,18 @@ exports.run = function run(server, sessionStore) {
     }, 60 * 1000);
 
     socket.on('disconnect', function () {
-      console.log('A socket with sessionID ' + hs.sessionID + ' disconnected!');
+      //console.log('A socket with sessionID ' + hs.sessionID + ' disconnected!');
       // clear the socket interval to stop refreshing the session
       clearInterval(intervalID);
     });
+
+    socket.on('closeflashmsg', function (flashMsgKey) {
+      console.log('closeflashmsg', socket.handshake.sessionID, arguments);
+      
+      socket.volatile
+        .broadcast.to(socket.handshake.sessionID)
+        .emit('closeflashmsg', flashMsgKey);
+    })
 
   });
 }

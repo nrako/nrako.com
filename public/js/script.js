@@ -1,15 +1,17 @@
 
-/*
-$(".alert").alert().each(function () {
-  $(this).delay(4000).fadeOut(1000).find('[data-dismiss="alert"]').delay(5000).queue(function() {
-    $(this).trigger('click');
-  });
-});
-*/
-
 $('#navbar').scrollspy();
 
 var socket = io.connect(window.location.protocol + '//' + window.location.host);
+
+$('.alert .close').live('click', function () {
+  $(this).parent().fadeOut(500, function () {
+    if ($(this).attr('id') != null) {
+      socket.emit('closeflashmsg', $(this).attr('id'));
+    }
+    $(this).remove();
+  });
+  return false;
+});
 
 socket.on('message', function (data) {
   console.log('IO Message', data);
@@ -17,6 +19,10 @@ socket.on('message', function (data) {
 
 socket.on('flashmsg', function (data) {
   $('#flashmsgs').append(createFlashMsgHtml(data));
+});
+
+socket.on('closeflashmsg', function (flashMsgId) {
+  $('#' + flashMsgId).remove();
 });
 
 function showFlashMsgs(data) {
@@ -30,7 +36,10 @@ function showFlashMsgs(data) {
   }
 }
 function createFlashMsgHtml(data) {
-  return '<div ' + (data.guid ? 'id="fm-' + data.guid +'"' : '') + 'class="alert alert-' + data.type + '">' + data.msg + '<a class="close" data-dismiss="alert" href="#">&times;</a></div>';
+  return '<div ' + (data.guid ? 'id="fm-' + data.guid +'"' : '') 
+    + 'class="alert alert-' + data.type + '">' 
+    + data.msg 
+    + '<a class="close" data-dismiss="alert" href="#">&times;</a></div>';
 }
 
 $('.form-contact').submit(function (e) {
@@ -38,7 +47,7 @@ $('.form-contact').submit(function (e) {
   $.post(f.attr('action'), f.serialize(), function (data) {
     if (data.flash)
       showFlashMsgs(data.flash);
-
+    else
     f.get(0).reset();
   });
   return false;
