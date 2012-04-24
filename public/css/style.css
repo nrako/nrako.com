@@ -4,6 +4,139 @@
 body {
   background-color: #e3e2dd;
 }
+@font-face {
+  font-family: 'JustVector';
+  src: url("../fnt/justvectorv2-webfont.eot");
+  src: url("../fnt/justvectorv2-webfont.eot?#iefix") format('eot'), url("../fnt/justvectorv2-webfont.woff") format('woff'), url("../fnt/justvectorv2-webfont.ttf") format('truetype'), url("../fnt/justvectorv2-webfont.svg#webfontkw9J4lGf") format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+div.socialicons > a {
+  font-family: 'JustVector', Arial, sans-serif;
+  font-size: 3.2em;
+  line-height: 1.4em;
+  display: inline-block;
+  height: 1.4em;
+  width: 1.4em;
+  -webkit-border-radius: 0.1em;
+  -moz-border-radius: 0.1em;
+  border-radius: 0.1em;
+  margin: 0.1em;
+  background-color: #eee;
+  color: #333;
+  text-shadow: 0 0 2px #333;
+  -webkit-box-shadow: 0.06em 0.06em 0.03em #ddd;
+  -moz-box-shadow: 0.06em 0.06em 0.03em #ddd;
+  box-shadow: 0.06em 0.06em 0.03em #ddd;
+}
+div.socialicons > a:hover,
+div.socialicons > a:focus {
+  outline: 0;
+  text-decoration: none;
+}
+div.socialicons a.twitter:hover,
+div.socialicons a.twitter:focus {
+  background-color: #3cf;
+  color: #fff;
+  text-shadow: 0 0 2px #fff;
+}
+div.socialicons a.linkedin:hover,
+div.socialicons a.linkedin:focus {
+  background-color: #0093c5;
+  color: #fff;
+  text-shadow: 0 0 2px #fff;
+}
+div.socialicons a.skype:hover,
+div.socialicons a.skype:focus {
+  background-color: #00aff0;
+  color: #fff;
+  text-shadow: 0 0 2px #fff;
+}
+div.socialicons a.github:hover,
+div.socialicons a.github:focus {
+  background-color: #333;
+  color: #fafafa;
+  text-shadow: 0 0 2px #fafafa;
+}
+div.socialicons a.tumblr:hover,
+div.socialicons a.tumblr:focus {
+  background-color: #2c4762;
+  color: #fafafa;
+  text-shadow: 0 0 2px #fafafa;
+}
+div.socialicons a.facebook:hover,
+div.socialicons a.facebook:focus {
+  background-color: #3b5998;
+  color: #fff;
+  text-shadow: 0 0 2px #fff;
+}
+div.socialicons a.delicious:hover,
+div.socialicons a.delicious:focus {
+  background-color: #ddd;
+  color: #ddd;
+  text-shadow: none;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+div.socialicons a.delicious:hover .tl,
+div.socialicons a.delicious:focus .tl {
+  position: absolute;
+  display: block;
+  width: 0.7em;
+  height: 0.7em;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+}
+div.socialicons a.delicious:hover .tr,
+div.socialicons a.delicious:focus .tr {
+  position: absolute;
+  display: block;
+  width: 0.7em;
+  height: 0.7em;
+  top: 0;
+  right: 0;
+  background-color: #3274d2;
+}
+div.socialicons a.delicious:hover .bl,
+div.socialicons a.delicious:focus .bl {
+  position: absolute;
+  display: block;
+  width: 0.7em;
+  height: 0.7em;
+  bottom: 0;
+  left: 0;
+  background-color: #000;
+}
+div.socialicons a.googleplus {
+  letter-spacing: 0.3em;
+}
+div.socialicons a.googleplus:hover,
+div.socialicons a.googleplus:focus {
+  background-color: #cc402f;
+  color: #fafafa;
+  line-height: 1.4em;
+  text-shadow: 0 0 2px #fafafa;
+}
+div.socialicons a.googleplus sup {
+  position: absolute;
+  top: 0.69em;
+  right: -0.18em;
+}
+.ttip {
+  opacity: 0.9;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  position: absolute;
+  background-color: #333;
+  padding: 20px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
 .main {
   background-color: #fff;
   margin-bottom: 100px !important;

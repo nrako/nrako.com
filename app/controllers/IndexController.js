@@ -1,15 +1,11 @@
 var form = require('express-form'),
     field = form.field;
 
-form.configure({
-  flashErrors: false
-});
+form.configure({flashErrors: false});
 
 module.exports = function IndexController(app) {
 
   app.get('/', function ResumeAction(req, res) {
-    require('../../io').sio.sockets.in(req.sessionID).send('Man, good to see you back!');
-
     res.render('index', { title: 'Home' });
   });
 
@@ -83,5 +79,4 @@ module.exports = function IndexController(app) {
       else
         res.render('contact', { title: 'Contact' });
   });
-
 }

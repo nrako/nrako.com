@@ -1,0 +1,118 @@
+// http://www.alexpeattie.com/projects/justvector_font/
+
+default-font-size = 13px
+icon-font-size = 3.2em
+icon-size = 1.4em
+
+div.socialicons
+  > a
+    font-family: 'JustVector', Arial, sans-serif
+    font-size: icon-font-size
+    line-height: icon-size
+    display: inline-block
+    height: icon-size
+    width: icon-size
+    border-radius: 0.1em
+    margin: 0.1em
+    background-color: #eee
+    color: #333
+    text-shadow: 0 0 2px #333
+    box-shadow: 0.06em 0.06em 0.03em #ddd
+    &:hover
+    &:focus
+      outline: 0
+      text-decoration: none
+
+  a.twitter
+    &:hover
+    &:focus
+      background-color: rgba(51, 204, 255, 1)
+      color: #fff
+      text-shadow: 0 0 2px #fff
+
+  a.linkedin
+    &:hover
+    &:focus
+      background-color: rgba(0, 147, 197, 1)
+      color: #fff
+      text-shadow: 0 0 2px #fff
+
+  a.skype
+    &:hover
+    &:focus
+      background-color: rgba(0, 175, 240, 1)
+      color: #fff
+      text-shadow: 0 0 2px #fff
+
+  a.github
+    &:hover
+    &:focus
+      background-color: #333
+      color: rgba(250, 250, 250, 1)
+      text-shadow: 0 0 2px rgba(250, 250, 250, 1)
+
+  a.tumblr
+    &:hover
+    &:focus
+      background-color: #2C4762
+      color: rgba(250, 250, 250, 1)
+      text-shadow: 0 0 2px rgba(250, 250, 250, 1)
+
+  a.facebook
+    &:hover
+    &:focus
+      background-color: #3B5998
+      color: #fff
+      text-shadow: 0 0 2px #fff
+
+  delicious-quarter()
+    position: absolute
+    display: block
+    width: (icon-size / 2)em
+    height: (icon-size / 2)em
+
+  a.delicious
+    &:hover
+    &:focus
+      background-color: rgba(221, 221, 221, 1)
+      color: rgba(221, 221, 221, 1)
+      text-shadow: none
+      border-radius: 0
+      .tl
+        delicious-quarter()
+        top: 0
+        left: 0
+        background-color: #fff
+      .tr
+        delicious-quarter()
+        top: 0
+        right: 0
+        background-color: rgba(50, 116, 210, 1)
+      .bl
+        delicious-quarter()
+        bottom: 0
+        left: 0
+        background-color: #000
+
+  a.googleplus
+    letter-spacing: 0.3em
+    &:hover
+    &:focus
+      background-color: rgba(204, 64, 47, 1)
+      color: rgba(250, 250, 250, 1)
+      line-height: 1.4em
+      text-shadow: 0 0 2px rgba(250, 250, 250, 1)
+    sup
+      position: absolute
+      top: 0.69em
+      right: -0.18em
+
+.ttip
+  opacity: 0.9
+  top: 0
+  left: 0
+  visibility: hidden
+  position: absolute
+  background-color: #333
+  padding: 20px
+  border-radius: 4px

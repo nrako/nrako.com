@@ -1,5 +1,17 @@
 
 $('#navbar').scrollspy();
+$(".collapse").collapse()
+$('.navbar a').click(function () {
+  var href = $(this).attr('href');
+  if (!href || href.substr(0, 1) != '#')
+    return;
+
+  $('body').animate({
+    scrollTop: $(href).offset().top
+  }, 400);
+
+  return false;
+});
 
 var socket = io.connect(window.location.protocol + '//' + window.location.host);
 
@@ -11,10 +23,6 @@ $('.alert .close').live('click', function () {
     $(this).remove();
   });
   return false;
-});
-
-socket.on('message', function (data) {
-  console.log('IO Message', data);
 });
 
 socket.on('flashmsg', function (data) {
@@ -47,12 +55,13 @@ $('.form-contact').submit(function (e) {
   $.post(f.attr('action'), f.serialize(), function (data) {
     if (data.flash)
       showFlashMsgs(data.flash);
-    else
-    f.get(0).reset();
+    
+    if (data.flash && !data.flash.error)
+      f.get(0).reset();
   });
   return false;
 });
-
+/*
 // google+ badge
 window.___gcfg = {lang: 'en'};
 (function() {var po = document.createElement("script");
@@ -61,13 +70,5 @@ window.___gcfg = {lang: 'en'};
   s.parentNode.insertBefore(po, s);
 })();
 
-// twitter follow button
-!function(d,s,id){
-  var js,fjs=d.getElementsByTagName(s)[0];
-  if(!d.getElementById(id)){
-    js=d.createElement(s);
-    js.id=id;
-    js.src="//platform.twitter.com/widgets.js";
-    fjs.parentNode.insertBefore(js,fjs);
-  }
-}(document,"script","twitter-wjs");
+//$('a[data-ttip]').ttip();
+*/

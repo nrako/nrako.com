@@ -20,7 +20,7 @@ head
   link(rel='stylesheet', href='lib/bootstrap/css/bootstrap.min.css')
   link(rel='stylesheet', href='lib/bootstrap/css/bootstrap-responsive.min.css')
   link(rel='stylesheet', href='css/style.css')
-  link(rel='stylesheet', href='css/boxshadoweffects.css')
+  //link(rel='stylesheet', href='css/boxshadoweffects.css')
 
   <!-- Le fav and touch icons -->
   link(rel="shortcut icon", href="ico/favicon.ico")
@@ -35,7 +35,7 @@ body(data-spy="scroll")
   include ../partials/nav
   include ../partials/messages
  
-  div.main.container-fluid.effect8!= body
+  div.main.container-fluid!= body
     footer
       p &copy; nrako.com 2012
   
@@ -44,7 +44,9 @@ body(data-spy="scroll")
 
   script(src='js/plugins.js')
   script(src='lib/bootstrap/js/bootstrap-scrollspy.js')
+  script(src='lib/bootstrap/js/bootstrap-collapse.js')
   script(src='/socket.io/socket.io.js')
+  //script(src='js/ttip.js')
   script(src='js/script.js')
 
   script
