@@ -1,6 +1,6 @@
 # README
 
-test1
+test2
 
 This is only my personnal website, a playground over a node.js stack.
 
