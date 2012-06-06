@@ -1,2 +1,8 @@
 node_modules
 npm-debug.log
+dna.json
+cookbooks
+log
+tmp
+fleet.json
+.vagrant
