@@ -15,7 +15,7 @@
     , "mailer": ">= 0.6.7"
     , "connect": "2.0.3"
     , "console-trace": ">= 0.1.0"
-    , "expess-form": ">= 0.6.2"
+    , "express-form": ">= 0.6.2"
   }
   , "engines" : { 
       "node" : ">=0.6.6"

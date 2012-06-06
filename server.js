@@ -31,5 +31,11 @@ mvc.boot(app);
 // run socket.io
 io.run(server, mvc.sessionStore);
 
-server.listen(config.port);
+var port = process.argv[2] || config.port;
+
+port = isNaN(port) ? config.port : port;
+
+console.dir(process.env);
+
+server.listen(port);
 console.log("Express server listening on port %d in %s mode for host %s", server.address().port, server.settings.env, config.hostname);

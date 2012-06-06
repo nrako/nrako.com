@@ -47,19 +47,19 @@ module.exports = function IndexController(app) {
           ssl:              config.email.ssl,
           domain:           config.hostname,
           to:               config.contact.to,
-          from:             config.email.username,
+          from:             process.env.EMAIL_USERNAME,
           reply_to:         req.form.email,
           subject:          'Contact Form : ' + req.form.headline,
           body:             req.form.msg,
           authentication:   'login',
-          username:         config.email.username,
-          password:         config.email.pwd
+          username:         process.env.EMAIL_USERNAME,
+          password:         process.env.EMAIL_PWD
         };
         
         if (config.email.disable === true) {
           io.flashMsg('info','Email disabled!');
         } else
-          console.log('send email', email);
+          //console.log('send email', email);
           mailer.send(email, function sendContactMailResult(err, result) {
             if (err || !result) {
               console.error(err);

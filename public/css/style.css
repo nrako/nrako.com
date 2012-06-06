@@ -19,14 +19,12 @@ div.socialicons > a {
   height: 1.4em;
   width: 1.4em;
   -webkit-border-radius: 0.1em;
-  -moz-border-radius: 0.1em;
   border-radius: 0.1em;
   margin: 0.1em;
   background-color: #eee;
   color: #333;
   text-shadow: 0 0 2px #333;
   -webkit-box-shadow: 0.06em 0.06em 0.03em #ddd;
-  -moz-box-shadow: 0.06em 0.06em 0.03em #ddd;
   box-shadow: 0.06em 0.06em 0.03em #ddd;
 }
 div.socialicons > a:hover,
@@ -76,7 +74,6 @@ div.socialicons a.delicious:focus {
   color: #ddd;
   text-shadow: none;
   -webkit-border-radius: 0;
-  -moz-border-radius: 0;
   border-radius: 0;
 }
 div.socialicons a.delicious:hover .tl,
@@ -126,7 +123,8 @@ div.socialicons a.googleplus sup {
 }
 .ttip {
   opacity: 0.9;
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+  filter: alpha(opacity=90);
   top: 0;
   left: 0;
   visibility: hidden;
@@ -134,7 +132,6 @@ div.socialicons a.googleplus sup {
   background-color: #333;
   padding: 20px;
   -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 .main {
@@ -160,7 +157,6 @@ div.socialicons a.googleplus sup {
 }
 .form-actions {
   -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
   border-radius: 5px;
   padding: 10px;
 }
