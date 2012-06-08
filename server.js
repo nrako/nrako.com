@@ -34,7 +34,7 @@ server.use(express.vhost('*.' + config.hostname, redirect));
 mvc.boot(app);
 
 // run socket.io
-io.run(server, mvc.sessionStore);
+//io.run(server, mvc.sessionStore);
 
 console.dir(process.env);
 
