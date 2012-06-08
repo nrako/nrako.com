@@ -8,8 +8,8 @@ console.traceAlways = true;
 
 var express = require('express'),
     config = require('config'),
-    mvc = require('./mvc'),
-    io = require('./io');
+    mvc = require('./mvc');//,
+    //io = require('./io');
 
 // TODO use https://github.com/LearnBoost/up
 var server = module.exports = express.createServer();
@@ -18,7 +18,7 @@ var app = express.createServer();
 
 var redirect = express.createServer();
 
-var port = process.argv[2] || config.port;
+var port = process.env.port || (process.argv[2] || config.port);
 
 port = isNaN(port) ? config.port : port;
 
