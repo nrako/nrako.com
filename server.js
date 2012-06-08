@@ -18,9 +18,13 @@ var app = express.createServer();
 
 var redirect = express.createServer();
 
+var port = process.argv[2] || config.port;
+
+port = isNaN(port) ? config.port : port;
+
 // redirect all subdomain www and others
 redirect.all('*', function(req, res){
-  res.redirect('http://' + config.hostname + (config.port == 80 ? '' :':' + config.port) + req.url);
+  res.redirect('http://' + config.hostname + (port == 80 ? '' :':' + port) + req.url);
 });
 
 server.use(express.vhost(config.hostname, app));
@@ -31,10 +35,6 @@ mvc.boot(app);
 
 // run socket.io
 io.run(server, mvc.sessionStore);
-
-var port = process.argv[2] || config.port;
-
-port = isNaN(port) ? config.port : port;
 
 console.dir(process.env);
 
