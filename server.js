@@ -34,9 +34,9 @@ server.use(express.vhost('*.' + config.hostname, redirect));
 mvc.boot(app);
 
 // run socket.io
-//io.run(server, mvc.sessionStore);
+io.run(server, mvc.sessionStore);
 
-console.dir(process.env);
+//console.dir(process.env);
 
 server.listen(port);
 //console.log("Express server listening on port %d in %s mode for host %s", server.address().port, server.settings.env, config.hostname);
