@@ -39,4 +39,4 @@ mvc.boot(app);
 //console.dir(process.env);
 
 server.listen(port);
-//console.log("Express server listening on port %d in %s mode for host %s", server.address().port, server.settings.env, config.hostname);
+console.log("Express server listening on port %d in %s mode for host %s", server.address().port, server.settings.env, config.hostname);
