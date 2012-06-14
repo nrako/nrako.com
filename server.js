@@ -9,7 +9,7 @@ console.traceAlways = true;
 var express = require('express'),
     config = require('config'),
     mvc = require('./mvc');//,
-    //io = require('./io');
+    io = require('./io');
 
 // TODO use https://github.com/LearnBoost/up
 var server = module.exports = express.createServer();
@@ -34,7 +34,7 @@ server.use(express.vhost('*.' + config.hostname, redirect));
 mvc.boot(app);
 
 // run socket.io
-//io.run(server, mvc.sessionStore);
+io.run(server, mvc.sessionStore);
 
 console.dir(process.env);
 
