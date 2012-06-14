@@ -1,6 +1,6 @@
 {
-  "hostname": "nrako.azurewebsites.net",
-  "port": 3000,
+  "hostname": "nrako.com",
+  "port": 8000,
   "email" : {
   }
 }

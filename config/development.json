@@ -1,6 +1,6 @@
 {
   "hostname": "nrako.dev",
-  "port": 3000,
+  "port": 8000,
   "email" : {
     "disable": false
   }
