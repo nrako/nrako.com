@@ -1,0 +1,7 @@
+{
+  "hostname": "nrako.test",
+  "port": 8000,
+  "email" : {
+    "disable": false
+  }
+}
