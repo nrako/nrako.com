@@ -24,7 +24,7 @@ port = isNaN(port) ? config.port : port;
 
 // redirect all subdomain www and others
 redirect.all('*', function(req, res){
-  res.redirect('http://' + config.hostname + (port == 80 ? '' :':' + port) + req.url);
+  res.redirect('http://' + config.hostname + req.url);
 });
 
 server.use(express.vhost(config.hostname, app));
