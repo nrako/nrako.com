@@ -6,7 +6,7 @@
 // if IE 8
   | <html class="no-js ie8 oldie" lang="en">
 // if gt IE 8
-  | <html class="no-js" lang="en"> 
+  | <html class="no-js" lang="en">
 head
   meta(charset='utf-8')
   meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
@@ -22,31 +22,25 @@ head
   link(rel='stylesheet', href='css/style.css')
   //link(rel='stylesheet', href='css/boxshadoweffects.css')
 
-  <!-- Le fav and touch icons -->
   link(rel="shortcut icon", href="ico/favicon.ico")
   link(rel="apple-touch-icon-precomposed", sizes="114x114", href="ico/apple-touch-icon-114-precomposed.ico")
   link(rel="apple-touch-icon-precomposed", sizes="72x72", href="ico/apple-touch-icon-72-precomposed.ico")
   link(rel="apple-touch-icon-precomposed", href="ico/apple-touch-icon-57-precomposed.ico")
 
-  
+
   script(src='lib/modernizr/modernizr-2.5.3.js')
 
 body(data-spy="scroll")
-  include ../partials/nav
-  include ../partials/messages
- 
-  div.main.container-fluid!= body
-    footer
-      p &copy; nrako.com 2012
-  
+  div#flashmsgs
+
+  div.main.container-fluid
+    block content
+
   script(src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js')
   script window.jQuery || document.write('<script src="js/lib/jquery/jquery-1.7.1.min.js"><\\/script>');
 
   script(src='js/plugins.js')
-  script(src='lib/bootstrap/js/bootstrap-scrollspy.js')
-  script(src='lib/bootstrap/js/bootstrap-collapse.js')
-  script(src='/socket.io/socket.io.js')
-  //script(src='js/ttip.js')
+  script(src='http://app.eventsourcehq.com/es.js')
   script(src='js/script.js')
 
   script
@@ -54,7 +48,7 @@ body(data-spy="scroll")
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
     g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
     s.parentNode.insertBefore(g,s)}(document,'script'));
-  
+
   // if lt IE 7
     script(src='//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.2/CFInstall.min.js')
 

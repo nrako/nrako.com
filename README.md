@@ -1,26 +1,19 @@
 # README
 
-test5
+Simple landing personal website.
 
-This is only my personnal website, a playground over a node.js stack.
+## Versions
 
-## Stack involves
-
-* Node.js (0.6)
-* express (2.5)
-* socket.io (0.9)
-* jade
-* stylus
+* v1 : aws ec2, chef, express v2, socket.io, bootstrap
+* v2 : heroku, express v3, EventSource HQ, SendGrid, bootstrap
 
 ## Credits
 
-Thanks to @alexpeattie and Sergio Diaz for [Just Vector font icons](http://www.alexpeattie.com/projects/justvector_font/)
+@alexpeattie and Sergio Diaz for [Just Vector font icons](http://www.alexpeattie.com/projects/justvector_font/)
 
 ## Licence
 
 (The MIT License)
-
-Copyright (c) 2012 Nicolas Rakotomihamina <@nrako>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
