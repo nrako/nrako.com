@@ -18,9 +18,10 @@ div.socialicons a.googleplus:hover,div.socialicons a.googleplus:focus{background
 div.socialicons a.googleplus sup{position:absolute;top:.69em;right:-.18em}
 .ttip{opacity:.9;top:0;left:0;visibility:hidden;position:absolute;background-color:#333;padding:20px;border-radius:4px}
 .main{background-color:#fff;margin-bottom:100px !important;padding:20px}
-.hero-unit{text-align:center}
+.hero-unit{text-align:center;}
+.hero-unit h1{font-size:38px}
 @media (max-width: 480px){.hero-unit{padding:30px;}
-.hero-unit h1{font-size:40px}
+.hero-unit h1{font-size:35px}
 h1{font-size:30px}
 h2{font-size:25px}
 h3{font-size:20px}
