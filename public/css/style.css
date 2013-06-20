@@ -20,6 +20,9 @@ div.socialicons a.googleplus sup{position:absolute;top:.69em;right:-.18em}
 .main{background-color:#fff;margin-bottom:100px !important;padding:20px}
 .hero-unit{text-align:center;}
 .hero-unit h1{font-size:38px}
+h1{font-size:25px;text-align:center}
+.page-header{margin-bottom:10px;}
+.page-header h1{margin-bottom:0}
 @media (max-width: 480px){.hero-unit{padding:30px;}
 .hero-unit h1{font-size:35px}
 h1{font-size:30px}
