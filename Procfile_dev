@@ -1,1 +1,0 @@
-web: nodemon --debug app.js --watch app.s --watch public --watch routes --watch views
