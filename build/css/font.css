@@ -1,0 +1,62 @@
+@charset "UTF-8";
+@font-face {
+  font-family: "nrako";
+  src: url("/fonts/nrako.eot");
+  src: url("/fonts/nrako.eot?#iefix") format("embedded-opentype"), url("/fonts/nrako.ttf") format("truetype"), url("/fonts/nrako.svg#nrako") format("svg"), url("/fonts/nrako.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+[data-icon]:before {
+  font-family: "nrako" !important;
+  content: attr(data-icon);
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+[class^="icon-"]:before,
+[class*=" icon-"]:before {
+  font-family: "nrako" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.icon-github-alt:before {
+  content: "a";
+}
+.icon-googleplus:before {
+  content: "b";
+}
+.icon-github:before {
+  content: "j";
+}
+.icon-twitter:before {
+  content: "n";
+}
+.icon-tumblr-circled:before {
+  content: "o";
+}
+.icon-skype:before {
+  content: "r";
+}
+.icon-linkedin:before {
+  content: "s";
+}
+.icon-playstation:before {
+  content: "t";
+}
+.icon-rss:before {
+  content: "u";
+}
+.icon-mail:before {
+  content: "c";
+}

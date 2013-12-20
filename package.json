@@ -1,25 +1,8 @@
 {
-  "name": "nrako.com",
-  "version": "0.2.1",
-  "private": true,
-  "description": "@nrako website nrako.com",
-  "scripts": {
-    "start": "node app"
-  },
   "dependencies": {
-    "express": "3.1.0",
-    "jade": "*",
-    "stylus": "*",
-    "nib": "*",
-    "sendgrid": "~0.2.5",
-    "express-form": "~0.7.0",
-    "eshq-js": "0.0.11"
-  },
-  "engines": {
-    "node": "0.8.x",
-    "npm": "1.1.x"
-  },
-  "devDependencies": {
-    "console-trace": "~0.2.1"
+    "wintersmith-stylus": "~0.4.0",
+    "wintersmith-jade": "~0.1.0",
+    "wintersmith": "~2.0.7",
+    "wintersmith-livereload": "~0.1.0"
   }
 }

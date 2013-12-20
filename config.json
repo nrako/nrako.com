@@ -1,0 +1,10 @@
+{
+  "locals": {
+    "title": "Nicholas Rakotomihamina"
+  },
+  "plugins": [
+    "wintersmith-stylus",
+    "wintersmith-jade",
+    "wintersmith-livereload"
+  ]
+}
