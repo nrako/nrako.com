@@ -1,35 +1,9 @@
-# README
+# nrako.com
 
-Simple landing personal website.
+[![wercker status](https://app.wercker.com/status/8855d92005c5cba926ab1a392949f822 "wercker status")](https://app.wercker.com/project/bykey/8855d92005c5cba926ab1a392949f822)
 
-## Versions
-
-* v1 : aws ec2, chef, express v2, socket.io, bootstrap
-* v2 : heroku, express v3, EventSource HQ, SendGrid, bootstrap
-
-## Credits
-
-@alexpeattie and Sergio Diaz for [Just Vector font icons](http://www.alexpeattie.com/projects/justvector_font/)
+Sources for [nrako.github.io](https://github.com/nrako/nrako.github.io).
 
 ## Licence
 
-(The MIT License)
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT
