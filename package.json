@@ -1,0 +1,23 @@
+{
+  "name": "nrako.com",
+  "version": "0.0.1",
+  "description": "nrako.com website",
+  "main": "index.js",
+  "repository": "git@github.com:nrako/nrako.com.git",
+  "author": "Nicholas Rakoto <nico@nrako.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "next": "^4.2.3",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  },
+  "devDependencies": {
+    "eslint": "^4.15.0"
+  }
+}
