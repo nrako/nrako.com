@@ -1,5 +1,6 @@
 module.exports = {
-  globalSetup: './support/setup.js',
-  globalTeardown: './support/teardown.js',
-  testEnvironment: './support/puppeteer_environment.js',
+  globalSetup: './__tests__/.support/setup.js',
+  globalTeardown: './__tests__/.support/teardown.js',
+  testEnvironment: './__tests__/.support/puppeteer_environment.js',
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/__tests__/.support']
 }
