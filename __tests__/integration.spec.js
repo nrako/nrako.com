@@ -12,8 +12,10 @@ describe('/ (Home Page)', () => {
     await page.close()
   })
 
-  it('should load without error', async () => {
+  it('renders correctly', async () => {
     let text = await page.evaluate(() => document.body.textContent)
     expect(text).toContain('Nicholas Rakotomihamina')
+    const img = await page.screenshot()
+    expect(img).toMatchImageSnapshot()
   })
 }, timeout)

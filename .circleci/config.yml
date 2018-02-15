@@ -30,5 +30,11 @@ jobs:
 
       # build next
       - run: npm run build
+      # use ci snapshots for comparisons
+      - run: rm -rf ~/repo/__tests__/__image_snapshots__/ && cp -r ~/repo/__tests__/ci__image_snapshots__/ ~/repo/__tests__/__image_snapshots__/
       # run tests!
       - run: npm run test
+      # store artifacts, diffs from jest-image-snapshot
+      - store_artifacts:
+          path: ~/repo/__tests__/__image_snapshots__/__diff_output__/
+          destination: snapshots-diff

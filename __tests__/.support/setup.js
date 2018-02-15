@@ -12,7 +12,7 @@ module.exports = async function() {
   console.log(chalk.green('Setup Test Server'))
   await server
   console.log(chalk.green('Setup Puppeteer'))
-  const browser = await puppeteer.launch({})
+  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']})
   global.__BROWSER__ = browser
   mkdirp.sync(DIR)
   fs.writeFileSync(path.join(DIR, 'wsEndpoint'), browser.wsEndpoint())
