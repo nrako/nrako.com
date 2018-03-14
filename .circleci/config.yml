@@ -1,0 +1,40 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8.9.4-browsers
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      # build next
+      - run: npm run build
+      # use ci snapshots for comparisons
+      - run: rm -rf ~/repo/__tests__/__image_snapshots__/ && cp -r ~/repo/__tests__/ci__image_snapshots__/ ~/repo/__tests__/__image_snapshots__/
+      # run tests!
+      - run: npm run test
+      # store artifacts, diffs from jest-image-snapshot
+      - store_artifacts:
+          path: ~/repo/__tests__/__image_snapshots__/__diff_output__/
+          destination: snapshots-diff
