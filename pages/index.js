@@ -1,4 +1,4 @@
-import Layout from "../components/layout";
+import Layout from '../components/layout'
 
 export default () => (
   <Layout>
@@ -50,4 +50,4 @@ export default () => (
       }
     `}</style>
   </Layout>
-);
+)

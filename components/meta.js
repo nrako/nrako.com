@@ -1,4 +1,4 @@
-import Head from "next/head";
+import Head from 'next/head'
 
 export default () => (
   <div>
@@ -14,7 +14,7 @@ export default () => (
 
       body {
         color: #101;
-        font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+        font: 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
           Arial, sans-serif;
       }
 
@@ -32,4 +32,4 @@ export default () => (
       }
     `}</style>
   </div>
-);
+)
