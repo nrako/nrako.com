@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "wintersmith-stylus": "~0.4.0",
+    "wintersmith-stylus": "~0.5.1",
     "wintersmith-jade": "~0.1.0",
-    "wintersmith": "~2.0.9",
-    "wintersmith-livereload": "~0.1.0"
+    "wintersmith": "~2.4.1",
+    "wintersmith-livereload": "~1.0.0"
   }
 }
