@@ -36,5 +36,11 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "all"
+  },
+  "now": {
+    "type": "npm",
+    "env": {
+      "NODE_ENV": "production"
+    }
   }
 }
