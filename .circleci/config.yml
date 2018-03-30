@@ -1,15 +1,10 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
-version: 2
+defaults: &defaults
+  docker:
+    - image: circleci/node:8.9.4-browsers
+
 jobs:
   build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:8.9.4-browsers
-
-    working_directory: ~/repo
+    <<: *defaults
 
     steps:
       - checkout
@@ -28,13 +23,42 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # build next
       - run: npm run build
+
+      - persist_to_workspace:
+          root: .
+          paths: .next
+
+  test:
+    <<: *defaults
+
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: .
+
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+
       # use ci snapshots for comparisons
-      - run: rm -rf ~/repo/__tests__/__image_snapshots__/ && cp -r ~/repo/__tests__/ci__image_snapshots__/ ~/repo/__tests__/__image_snapshots__/
+      - run: rm -rf ~/project/__tests__/__image_snapshots__/ && cp -r ~/project/__tests__/ci__image_snapshots__/ ~/project/__tests__/__image_snapshots__/
+
       # run tests!
       - run: npm run test
+
       # store artifacts, diffs from jest-image-snapshot
       - store_artifacts:
-          path: ~/repo/__tests__/__image_snapshots__/__diff_output__/
+          path: ~/project/__tests__/__image_snapshots__/__diff_output__/
           destination: snapshots-diff
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
