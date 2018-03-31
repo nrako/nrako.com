@@ -15,10 +15,13 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
+    "export": "next export",
     "start": "next start",
     "test": "jest",
-    "test:ci": "docker-compose -p tests run -p 3000 --rm web npm run build && npm run test",
-    "test:ciu": "docker-compose -p tests run -p 3000 --rm web npm run test:_ciu",
+    "test:ci":
+      "docker-compose -p tests run -p 3000 --rm web npm run build && npm run test",
+    "test:ciu":
+      "docker-compose -p tests run -p 3000 --rm web npm run test:_ciu",
     "test:_ciu": "next build && jest -u",
     "format": "prettier --write \"**/*.{js,json,md}\"",
     "format:check": "prettier --list-different \"**/*.{js,json,md}\""

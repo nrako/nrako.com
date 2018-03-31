@@ -24,10 +24,13 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run: npm run build
+      - run: npm run export
 
       - persist_to_workspace:
           root: .
-          paths: .next
+          paths:
+            - .next
+            - out
 
   test:
     <<: *defaults
@@ -54,11 +57,40 @@ jobs:
           path: ~/project/__tests__/__image_snapshots__/__diff_output__/
           destination: snapshots-diff
 
+  deploy:
+    <<: *defaults
+
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: .
+
+      - run:
+          command: |
+            git config --global user.email "bot@circleci"
+            git config --global user.name "CircleCI"
+            git clone git@github.com:$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME.git -b gh-pages public
+            cp -a out/. public/.
+            cd public
+            git add -A
+            git commit -m "Automated deployment to GitHub Pages: ${CIRCLE_SHA1}" --allow-empty
+            git push origin gh-pages
+
 workflows:
   version: 2
-  build_and_test:
+  build_test_and_deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              ignore: gh-pages
       - test:
           requires:
             - build
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
