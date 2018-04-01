@@ -2,6 +2,7 @@ defaults: &defaults
   docker:
     - image: circleci/node:8.9.4-browsers
 
+version: 2
 jobs:
   build:
     <<: *defaults
@@ -79,7 +80,7 @@ jobs:
             cp -a out/. public/.
             cd public
             git add -A
-            git commit -m "Automated deployment to GitHub Pages: ${CIRCLE_SHA1}" --allow-empty
+            git commit -m "Automated deployment to GitHub Pages: ${CIRCLE_SHA1} [ci skip]" --allow-empty
             git push origin gh-pages
 
 workflows:
