@@ -32,7 +32,7 @@
     "jest": "^22.4.2",
     "jest-image-snapshot": "^2.4.0",
     "prettier": "1.11.1",
-    "puppeteer": "^1.1.1",
+    "puppeteer": "^1.2.0",
     "rimraf": "^2.6.2"
   },
   "now": {
