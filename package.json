@@ -22,17 +22,17 @@
     "test:_ciu": "next build && jest -u"
   },
   "dependencies": {
-    "next": "^5.0.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "next": "^5.1.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
     "chalk": "^2.3.2",
-    "eslint": "^4.18.2",
-    "jest": "^22.4.2",
+    "eslint": "^4.19.1",
+    "jest": "^22.4.3",
     "jest-image-snapshot": "^2.4.0",
     "prettier": "1.11.1",
-    "puppeteer": "^1.1.1",
+    "puppeteer": "^1.2.0",
     "rimraf": "^2.6.2"
   },
   "now": {
