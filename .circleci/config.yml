@@ -17,7 +17,6 @@ jobs:
           - v1-dependencies-
 
       - run: npm install
-      - run: sudo npm install -g greenkeeper-lockfile@1
 
       - save_cache:
           paths:
@@ -26,7 +25,6 @@ jobs:
 
       - run: npm run build
       - run: npm run export
-      - run: greenkeeper-lockfile-update
 
       - persist_to_workspace:
           root: .
@@ -51,10 +49,12 @@ jobs:
       # use ci snapshots for comparisons
       - run: rm -rf ~/project/__tests__/__image_snapshots__/ && cp -r ~/project/__tests__/ci__image_snapshots__/ ~/project/__tests__/__image_snapshots__/
 
+      - run: sudo npm install -g greenkeeper-lockfile@1
+      - run: greenkeeper-lockfile-update
+
       # run tests!
       - run: npm run test
 
-      - run: sudo npm install -g greenkeeper-lockfile@1
       - run: greenkeeper-lockfile-upload
 
       # store artifacts, diffs from jest-image-snapshot
