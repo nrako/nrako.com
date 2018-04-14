@@ -8,6 +8,7 @@ export default () => (
         <nav>
           <a href="https://twitter.com/nrako">Twitter</a>
           <a href="https://github.com/nrako">Github</a>
+          <a href="/static/GPG.asc">GPG</a>
         </nav>
       </div>
     </div>
