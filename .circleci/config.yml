@@ -55,6 +55,8 @@ jobs:
       # run tests!
       - run: npm run test
 
+      - run: npm run format:check
+
       - run: greenkeeper-lockfile-upload
 
       # store artifacts, diffs from jest-image-snapshot
