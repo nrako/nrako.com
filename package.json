@@ -42,6 +42,14 @@
   "prettier": {
     "semi": false,
     "singleQuote": true,
-    "trailingComma": "all"
+    "trailingComma": "all",
+    "overrides": [
+      {
+        "files": "package.json",
+        "options": {
+          "printWidth": 120
+        }
+      }
+    ]
   }
 }
