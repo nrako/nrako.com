@@ -1,0 +1,161 @@
+export const meta = {
+  title: 'Post Style Guide',
+  description: 'A complete style guide of post',
+  date: '2018-06-29T20:01:43+0200',
+}
+
+This is the introduction. If the first child of a post is a paragraph it's
+style will slightly "elevated", bigger font size etc.
+
+## Subheader
+
+Simple Subheader.  Facilisis lectus. Praesent sed mi. Phasellus ipsum. Donec
+quis tellus id lectus faucibus molestie. Praesent vel ligula. Nam venenatis
+neque quis mauris. Proin felis. Cum sociis natoque penatibus et magnis dis
+parturient montes, nascetur ridiculus mus. Aliquam quam. Nam felis velit,
+semper nec, aliquam nec, iaculis vel, mi. Nullam et augue vitae nunc tristique
+vehicula. Suspendisse eget elit. Duis adipiscing dui non quam.
+
+* First item
+* Second item
+* Third item...
+
+### Sub-subheader
+
+Tortor porta mollis. Praesent orci. Cras dignissim vulputate metus.
+
+1. One
+2. Two
+2. Tree, It's kind of dangerous to be a emcee
+
+Phasellus eu quam. Quisque interdum cursus purus. In orci. Maecenas vehicula.
+Sed et mauris. Praesent feugiat viverra lacus. Suspendisse pulvinar lacus ut
+nunc. Quisque nisi. Suspendisse id risus nec nisi ultrices ornare. Donec eget
+tellus. Nullam molestie placerat felis. Aenean facilisis. Nunc erat. Integer in
+tellus.
+
+#### Sub-sub-subheader
+
+MDX is a super helpful markdown parser supporting JSX
+
+Contrary to popular belief, Lorem Ipsum is not simply random text. It has
+roots in a piece of classical Latin literature from 45 BC, making it over
+2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney
+College in Virginia, looked up one of the more obscure Latin words,
+consectetur, from a Lorem Ipsum passage, and going through the cites of the
+word in classical literature, discovered the undoubtable source. Lorem Ipsum
+comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum"
+(The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a
+treatise on the theory of ethics, very popular during the Renaissance. The
+first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line
+in section 1.10.32.
+
+> de Finibus Bonorum et Malorum
+
+The standard chunk of Lorem Ipsum used since the 1500s is reproduced below
+for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum
+et Malorum" by Cicero are also reproduced in their exact original form,
+accompanied by English versions from the 1914 translation by H. Rackham.
+
+```jsx
+import Markdown, { meta } from './hello.mdx'
+import Post, { components } from '../../components/post'
+
+// Test comment with a line of 80 characters length to see how this fit in here?
+export default () => (
+  <Post meta={meta}>
+    <Markdown components={components} />
+  </Post>
+)
+```
+
+```css
+h1 {
+  color: red;
+}
+```
+
+It is a long established fact that a reader will be distracted by the readable
+content of a page when looking at its layout. The point of using Lorem Ipsum is
+that it has a more-or-less normal distribution of letters, as opposed to using
+'Content here, content here', making it look like readable English. Many
+desktop publishing packages and [web page](https://localhost/) editors now use
+Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will
+uncover many web sites still in their infancy. Various versions have evolved
+over the years, sometimes by accident, sometimes on purpose (injected humour
+and the like).
+
+```reason
+type schoolPerson = Teacher | Director | Student(string);
+
+let greeting = stranger =>
+  switch (stranger) {
+  | Teacher => "Hey professor!"
+  | Director => "Hello director."
+  | Student("Richard") => "Still here Ricky?"
+  | Student(anyOtherName) => "Hey, " ++ anyOtherName ++ "."
+  };
+```
+
+Run:
+> $ npm run dev
+
+Some inline `code .` in the middle of some text.
+
+> `Test`
+
+## Section Divider
+
+The dominoes bellow are section dividers `<hr/>` and `* * *` in markdown.
+
+* * *
+
+Every second divier
+
+* * *
+
+Every third divider
+
+* * *
+
+Why dominoes? Why not, let's make up some use for these characters.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+culpa qui officia deserunt mollit anim id est laborum.
+
+#### A table which fills the width
+
+| Command    | Description                                    | Description                                    |
+| ---------- | ---------------------------------------------- | ---------------------------------------------- |
+| git status | List all new or modified files                 | List all new or modified files                 |
+| git diff   | Show file differences that haven't been staged kajdlfdsjaldjf | Show file differences that haven't been staged |
+| git commit   | askldfjl adslkfj asdkljf lkasdfj klasdjf klajsdlfj a adkfjalsjdflak | Show file differences that haven't been staged |
+| git diff   | Show file differences that haven't been staged | Show file differences that haven't been staged |
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+#### A table which doesn't fill the width
+
+A table that doesn't fill the width is centered.
+
+| Command    | Description                                    |
+| ---------- | ---------------------------------------------- |
+| git status | List all new or modified files                 |
+| git diff   | Show file differences that haven't been staged |
+| git diff   | Show file differences that haven't been staged |
+| git diff   | Show file differences that haven't been staged |
+
+The standard chunk of **Lorem Ipsum** used since the 1500s is reproduced below
+for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum
+et Malorum" by Cicero are also reproduced in their exact original form,
+accompanied by English versions from the 1914 translation by H. Rackham.
+
+Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum
+et Malorum" by Cicero are also reproduced in their exact original form,
+accompanied by English versions from the 1914 translation by H. Rackham.
