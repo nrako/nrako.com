@@ -40,7 +40,9 @@ describe(
     })
 
     it('renders correctly', async () => {
-      let title = await page.evaluate(() => document.querySelector('title').textContent)
+      let title = await page.evaluate(
+        () => document.querySelector('title').textContent,
+      )
       expect(title).toEqual('Post Style Guide')
       const img = await page.screenshot()
       expect(img).toMatchImageSnapshot()

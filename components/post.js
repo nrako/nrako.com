@@ -12,7 +12,9 @@ export default ({ meta, children }) => (
           {meta.title}
           <small>{meta.description}</small>
         </h1>
-        <time className="time" dateTime={meta.date}>{meta.date}</time>
+        <time className="time" dateTime={meta.date}>
+          {meta.date}
+        </time>
       </header>
       {children}
     </article>
@@ -77,14 +79,14 @@ export default ({ meta, children }) => (
         letter-spacing: 0.2em;
         font-size: 1.8em;
       }
-      .post hr:nth-of-type(3n+1)::before {
+      .post hr:nth-of-type(3n + 1)::before {
         content: '🁅🁛🀵';
       }
-      .post hr:nth-of-type(3n+2)::before {
+      .post hr:nth-of-type(3n + 2)::before {
         content: '🁐🁻🁇';
         letter-spacing: 0.1em;
       }
-      .post hr:nth-of-type(3n+0)::before {
+      .post hr:nth-of-type(3n + 0)::before {
         content: '🁄🁗🁈';
       }
     `}</style>

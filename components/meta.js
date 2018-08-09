@@ -9,18 +9,24 @@ export default () => (
     <style jsx global>{`
       body {
         color: #101;
-        font: 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        font: 18px -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+          Arial, sans-serif;
         line-height: 1.58;
         margin: 0;
         font-weight: 400;
       }
 
-      h1, h2, h3, h4 {
+      h1,
+      h2,
+      h3,
+      h4 {
         font-weight: 500;
         margin-top: 2em;
       }
 
-      p, ul, ol {
+      p,
+      ul,
+      ol {
         font-family: -apple-system-body, georgia, serif;
       }
 
