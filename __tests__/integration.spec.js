@@ -47,6 +47,16 @@ describe(
       const img = await page.screenshot()
       expect(img).toMatchImageSnapshot()
     })
+
+    it('renders correctly on small screen', async () => {
+      await page.setViewport({ width: 500, height: 5500 })
+      let title = await page.evaluate(
+        () => document.querySelector('title').textContent,
+      )
+      expect(title).toEqual('Post Style Guide')
+      const img = await page.screenshot()
+      expect(img).toMatchImageSnapshot()
+    })
   },
   timeout,
 )
