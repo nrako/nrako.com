@@ -40,6 +40,7 @@ describe(
     })
 
     it('renders correctly', async () => {
+      await page.setViewport({ width: 800, height: 4800 })
       let title = await page.evaluate(
         () => document.querySelector('title').textContent,
       )
