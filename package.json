@@ -32,8 +32,9 @@
     "eslint": "^5.7.0",
     "jest": "^23.6.0",
     "jest-image-snapshot": "^2.5.0",
+    "jest-puppeteer": "^3.5.1",
     "prettier": "^1.14.3",
-    "puppeteer": "^1.9.0",
+    "puppeteer": "^1.10.0",
     "rimraf": "^2.6.2"
   },
   "now": {
