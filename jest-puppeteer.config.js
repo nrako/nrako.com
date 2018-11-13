@@ -1,7 +1,6 @@
 module.exports = {
   server: {
-    command: 'next start',
-    port: 3000,
+    command: 'next start -p 3001',
   },
   launch: {
     // headless: false,

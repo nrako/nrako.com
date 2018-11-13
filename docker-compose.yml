@@ -8,4 +8,4 @@ services:
       - ./__tests__/ci__image_snapshots__:/usr/app/__tests__/__image_snapshots__
       - /usr/app/node_modules
     ports:
-      - "3000:3000"
+      - "3001:3001"
