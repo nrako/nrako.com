@@ -1,5 +1,5 @@
 const timeout = 5000
-const url = 'http://localhost:3000'
+const url = 'http://localhost:3001'
 
 describe(
   '/ (Home Page)',
@@ -7,7 +7,7 @@ describe(
     let page
 
     beforeAll(async () => {
-      page = await global.__BROWSER__.newPage()
+      page = await browser.newPage()
       await page.goto(url)
     }, timeout)
 
@@ -16,8 +16,7 @@ describe(
     })
 
     it('renders correctly', async () => {
-      let text = await page.evaluate(() => document.body.textContent)
-      expect(text).toContain('Nicholas Rakotomihamina')
+      await expect(page).toMatch('Nicholas Rakotomihamina')
       const img = await page.screenshot()
       expect(img).toMatchImageSnapshot()
     })
@@ -31,7 +30,7 @@ describe(
     let page
 
     beforeAll(async () => {
-      page = await global.__BROWSER__.newPage()
+      page = await browser.newPage()
       await page.goto(`${url}/posts/_post_style_guide`)
     }, timeout)
 
