@@ -7,7 +7,7 @@ const withMDX = require('@zeit/next-mdx')({
 })
 
 module.exports = withMDX({
-  exportPathMap: function(defaultPathMap) {
+  exportPathMap: function() {
     return {
       '/': { page: '/' },
       '/posts/post_style_guide': { page: '/posts/_post_style_guide' },
