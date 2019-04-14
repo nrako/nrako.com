@@ -24,7 +24,7 @@
     "next": "^8.0.4",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "remark-highlight.js": "^5.0.0"
+    "remark-highlight.js": "^5.1.0"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^1.0.4",
