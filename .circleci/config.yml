@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-    - image: circleci/node:8.9.4-browsers
+    - image: circleci/node:dubnium-browsers
 
 version: 2
 jobs:

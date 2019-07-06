@@ -15,8 +15,8 @@
     "format:check": "prettier --list-different \"**/*.{js,json,md}\"",
     "start": "next start",
     "test": "jest",
-    "test:ci": "docker-compose -p tests run -p 3001 --rm web npm run build && npm run test",
-    "test:ciu": "docker-compose -p tests run -p 3001 --rm web npm run test:_ciu",
+    "test:ci": "docker-compose exec test npm run test",
+    "test:ciu": "docker-compose exec test npm run test:_ciu",
     "test:_ciu": "next build && jest -u"
   },
   "dependencies": {
