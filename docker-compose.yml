@@ -1,11 +1,15 @@
-version: '2'
+version: "3.2"
 services:
-  web:
-    build: .
-    command: npm run dev
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: tail -F /dev/null
     volumes:
-      - .:/usr/app/
+      - ./components:/usr/app/components
+      - ./pages:/usr/app/pages
+      - ./static:/usr/app/static
+      - ./__tests__:/usr/app/__tests__
       - ./__tests__/ci__image_snapshots__:/usr/app/__tests__/__image_snapshots__
-      - /usr/app/node_modules
     ports:
       - "3001:3001"
