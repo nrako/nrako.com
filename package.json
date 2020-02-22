@@ -27,9 +27,9 @@
     "remark-highlight.js": "^5.1.1"
   },
   "devDependencies": {
-    "@mdx-js/mdx": "^1.0.21",
+    "@mdx-js/mdx": "^1.5.7",
     "babel-eslint": "^10.0.2",
-    "chalk": "^2.4.2",
+    "chalk": "^3.0.0",
     "eslint": "^6.0.1",
     "eslint-plugin-react": "^7.14.2",
     "jest": "^24.8.0",
