@@ -17,14 +17,17 @@
     "test": "jest",
     "test:ci": "docker-compose exec test npm run test",
     "test:ciu": "docker-compose exec test npm run test:_ciu",
-    "test:_ciu": "next build && jest -u"
+    "test:_ciu": "next build && jest -u",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@zeit/next-mdx": "^1.2.0",
-    "next": "^9.0.0",
+    "next": "^9.3.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "remark-highlight.js": "^6.0.0"
+    "remark-highlight.js": "^6.0.0",
+    "snyk": "^1.305.1"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^1.5.7",
@@ -57,5 +60,6 @@
         }
       }
     ]
-  }
+  },
+  "snyk": true
 }
