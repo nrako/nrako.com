@@ -26,4 +26,9 @@ module.exports = {
     'react/prop-types': 0,
     'react/jsx-no-undef': [2, { allowGlobals: true }],
   },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
 }
