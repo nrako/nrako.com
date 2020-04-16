@@ -418,3 +418,7 @@ patch:
         patched: '2020-04-16T20:09:48.879Z'
     - snyk > inquirer > lodash:
         patched: '2020-04-16T20:15:04.459Z'
+    - snyk > inquirer > lodash:
+        patched: '2020-04-16T20:25:51.701Z'
+    - next > @babel/preset-modules > @babel/types > lodash:
+        patched: '2020-04-16T20:25:51.701Z'
