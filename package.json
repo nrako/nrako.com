@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@zeit/next-mdx": "^1.2.0",
-    "next": "^9.3.5",
+    "next": "^9.3.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "remark-highlight.js": "^6.0.0",
