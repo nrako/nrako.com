@@ -23,8 +23,8 @@
   "dependencies": {
     "@zeit/next-mdx": "^1.2.0",
     "next": "^9.3.5",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
     "remark-highlight.js": "^6.0.0",
     "snyk": "^1.313.1"
   },
