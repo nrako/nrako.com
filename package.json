@@ -27,7 +27,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "remark-highlight.js": "^6.0.0",
-    "snyk": "^1.315.1"
+    "snyk": "^1.465.0"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^1.5.8",
