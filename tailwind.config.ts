@@ -1,7 +1,14 @@
-import { type Config } from "tailwindcss";
+import { type Config } from 'tailwindcss'
+import typographyPlugin from 'npm:@tailwindcss/typography'
 
 export default {
-  content: [
-    "{routes,islands,components}/**/*.{ts,tsx}",
+  plugins: [
+    typographyPlugin
   ],
-} satisfies Config;
+  content: [
+    '{routes,islands,components}/**/*.{ts,tsx}',
+    'posts/*.md',
+    '../fresh-blog-plugin/components/**/*.tsx', // TODO replace by node_modules/fresh-blog-plugin ... ?
+    '../fresh-blog-plugin/routes/**/*.tsx', // TODO replace by node_modules/fresh-blog-plugin ... ?
+  ],
+} satisfies Config

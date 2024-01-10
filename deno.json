@@ -26,14 +26,26 @@
     "preact/": "https://esm.sh/preact@10.19.2/",
     "@preact/signals": "https://esm.sh/*@preact/signals@1.2.1",
     "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.0",
-    "tailwindcss": "npm:tailwindcss@3.3.5",
-    "tailwindcss/": "npm:/tailwindcss@3.3.5/",
-    "tailwindcss/plugin": "npm:/tailwindcss@3.3.5/plugin.js",
-    "$std/": "https://deno.land/std@0.208.0/"
+    "tailwindcss": "npm:tailwindcss@3.4.0",
+    "tailwindcss/": "npm:/tailwindcss@3.4.0/",
+    "tailwindcss/plugin": "npm:/tailwindcss@3.4.0/plugin.js",
+    "$std/": "https://deno.land/std@0.208.0/",
+    "gfm/": "https://deno.land/x/gfm@0.3.0/",
+    "$deno_dom/": "https://deno.land/x/deno_dom@v0.1.43/",
+    "myst-parser": "https://esm.sh/myst-parser@1.0.21",
+    "myst-to-html": "https://esm.sh/myst-to-html@1.0.21",
+    "rehype-stringify": "https://esm.sh/rehype-stringify@10.0.0",
+    "unified": "https://esm.sh/unified@11.0.4"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact"
+  },
+  "fmt": {
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": true
   },
   "nodeModulesDir": true
 }
