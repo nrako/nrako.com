@@ -1,7 +1,11 @@
-# Fresh project
+# nrako.com
 
-Your new Fresh project is ready to go. You can follow the Fresh "Getting
-Started" guide here: https://fresh.deno.dev/docs/getting-started
+Personal website for <a href="https://github.com/nrako">@nrako</a>.
+
+## Run Code
+
+Follow the Fresh 🍋 "Getting Started" guide here:
+https://fresh.deno.dev/docs/getting-started
 
 ### Usage
 
@@ -14,3 +18,7 @@ deno task dev
 ```
 
 This will watch the project directory and restart as necessary.
+
+## License
+
+See LICENSE.md file

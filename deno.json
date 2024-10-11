@@ -18,10 +18,12 @@
     "**/_fresh/*"
   ],
   "imports": {
-    "fresh": "jsr:@fresh/core@^2.0.0-alpha.22",
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
-    "preact": "npm:preact@^10.24.2",
+    "@preact-icons/gr": "jsr:@preact-icons/gr@^1.0.12",
+    "@preact-icons/tb": "jsr:@preact-icons/tb@^1.0.12",
     "@preact/signals": "npm:@preact/signals@^1.3.0",
+    "fresh": "jsr:@fresh/core@^2.0.0-alpha.22",
+    "preact": "npm:preact@^10.24.2",
     "tailwindcss": "npm:tailwindcss@3.4.3",
     "tailwindcss/plugin": "npm:tailwindcss@3.4.3/plugin.js"
   },
@@ -51,5 +53,13 @@
     "exclude": [
       "./.vscode"
     ]
+  },
+  "deploy": {
+    "project": "703c1356-ef37-4d2b-91ef-d83ba55c6379",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
   }
 }
