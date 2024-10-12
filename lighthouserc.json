@@ -1,0 +1,24 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["${DEPLOYMENT_URL}"],
+      "settings": {
+        "chromeFlags": "--no-sandbox",
+        "skipAudits": [
+          "unminified-css",
+          "is-crawlable"
+        ]
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "is-crawlable": "off",
+        "unminified-css": "off"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

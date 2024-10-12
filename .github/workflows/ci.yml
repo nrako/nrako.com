@@ -2,16 +2,16 @@ name: CI
 
 on:
   push:
-    branches: ['main']
+    branches: main
   pull_request:
-    branches: ['main']
-
-permissions:
-  contents: read
+    branches: main
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Setup repo
@@ -40,3 +40,46 @@ jobs:
       #   with:
       #     github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
       #     path-to-lcov: cov.lcov
+
+  deploy:
+    name: Deploy & Lighthouse Check
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x
+
+      - name: Build step
+        run: 'deno task build'
+
+      - name: Upload to Deno Deploy
+        id: deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: 'nrakodotcom'
+          entrypoint: 'main.ts'
+          root: '.'
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        with:
+          configPath: './lighthouserc.json'
+          urls: ${{ steps.deploy.outputs.url }}
+          uploadArtifacts: true
+          temporaryPublicStorage: true
