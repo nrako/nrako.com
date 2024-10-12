@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.insert-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1.3em;
+  background-color: rgba(255, 0, 255, 0.8); /* Adjust color as needed */
+  animation: blink 0.7s steps(2, start) infinite;
+  vertical-align: text-bottom;
+}
+
+.visual-cursor {
+  position: absolute;
+  display: inline-block;
+  background-color: rgba(255, 0, 255, 0.8); /* Adjust color as needed */
+  width: 0.6em;
+  height: 1.3em;
+  animation: blink 0.7s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.vim-visual-mode {
+  position: relative;
+  display: inline;
+  background-color: rgba(0, 0, 255, 0.6); /* Adjust color as needed */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone; /* For Safari */
+}
+
+.vim-visual-mode .visual-cursor {
+  transform: translate(-0.6em, 0);
+}
