@@ -14,7 +14,7 @@ export default function App({ Component }: PageProps) {
         <link rel='stylesheet' href='/styles.css' />
       </head>
       <body class='bg-white dark:bg-black text-black dark:text-white font-sans'>
-        <header class='flex justify-end gap-4 container mx-auto pt-8 text-3xl'>
+        <header class='flex justify-end gap-4 container mx-auto pt-8 text-3xl px-4'>
           <nav class='flex gap-4 [&>a:hover]:text-red-600'>
             <a
               href='https://bsky.app/profile/nrako.bsky.social'
@@ -43,7 +43,7 @@ export default function App({ Component }: PageProps) {
         <main class='container mx-auto min-h-screen'>
           <Component />
         </main>
-        <footer class='text-sm flex justify-end container mx-auto my-4'>
+        <footer class='text-sm flex justify-end container mx-auto my-4 px-4'>
           <a
             class='hover:underline decoration-red-600 underline-offset-2 decoration-2'
             href='https://github.com/nrako/nrako.com'
