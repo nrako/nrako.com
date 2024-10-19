@@ -6,6 +6,10 @@ import processor from './processor.ts'
 import { ensureDir, exists } from '@std/fs'
 import { crypto } from '@std/crypto'
 import { encodeHex } from '@std/encoding'
+import { DOMParser } from '@b-fuze/deno-dom'
+
+// 200 word-per-minute is on the lower range of the average reading speed 200-300 wpm
+const WPM = 200
 
 export interface InternalOptions {
   /**
@@ -97,6 +101,7 @@ export interface Post {
   /** HTML content of the post */
   content: string
   messages: Messages
+  readingTimeMinutes: number
 }
 
 export const defaultOptions = {
@@ -176,10 +181,20 @@ export async function getPost(
   const text = await Deno.readTextFile(filePath)
   const { frontmatter, html, messages } = await processor(text, options)
 
+  const textContent =
+    new DOMParser().parseFromString(html, 'text/html')?.textContent ?? ''
+
+  const wordCount =
+    textContent.replace(/[-*\s\n]+/gm, ' ').split(/\s/).length ?? 0
+
+  // Calculate the reading time in minutes
+  const readingTimeMinutes = Math.floor(wordCount / WPM)
+
   const metadata: Omit<Post, 'content'> = {
     slug,
     frontmatter,
     messages,
+    readingTimeMinutes,
   }
 
   // Update cache

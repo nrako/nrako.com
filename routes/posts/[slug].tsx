@@ -93,7 +93,7 @@ export default define.page(
                     language={options.language}
                   />
                 )}
-              <ReadTime content={post.content} />
+              <ReadTime value={post.readingTimeMinutes} />
             </div>
           </header>
           <div
