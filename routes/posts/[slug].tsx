@@ -18,6 +18,7 @@ interface Data {
 export const handler = define.handlers<Data>({
   async GET(ctx: FreshContext) {
     const post = await getPost(ctx.params.slug, options)
+
     if (!post) return ctx.render(<div>Post not found</div>, { status: 404 })
     return {
       data: {

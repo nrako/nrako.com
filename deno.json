@@ -70,5 +70,6 @@
     ],
     "include": [],
     "entrypoint": "main.ts"
-  }
+  },
+  "unstable": ["kv"]
 }

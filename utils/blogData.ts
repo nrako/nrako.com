@@ -9,6 +9,11 @@ import { encodeHex } from '@std/encoding'
 
 export interface InternalOptions {
   /**
+   * Cache backend to use, either "filesystem" or "kv"
+   * @default { 'kv' }
+   */
+  cacheBackend?: 'filesystem' | 'kv'
+  /**
    * Title of the blog
    * @default { 'Blog' }
    */
@@ -95,7 +100,7 @@ export interface Post {
 }
 
 export const defaultOptions = {
-  cacheBackend: 'local' as 'local' | 'kv',
+  cacheBackend: 'kv' as 'filesystem' | 'kv',
   title: 'Nicholas´s Posts',
   description: 'All my posts as seen on nrako.com',
   language: 'en',
@@ -116,64 +121,6 @@ export const defaultOptions = {
   dev: false,
 }
 
-export interface Post {
-  /** slug of the post, derived from the filename */
-  slug: string
-  frontmatter: PageFrontmatter
-  /** HTML content of the post */
-  content: string
-  messages: Messages
-}
-
-type Hash = string
-interface CacheManifest {
-  [key: string]: Hash
-}
-
-interface ManifestEntry {
-  hash: string
-  cacheFile: string
-}
-
-async function getHashForFile(filePath: string): Promise<Hash> {
-  const file = await Deno.readFile(filePath)
-  const fileHashBuffer = await crypto.subtle.digest('SHA-256', file)
-  return encodeHex(fileHashBuffer)
-}
-
-async function readManifest(cacheDir: string): Promise<CacheManifest> {
-  const manifestPath = join(cacheDir, 'manifest.json')
-  if (await exists(manifestPath)) {
-    const manifestContent = await Deno.readTextFile(manifestPath)
-    return JSON.parse(manifestContent)
-  }
-  return {}
-}
-
-async function writeManifest(
-  cacheDir: string,
-  manifest: CacheManifest,
-): Promise<void> {
-  await ensureDir(cacheDir) // Ensure cache directory exists
-  const manifestPath = join(cacheDir, 'manifest.json')
-  await Deno.writeTextFile(manifestPath, JSON.stringify(manifest, null, 2))
-}
-
-async function cleanupCacheFiles(
-  cacheDir: string,
-  slug: string,
-  hash: Hash,
-): Promise<void> {
-  const htmlCacheFilePath = join(cacheDir, `${slug}-${hash}.html`)
-  const metadataCacheFilePath = join(cacheDir, `${slug}-${hash}.json`)
-  if (await exists(htmlCacheFilePath)) {
-    await Deno.remove(htmlCacheFilePath)
-  }
-  if (await exists(metadataCacheFilePath)) {
-    await Deno.remove(metadataCacheFilePath)
-  }
-}
-
 /**
  * `getPosts` returns all the posts at the given `options.contentDir`
  *
@@ -184,9 +131,7 @@ async function cleanupCacheFiles(
  * @param {InternalOptions} options
  * @returns {Promise<Post[]>}
  */
-export async function getPosts(
-  options: InternalOptions,
-): Promise<Post[]> {
+export async function getPosts(options: InternalOptions): Promise<Post[]> {
   const files = Deno.readDir(options.contentDir)
   const promises = []
   for await (const fileOrFolder of files) {
@@ -216,34 +161,19 @@ export async function getPost(
   slug: string,
   options: InternalOptions,
 ): Promise<Post | null> {
-  const cacheDir = join(options.contentDir, '.cache')
   const filePath = join(options.contentDir, `${slug}.md`)
   if (!(await exists(filePath))) return null
 
-  const currentHash = await getHashForFile(filePath)
-  const manifest = await readManifest(cacheDir)
+  const hash = await getHashForFile(filePath)
+  const cache = await readCache(options, [slug, hash])
 
-  if (manifest[slug] === currentHash) {
-    // Serve cached HTML content if hash matches
-    const cachedHtmlPath = join(cacheDir, `${slug}-${manifest[slug]}` + '.html')
-    const cachedMetadataPath = join(
-      cacheDir,
-      `${slug}-${manifest[slug]}` + '.json',
-    )
-
-    if (await exists(cachedHtmlPath) && await exists(cachedMetadataPath)) {
-      const html = await Deno.readTextFile(cachedHtmlPath)
-      const json = await Deno.readTextFile(cachedMetadataPath)
-
-      const metadata = JSON.parse(json)
-      return {
-        ...metadata,
-        content: html,
-      }
+  if (cache) {
+    return {
+      ...cache.metadata,
+      content: cache.html,
     }
   }
-
-  const text = await Deno.readTextFile(join(options.contentDir, `${slug}.md`))
+  const text = await Deno.readTextFile(filePath)
   const { frontmatter, html, messages } = await processor(text, options)
 
   const metadata: Omit<Post, 'content'> = {
@@ -252,27 +182,60 @@ export async function getPost(
     messages,
   }
 
-  // Cleanup outdated cache file if any
-  if (manifest[slug]) {
-    await cleanupCacheFiles(cacheDir, slug, manifest[slug])
-  }
-
-  await ensureDir(cacheDir) // Ensure cache directory exists
-  await Deno.writeTextFile(
-    join(cacheDir, `${slug}-${currentHash}.html`),
-    html,
-  )
-  await Deno.writeTextFile(
-    join(cacheDir, `${slug}-${currentHash}.json`),
-    JSON.stringify(metadata),
-  )
-
-  // Update manifest
-  manifest[slug] = currentHash
-  await writeManifest(cacheDir, manifest)
+  // Update cache
+  await writeCache(options, [slug, hash], { metadata, html })
 
   return {
     ...metadata,
     content: html,
   }
+}
+
+// Functions to get the posts and handle caching
+async function getHashForFile(filePath: string): Promise<string> {
+  const file = await Deno.readFile(filePath)
+  const fileHashBuffer = await crypto.subtle.digest('SHA-256', file)
+  return encodeHex(fileHashBuffer)
+}
+
+// Utility to read and write cache based on backend configuration
+async function writeCache(
+  options: InternalOptions,
+  key: [string, string],
+  value: { metadata: Omit<Post, 'content'>; html: string },
+): Promise<void> {
+  if (options.cacheBackend === 'filesystem') {
+    await ensureDir(join(options.contentDir, '.cache'))
+    await Deno.writeTextFile(
+      join(options.contentDir, '.cache', `${key[0]}-${key[1]}.json`),
+      JSON.stringify(value),
+    )
+  } else if (options.cacheBackend === 'kv') {
+    const kv = await Deno.openKv()
+    await kv.set(key, value)
+  }
+}
+
+async function readCache(
+  options: InternalOptions,
+  key: [string, string],
+): Promise<{ metadata: Omit<Post, 'content'>; html: string } | null> {
+  if (options.cacheBackend === 'filesystem') {
+    const cachePath = join(
+      options.contentDir,
+      '.cache',
+      `${key[0]}-${key[1]}.json`,
+    )
+    if (await exists(cachePath)) {
+      const cachedContent = await Deno.readTextFile(cachePath)
+      return JSON.parse(cachedContent)
+    }
+  } else if (options.cacheBackend === 'kv') {
+    const kv = await Deno.openKv()
+    const result = await kv.get<
+      { metadata: Omit<Post, 'content'>; html: string }
+    >(key)
+    if (result) return result.value
+  }
+  return null
 }
