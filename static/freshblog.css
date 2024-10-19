@@ -1,0 +1,379 @@
+.shiki {
+  position: relative;
+  padding-left: 0;
+  padding-right: 0;
+  overflow: auto;
+}
+
+.shiki code {
+  display: block;
+  min-width: 100%;
+  width: fit-content;
+  line-height: 1.7;
+}
+
+.shiki .line:not(:empty) {
+  padding-left: 1.5em;
+  padding-right: 1.5em;
+}
+
+.shiki.has-diff .line:not(:empty) {
+  padding-left: 2.5em;
+}
+
+.shiki .diff {
+  display: inline-block;
+  width: 100%;
+}
+
+.shiki .diff.add {
+  background-color: #0505;
+}
+
+.shiki .diff.remove {
+  background-color: #8005;
+}
+
+.shiki .diff:before {
+  position: absolute;
+  left: 1em;
+}
+
+.shiki .diff.add:before {
+  content: '+';
+  color: green;
+}
+
+.shiki .diff.remove:before {
+  content: '-';
+  color: red;
+}
+
+/* For shikiji dual themes support, see https://shikiji.netlify.app/guide/dual-themes */
+
+@media (prefers-color-scheme: dark) {
+  .shiki {
+    background-color: var(--shiki-dark-bg) !important;
+  }
+
+  .shiki,
+  .shiki span {
+    color: var(--shiki-dark) !important;
+    /* Optional, if you also want font styles */
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
+.fresh-blog h1 {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.fresh-blog h2 {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.freshBlog-post-content {
+  margin-bottom: 12rem;
+}
+
+.freshBlog-post-content .footnotes {
+  margin-top: 6rem;
+}
+
+.freshBlog-dialogMessages {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fef2f2;
+  padding: 1rem;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* shadow-lg */
+  margin-top: 1rem;
+
+  color: rgb(162, 94, 10);
+}
+
+.freshBlog-dialogMessages dt {
+  font-weight: 600;
+}
+
+.freshBlog-dialogMessages .freshBlog-dialogMessages-errors {
+  color: red;
+}
+
+.freshBlog-dialogMessages button {
+  font-weight: bold;
+  float: right;
+  color: black;
+}
+
+.freshBlog-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.freshBlog-footer svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.freshBlog-footer ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.freshBlog-footer ul li:not(:last-child)::after {
+  content: '|';
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.freshBlog-post header {
+  margin-bottom: 2rem;
+}
+
+.freshBlog-post header h1 {
+  margin: 0;
+}
+
+/* subtitle */
+
+.freshBlog-post header p {
+  margin: 0.5rem 0;
+  color: #6b7280;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.freshBlog-post header .freshBlog-post-meta {
+  color: #6b7280;
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 2rem;
+}
+
+/* Style for Callouts */
+
+.freshBlog-post-content .footnotes #footnote-label {
+  font-size: 1em;
+  margin-bottom: 0.5em;
+}
+
+.freshBlog-post-content .footnotes .data-footnote-backref {
+  font-family: monospace;
+}
+
+.freshBlog-post-content .footnotes ol :target {
+  /* Flash Twice */
+  animation: flash 0.8s ease-in 2;
+}
+
+.freshBlog-post-content .footnotes li,
+.freshBlog-post-content .footnotes p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+/* # anchor prepending headings */
+
+.freshBlog-post-content .anchorsign {
+  color: gray;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.freshBlog-post-content .anchorsign::before {
+  content: '#';
+  position: absolute;
+  left: -1.1rem;
+  top: 0;
+  transition: opacity 0.3s, color 0.3s;
+  font-size: 1rem;
+  line-height: 1rem;
+}
+
+.freshBlog-post-content :is(h1, h2, h3, h4, h5, h6):hover .anchorsign {
+  opacity: 1;
+  color: inherit;
+}
+
+/* Style for Callouts */
+
+.freshBlog-post-content .admonition {
+  width: 100%;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  background-color: rgba(249, 250, 251, 0.1);
+  overflow: hidden;
+  border-radius: 0.25rem;
+  border-left-width: 4px;
+  border-color: #3b82f6;
+}
+
+.freshBlog-post-content .admonition p {
+  padding: 0.25rem;
+  margin: 0;
+}
+
+.freshBlog-post-content .admonition-title {
+  font-weight: 500;
+  display: flex;
+  min-width: 0;
+  font-size: 1.125rem;
+  /* Equivalent to 'lg' in Tailwind */
+  color: #2563eb;
+  /* Tailwind's blue-600 */
+  background-color: #eff6ff;
+  /* Tailwind's blue-50 */
+}
+
+/* Style for image alignement */
+
+.freshBlog-post-content .align-center {
+  margin: 0 auto;
+}
+
+.freshBlog-post-content .align-right {
+  margin: 0 0 0 auto;
+}
+
+.freshBlog-postCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.freshBlog-postCard header {
+  margin-bottom: 0.5rem;
+}
+
+.freshBlog-postCard header h2 {
+  margin-bottom: 0rem;
+}
+
+.freshBlog-authors {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-right: 1rem;
+}
+
+.freshBlog-authors svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Displayed for screen readers only */
+
+.freshBlog-authors h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.freshBlog-authors article {
+  position: relative;
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.freshBlog-authors article h3,
+.freshBlog-authors article button {
+  font-size: 1.125rem;
+  margin: 0;
+  background: none !important;
+  border: none;
+  padding: 0 !important;
+  color: #6b7280;
+}
+
+.freshBlog-authors article address {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.freshBlog-authors article address a {
+  color: #6b7280;
+}
+
+.freshBlog-authors article address a:hover {
+  color: black;
+}
+
+.freshBlog-authors article [anchor] {
+  position: absolute;
+  top: calc(anchor(bottom) + 0.5rem);
+  left: calc(anchor(left) - 1rem);
+  filter: drop-shadow(0 10px 8px rgba(0 0 0 / 0.04)) drop-shadow(
+    0
+    4px
+    3px
+    rgba(0 0 0 / 0.1)
+  );
+  font-size: 0.875rem;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 0; /* Reset anchor margin, necessary for polyfill */
+  overflow: visible;
+  /* background: white; */ /* Required for polyfill */
+}
+
+.freshBlog-authors article [anchor] h3 {
+  margin-bottom: 0.5rem;
+}
+
+/* TODO https://www.smashingmagazine.com/2024/03/modern-css-tooltips-speech-bubbles-part1/ */
+
+/* clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), 0 calc(100% - 10px)); */
+
+.freshBlog-authors article dl {
+  margin: 0;
+}
+
+.freshBlog-authors article dl dt {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.freshBlog-authors article dl dd {
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .freshBlog-authors article dl div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+@keyframes flash {
+  0%, 100% {
+    background-color: transparent;
+  }
+  25%, 75% {
+    background-color: yellow; /* Or any color you prefer */
+  }
+}

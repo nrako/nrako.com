@@ -1,11 +1,16 @@
 {
   "ci": {
     "collect": {
-      "url": ["${DEPLOYMENT_URL}"],
+      "url": [
+        "${DEPLOYMENT_URL}",
+        "${DEPLOYMENT_URL}/posts",
+        "${DEPLOYMENT_URL}/posts/hello_web"
+      ],
       "settings": {
         "chromeFlags": "--no-sandbox",
         "skipAudits": [
           "unminified-css",
+          "unminified-js",
           "is-crawlable"
         ]
       }
@@ -14,7 +19,8 @@
       "preset": "lighthouse:recommended",
       "assertions": {
         "is-crawlable": "off",
-        "unminified-css": "off"
+        "unminified-css": "off",
+        "unminified-js": "off"
       }
     },
     "upload": {

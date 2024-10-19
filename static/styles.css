@@ -37,3 +37,19 @@
 .vim-visual-mode .visual-cursor {
   transform: translate(-0.6em, 0);
 }
+
+[popover] {
+  @apply dark:bg-slate-800 dark:text-white;
+}
+.freshBlog-authors [popover] h3 {
+  @apply text-black dark:text-white;
+}
+
+.prose :where(a):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+  @apply underline-offset-2;
+  @apply decoration-slate-900 dark:decoration-gray-400;
+}
+
+.prose a:hover, a:hover {
+  @apply decoration-red-600;
+}
