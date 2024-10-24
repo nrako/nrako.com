@@ -1,5 +1,6 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
 import type { Messages } from './processor.ts'
+import type { CommitInfo } from './githubVersionning.ts'
 // Importing two new std lib functions to help with parsing front matter and joining file paths.
 import { extname, join } from '@std/path'
 import processor from './processor.ts'
@@ -7,6 +8,8 @@ import { ensureDir, exists } from '@std/fs'
 import { crypto } from '@std/crypto'
 import { encodeHex } from '@std/encoding'
 import { DOMParser } from '@b-fuze/deno-dom'
+import { getCommitHistory } from './githubVersionning.ts'
+import { isDraftVersion } from './githubVersionning.ts'
 
 // 200 word-per-minute is on the lower range of the average reading speed 200-300 wpm
 const WPM = 200
@@ -88,6 +91,24 @@ export interface InternalOptions {
    *  @default 'only_in_posts'
    */
   showAuthors: 'always' | 'only_in_posts' | 'never'
+
+  /**
+   * Configure versionning
+   *
+   * @type {({
+   *     provider: 'github'
+   *     mainBranch: string
+   *     repoOwner: string
+   *     repoName: string
+   *   } | undefined)}
+   */
+  versionning: {
+    provider: 'github'
+    mainBranch: string
+    repoOwner: string
+    repoName: string
+  } | undefined
+
   /** This is used to mock a dev environement in tests do not use this
    * @ignore
    */
@@ -102,6 +123,7 @@ export interface Post {
   content: string
   messages: Messages
   readingTimeMinutes: number
+  versions?: CommitInfo[]
 }
 
 export const defaultOptions = {
@@ -123,6 +145,13 @@ export const defaultOptions = {
   cssFilename: 'freshblog.css',
   jsFilename: 'freshblog.js',
   showAuthors: 'only_in_posts' as 'always' | 'only_in_posts' | 'never',
+  versionning: {
+    // deno-lint-ignore prefer-as-const
+    provider: 'github' as 'github',
+    mainBranch: 'main',
+    repoOwner: 'nrako',
+    repoName: 'nrako.com',
+  },
   dev: false,
 }
 
@@ -181,20 +210,29 @@ export async function getPost(
   const text = await Deno.readTextFile(filePath)
   const { frontmatter, html, messages } = await processor(text, options)
 
-  const textContent =
-    new DOMParser().parseFromString(html, 'text/html')?.textContent ?? ''
-
-  const wordCount =
-    textContent.replace(/[-*\s\n]+/gm, ' ').split(/\s/).length ?? 0
-
-  // Calculate the reading time in minutes
-  const readingTimeMinutes = Math.floor(wordCount / WPM)
-
   const metadata: Omit<Post, 'content'> = {
     slug,
     frontmatter,
     messages,
-    readingTimeMinutes,
+    readingTimeMinutes: calculateReadingTime(html),
+  }
+
+  if (Deno.env.get('GITHUB_TOKEN')) {
+    metadata.versions = await getCommitHistory(slug, options)
+
+    if (
+      metadata.versions.length > 0 &&
+      await isDraftVersion(slug, text, metadata.versions[0], options)
+    ) {
+      metadata.versions.unshift({
+        sha: 'draft',
+        shortSha: 'draft',
+        message: 'Uncommited version',
+        date: new Date().toISOString(),
+        author: '',
+        verified: false,
+      })
+    }
   }
 
   // Update cache
@@ -214,9 +252,9 @@ async function getHashForFile(filePath: string): Promise<string> {
 }
 
 // Utility to read and write cache based on backend configuration
-async function writeCache(
+export async function writeCache(
   options: InternalOptions,
-  key: [string, string],
+  key: Array<string>,
   value: { metadata: Omit<Post, 'content'>; html: string },
 ): Promise<void> {
   if (options.cacheBackend === 'filesystem') {
@@ -231,9 +269,9 @@ async function writeCache(
   }
 }
 
-async function readCache(
+export async function readCache(
   options: InternalOptions,
-  key: [string, string],
+  key: Array<string>,
 ): Promise<{ metadata: Omit<Post, 'content'>; html: string } | null> {
   if (options.cacheBackend === 'filesystem') {
     const cachePath = join(
@@ -253,4 +291,20 @@ async function readCache(
     if (result) return result.value
   }
   return null
+}
+
+/**
+ * Calculates the reading time for a given html content.
+ * @param {string} html - The post content.
+ * @returns {number} - Estimated reading time in minutes.
+ */
+export function calculateReadingTime(html: string): number {
+  const textContent =
+    new DOMParser().parseFromString(html, 'text/html')?.textContent ?? ''
+
+  const wordCount =
+    textContent.replace(/[-*\s\n]+/gm, ' ').split(/\s/).length ?? 0
+
+  // Calculate the reading time in minutes
+  return Math.ceil(wordCount / WPM)
 }

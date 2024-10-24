@@ -2570,6 +2570,7 @@
     "https://unpkg.com/@oddbird/css-anchor-positioning/dist/css-anchor-positioning-fn.js": "https://unpkg.com/@oddbird/css-anchor-positioning@0.2.0/dist/css-anchor-positioning-fn.js"
   },
   "remote": {
+    "https://deno.land/std@0.168.0/encoding/base64.ts": "8605e018e49211efc767686f6f687827d7f5fd5217163e981d8d693105640d7a",
     "https://unpkg.com/@oddbird/css-anchor-positioning@0.2.0/dist/css-anchor-positioning-fn.js": "d2ce6b70236848b55e6a8fc28ded0b34e48a5939e09f462ec7afa2f1567ef68a"
   },
   "workspace": {

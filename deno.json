@@ -1,7 +1,7 @@
 {
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check **/*.ts **/*.tsx --no-lock",
-    "dev": "deno run -A --watch=static/,routes/ dev.ts",
+    "dev": "deno run -A --watch=static/,routes/ dev.ts --env-file .env ",
     "build": "deno run -A dev.ts build",
     "start": "deno run -A main.ts",
     "update": "deno run -A -r jsr:@fresh/update ."
@@ -66,7 +66,8 @@
   "deploy": {
     "project": "703c1356-ef37-4d2b-91ef-d83ba55c6379",
     "exclude": [
-      "**/node_modules"
+      "**/node_modules",
+      ".env"
     ],
     "include": [],
     "entrypoint": "main.ts"

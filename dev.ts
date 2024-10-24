@@ -4,6 +4,8 @@ import { tailwind } from '@fresh/plugin-tailwind'
 import { Builder } from 'fresh/dev'
 import { app } from './main.ts'
 
+Deno.env.set('ENV', 'development')
+
 const builder = new Builder()
 tailwind(builder, app, {})
 if (Deno.args.includes('build')) {
