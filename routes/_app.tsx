@@ -44,9 +44,9 @@ export default function App({ Component }: PageProps) {
             </a>
 
             <a
-              href='https://bsky.app/profile/nrako.bsky.social'
+              href='https://bsky.app/profile/nrako.com'
               aria-label='Social'
-              title='Follow me and at-me on Bsky'
+              title='Follow me and at-me on Bluesky'
               class='ml-auto'
             >
               <AtIcon />
