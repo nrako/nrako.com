@@ -147,8 +147,7 @@
 }
 
 /* subtitle */
-
-.freshBlog-post header p {
+.freshBlog-post-subtitle {
   margin: 0.5rem 0;
   color: #6b7280;
   font-size: 1.125rem;
@@ -319,7 +318,7 @@
   color: black;
 }
 
-.freshBlog-authors article [anchor] {
+.freshBlog-post header [anchor] {
   position: absolute;
   top: calc(anchor(bottom) + 0.5rem);
   left: calc(anchor(left) - 1rem);

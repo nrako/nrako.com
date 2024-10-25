@@ -1,62 +1,56 @@
+import { define } from '../../../utils.ts'
 import type { FreshContext, PageProps } from 'fresh'
-import { define } from '../../utils.ts'
+import { getPostAtVersion } from '../../../utils/githubVersionning.ts'
 import {
   defaultOptions as options,
   getPost,
   type Post,
-} from '../../utils/blogData.ts'
-import Time from '../../components/Time.tsx'
-import ReadTime from '../../components/ReadTime.tsx'
-import DialogMessages from '../../components/DialogMessages.tsx'
-import { Authors } from '../../components/Authors.tsx'
-import { PostVersions } from '../../components/PostVersions.tsx'
+} from '../../../utils/blogData.ts'
+import Time from '../../../components/Time.tsx'
+import ReadTime from '../../../components/ReadTime.tsx'
+import DialogMessages from '../../../components/DialogMessages.tsx'
+import { Authors } from '../../../components/Authors.tsx'
+import { PostVersions } from '../../../components/PostVersions.tsx'
 
 interface Data {
   post: Post
+  version: string
   displayMessages: boolean
 }
 
 export const handler = define.handlers<Data>({
   async GET(ctx: FreshContext) {
-    const post = await getPost(ctx.params.slug, options)
+    const { slug, sha } = ctx.params
+
+    const mainPost = await getPost(slug, options)
+
+    const latestCommit = mainPost?.versions?.[0]
+
+    // Redirect to the URL without the SHA if the provided SHA matches the latest.
+    if (sha === latestCommit?.shortSha) {
+      const url = new URL(ctx.req.url)
+      url.pathname = `/posts/${slug}`
+      return ctx.redirect(url.toString(), 307)
+    }
+
+    // Fetch the versioned content from GitHub or cache
+    const post = await getPostAtVersion(slug, sha, options)
 
     if (!post) return ctx.render(<div>Post not found</div>, { status: 404 })
+
     return {
       data: {
         post,
+        version: sha,
         displayMessages: options.dev || ctx.config.mode === 'development',
       },
-      // TODO fix head once supported. Current alpha version of Fresh v2 hasn't
-      // the new approach to support the deprecated "<Head>" element fleshed
-      // out. Those eleemnts do not work, and ideally the freshblog.css and
-      // freshblog.js file should be defined here too.
-      head: [
-        { title: `${post.frontmatter.title} - ${options.title}` },
-        {
-          tag: 'script',
-          attrs: {
-            async: true,
-            src: 'https://platform.twitter.com/widgets.js',
-            charset: 'utf-8',
-          },
-        },
-        {
-          tag: 'link',
-          attrs: {
-            rel: 'stylesheet',
-            type: 'text/css',
-            href:
-              'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css',
-          },
-        },
-      ],
     }
   },
 })
 
 export default define.page(
-  function PostPage(props: PageProps<Data>) {
-    const { post, displayMessages } = props.data
+  function PostShaPage(props: PageProps<Data>) {
+    const { post, displayMessages, version } = props.data
 
     post.messages.errors?.forEach((error) => console.error(post.slug, error))
     post.messages.warnings?.forEach((warning) =>
@@ -99,6 +93,19 @@ export default define.page(
               )}
               <ReadTime value={post.readingTimeMinutes} />
             </div>
+            <dialog
+              role='alertdialog'
+              open
+              class='freshBlog-dialogMessages not-prose'
+            >
+              You are looking at version{' '}
+              <a
+                href={`https://github.com/${options.versionning.repoOwner}/${options.versionning.repoName}/commit/${version}`}
+              >
+                {version}
+              </a>. Click <a href={`/posts/${post.slug}`}>here</a>{' '}
+              to go back to the latest version.
+            </dialog>
           </header>
           <div
             class='freshBlog-post-content'
