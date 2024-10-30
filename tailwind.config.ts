@@ -5,6 +5,7 @@ export default {
   plugins: [typographyPlugin],
   content: [
     '{routes,islands,components}/**/*.{ts,tsx}',
+    './posts/**/*.md',
   ],
   darkMode: ['variant', [
     '@media (prefers-color-scheme: dark) { &:not(.light *) }',
