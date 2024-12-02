@@ -31,7 +31,7 @@
     "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.15",
     "fresh": "jsr:@fresh/core@^2.0.0-alpha.22",
     "myst-frontmatter": "npm:myst-frontmatter@^1.7.5",
-    "preact": "npm:preact@^10.25.1",
+    "preact": "npm:preact@10.24.2",
     "tailwindcss": "npm:tailwindcss@^3.4.15",
     "tailwindcss/plugin": "npm:tailwindcss@^3.4.15/plugin.js"
   },

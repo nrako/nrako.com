@@ -148,6 +148,7 @@
         "npm:esbuild",
         "npm:esbuild-wasm",
         "npm:preact-render-to-string",
+        "npm:preact@10.24.2",
         "npm:preact@^10.24.1",
         "npm:preact@^10.25.1"
       ]
@@ -182,6 +183,7 @@
     "@preact-icons/common@1.0.12": {
       "integrity": "f7d7329d55c2753b0162438b120b638e5058fa406f49fe6b422e3b0694f6e0c1",
       "dependencies": [
+        "npm:preact@10.24.2",
         "npm:preact@^10.22.1",
         "npm:preact@^10.24.2",
         "npm:preact@^10.25.1"
@@ -2736,7 +2738,7 @@
       "npm:@preact/signals@^1.3.1",
       "npm:@tailwindcss/typography@~0.5.15",
       "npm:myst-frontmatter@^1.7.5",
-      "npm:preact@^10.25.1",
+      "npm:preact@10.24.2",
       "npm:tailwindcss@^3.4.15"
     ]
   }
