@@ -20,7 +20,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v2.0.0
+          deno-version: v2.1.3
 
       - name: Check types
         run: deno task check
