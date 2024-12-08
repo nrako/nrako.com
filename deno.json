@@ -22,18 +22,18 @@
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
     "@preact-icons/gr": "jsr:@preact-icons/gr@^1.0.12",
     "@preact-icons/tb": "jsr:@preact-icons/tb@^1.0.12",
-    "@preact/signals": "npm:@preact/signals@^1.3.0",
-    "@std/assert": "jsr:@std/assert@^1.0.6",
+    "@preact/signals": "npm:@preact/signals@^1.3.1",
+    "@std/assert": "jsr:@std/assert@^1.0.8",
     "@std/crypto": "jsr:@std/crypto@^1.0.3",
     "@std/encoding": "jsr:@std/encoding@^1.0.5",
-    "@std/fs": "jsr:@std/fs@^1.0.4",
-    "@std/path": "jsr:@std/path@^1.0.6",
+    "@std/fs": "jsr:@std/fs@^1.0.6",
+    "@std/path": "jsr:@std/path@^1.0.8",
     "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.15",
     "fresh": "jsr:@fresh/core@^2.0.0-alpha.22",
-    "myst-frontmatter": "npm:myst-frontmatter@^1.7.1",
-    "preact": "npm:preact@^10.24.2",
-    "tailwindcss": "npm:tailwindcss@3.4.3",
-    "tailwindcss/plugin": "npm:tailwindcss@3.4.3/plugin.js"
+    "myst-frontmatter": "npm:myst-frontmatter@^1.7.5",
+    "preact": "npm:preact@10.24.2",
+    "tailwindcss": "npm:tailwindcss@^3.4.15",
+    "tailwindcss/plugin": "npm:tailwindcss@^3.4.15/plugin.js"
   },
   "compilerOptions": {
     "lib": [
