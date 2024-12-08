@@ -4,7 +4,11 @@
     "dev": "deno run -A --watch=static/,routes/ dev.ts --env-file .env ",
     "build": "deno run -A dev.ts build",
     "start": "deno run -A main.ts",
-    "update": "deno run -A -r jsr:@fresh/update ."
+    "update": "deno run -A -r jsr:@fresh/update .",
+    "bsky-uri": {
+      "description": "Utility to retrieve the `at:` URI for a given bsky post URL. Useful to set the `site.bskyUri` in blog post's frontmatter.",
+      "command": "deno run -A utils/bsky-uri.ts"
+    }
   },
   "lint": {
     "rules": {
