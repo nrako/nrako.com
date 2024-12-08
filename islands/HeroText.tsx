@@ -110,7 +110,7 @@ export default function HeroText() {
 
   useEffect(() => {
     const totalAnimationTime = 8 * 1000 // Adjust based on TextPart's animation duration
-    const intervalBetweenAnimations = 8 * 1000 // 8 seconds
+    const intervalBetweenAnimations = 6 * 1000 // 6 seconds
 
     let isMounted = true
     const timeouts: number[] = []
@@ -165,7 +165,7 @@ export default function HeroText() {
       isMounted = false
       timeouts.forEach((t) => clearTimeout(t))
     }
-  }, [titleText, codingText, helpText, howText])
+  }, []) // Empty dependency array to ensure effect runs only once
 
   return (
     <>
