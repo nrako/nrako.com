@@ -77,7 +77,7 @@
 }
 
 .freshBlog-post-content {
-  margin-bottom: 12rem;
+  margin-bottom: 4rem;
 }
 
 .freshBlog-post-content .footnotes {
@@ -136,6 +136,10 @@
   content: '|';
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+}
+
+.freshBlog-post {
+  margin-bottom: 8rem;
 }
 
 .freshBlog-post header {

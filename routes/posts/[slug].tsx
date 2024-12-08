@@ -10,6 +10,7 @@ import ReadTime from '../../components/ReadTime.tsx'
 import DialogMessages from '../../components/DialogMessages.tsx'
 import { Authors } from '../../components/Authors.tsx'
 import { PostVersions } from '../../components/PostVersions.tsx'
+import BlueSkyInteractions from '../../islands/BlueSkyInteractions.tsx'
 
 interface Data {
   post: Post
@@ -106,6 +107,14 @@ export default define.page(
             data-dark-theme='dark'
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
+          {post.frontmatter.site?.bskyUri && (
+            <>
+              <hr />
+              <BlueSkyInteractions
+                postUri={post.frontmatter.site.bskyUri}
+              />
+            </>
+          )}
         </article>
       </>
     )

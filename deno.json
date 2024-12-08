@@ -4,7 +4,11 @@
     "dev": "deno run -A --watch=static/,routes/ dev.ts --env-file .env ",
     "build": "deno run -A dev.ts build",
     "start": "deno run -A main.ts",
-    "update": "deno run -A -r jsr:@fresh/update ."
+    "update": "deno run -A -r jsr:@fresh/update .",
+    "bsky-uri": {
+      "description": "Utility to retrieve the `at:` URI for a given bsky post URL. Useful to set the `site.bskyUri` in blog post's frontmatter.",
+      "command": "deno run -A utils/bsky-uri.ts"
+    }
   },
   "lint": {
     "rules": {
@@ -18,6 +22,7 @@
     "**/_fresh/*"
   ],
   "imports": {
+    "@atproto/api": "npm:@atproto/api@^0.13.19",
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
     "@preact-icons/gr": "jsr:@preact-icons/gr@^1.0.12",
@@ -29,6 +34,8 @@
     "@std/fs": "jsr:@std/fs@^1.0.6",
     "@std/path": "jsr:@std/path@^1.0.8",
     "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.15",
+    "@jridgewell/gen-mapping": "npm:@jridgewell/gen-mapping@^0.3.5",
+    "@jridgewell/trace-mapping": "npm:@jridgewell/trace-mapping@^0.3.25",
     "fresh": "jsr:@fresh/core@^2.0.0-alpha.22",
     "myst-frontmatter": "npm:myst-frontmatter@^1.7.5",
     "preact": "npm:preact@10.24.2",
