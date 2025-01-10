@@ -1,0 +1,12 @@
+- This is a personal website using Deno Fresh v2.
+- Fresh v2 is a early alpyha release, visit
+  https://github.com/denoland/fresh/issues/2363 to learn more about the changes.
+- Visit [https://fresh.deno.dev](https://fresh.deno.dev) to learn more about
+  Fresh v1
+- Fresh uses Preact
+- This uses TailwindCSS v3
+- The testing framework is Deno test
+- The blogging part of this website uses [MyST](https://mystmd.org) for markdown
+  style authoring.
+- Content of posts are in the `posts/` folder
+- My style of authoring is direct, raw with a scientific approach.
