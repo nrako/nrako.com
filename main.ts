@@ -5,6 +5,17 @@ import { define, type State } from './utils.ts'
 export const app = new App<State>()
 app.use(staticFiles())
 
+// Redirect www to non-www
+const redirectWwwMiddleware = define.middleware((ctx) => {
+  const url = new URL(ctx.req.url)
+  if (url.hostname === 'www.nrako.com') {
+    url.hostname = 'nrako.com'
+    return Response.redirect(url.toString(), 301)
+  }
+  return ctx.next()
+})
+app.use(redirectWwwMiddleware)
+
 // this is the same as the /api/:name route defined via a file. feel free to delete this!
 app.get('/api2/:name', (ctx) => {
   const name = ctx.params.name
