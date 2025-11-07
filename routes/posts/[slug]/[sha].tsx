@@ -78,7 +78,7 @@ export default define.page(
                 <Authors
                   authors={post.frontmatter.authors}
                   affiliations={post.frontmatter.affiliations}
-                  showLinks={true}
+                  showLinks
                 />
               )}
               {post.frontmatter.date &&
@@ -111,6 +111,7 @@ export default define.page(
             class='freshBlog-post-content'
             data-light-theme='light'
             data-dark-theme='dark'
+            // deno-lint-ignore react-no-danger
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </article>

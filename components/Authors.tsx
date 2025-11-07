@@ -17,6 +17,7 @@ export function Author({ author, affiliations, showLinks = false }: {
       {showLinks && (
         <>
           <button
+            type='button'
             id={`author-${author.id}`}
             /* @ts-ignore-next-line */
             popovertarget={`author-popover-${author.id}`}

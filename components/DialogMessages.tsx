@@ -34,7 +34,7 @@ export default function DialogMessages(
         </dl>
       )}
       <form method='dialog'>
-        <button>Close</button>
+        <button type='submit'>Close</button>
       </form>
     </dialog>
   )

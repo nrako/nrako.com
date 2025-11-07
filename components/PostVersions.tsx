@@ -19,6 +19,7 @@ export function PostVersions({
   return (
     <section class='not-prose'>
       <button
+        type='button'
         id='versions-button'
         /* @ts-ignore-next-line */
         popovertarget='versions-popover'

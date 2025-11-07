@@ -46,6 +46,7 @@ export default function ThemeToggle() {
 
   return (
     <button
+      type='button'
       id='theme-toggle-button'
       onClick={toggleTheme}
       disabled
