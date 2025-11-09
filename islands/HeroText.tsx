@@ -9,26 +9,32 @@ import {
 import VimReplaceText from './VimReplaceText.tsx'
 
 const titleOptions = [
-  'Web App Developer',
+  'Product Design Lead',
+  'Full-stack Web Developer',
   'Technical Product Manager',
-  'Tech Design Lead',
 ]
 
 const codingOptions = [
   'shortly after IE6 was released',
   'when the iPhone was only a rumor',
-  'when AJAX was still called XMLHttpRequest',
-  'when MySpace was the hype',
+  'for over 15 years',
+  'across startups, agencies, and SaaS platforms',
 ]
 
-const helpOptions = ['shape', 'successfully ship', 'refine']
+const helpOptions = [
+  'shape great',
+  'successfully ship',
+  'strategically develop',
+  'build and scale',
+]
 
 const howOptions = [
+  'through technical leadership and product strategy.',
   'by driving iterative design & development.',
-  'by adopting the ShapeUp methodology.',
   'to reach their business goals!',
-  'by aligning on expectations and goals.',
-  'with advanced design system.',
+  'by aligning design, engineering, and business goals.',
+  'with international design systems at scale.',
+  'leveraging ShapeUp methodology for rapid delivery.',
 ]
 
 const allOptions = [titleOptions, codingOptions, helpOptions, howOptions]
@@ -77,9 +83,10 @@ function reducer(state: State, action: Action): State {
 
       return {
         ...state,
-        parts: state.parts.map((part, i) =>
-          i === partIndex ? { ...part, nextText } : part
-        ),
+        parts: state.parts.map((
+          part,
+          i,
+        ) => (i === partIndex ? { ...part, nextText } : part)),
       }
     }
     case 'COMPLETE_ANIMATION': {
@@ -179,8 +186,8 @@ export default function HeroText() {
         <VimReplaceText text={titlePart.text} newText={titlePart.nextText} />
         {' '}
         based in Switzerland. I got into coding{' '}
-        <VimReplaceText text={codingPart.text} newText={codingPart.nextText} />
-        . I help cross-functional teams{' '}
+        <VimReplaceText text={codingPart.text} newText={codingPart.nextText} />.
+        I help cross-functional teams{' '}
         <VimReplaceText text={helpPart.text} newText={helpPart.nextText} />{' '}
         Mobile and Web apps{' '}
         <VimReplaceText text={howPart.text} newText={howPart.nextText} />
