@@ -1,6 +1,5 @@
 {
   "tasks": {
-    "check": "deno fmt --check && deno lint && deno check **/*.ts **/*.tsx --no-lock",
     "dev": "deno run -A --watch=static/,routes/ dev.ts --env-file .env ",
     "build": "deno run -A dev.ts build",
     "start": "deno run -A main.ts",
