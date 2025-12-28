@@ -1,0 +1,25 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import PostCard from '@/components/PostCard.astro'
+import { getPosts, defaultOptions as options } from '@/lib/blogData'
+
+const posts = await getPosts(options)
+---
+
+<Layout title="Posts | nrako.com" description="All posts on nrako.com">
+  <div class="fresh-blog prose dark:prose-invert mx-auto">
+    {!posts.length && "There's no posts yet."}
+    {
+      posts.map((post) => (
+        <PostCard
+          url={`/posts/${post.slug}`}
+          frontmatter={post.frontmatter}
+          language="en"
+          showAuthors={false}
+        />
+      ))
+    }
+
+    <p class="text-center py-4">More to come soon...</p>
+  </div>
+</Layout>

@@ -1,0 +1,11 @@
+---
+interface Props {
+  value: number
+}
+
+const { value } = Astro.props
+---
+
+<span>
+  {value < 1 ? 'Less than a minute read' : `${value} min read`}
+</span>

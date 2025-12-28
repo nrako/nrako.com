@@ -82,8 +82,10 @@ make use of it here on my website.
 
 —my little safe space on the Web.
 
-[^issue-jsr]: JSR issue for publishing JSX/TSX files
+[^issue-jsr]:
+    JSR issue for publishing JSX/TSX files
     https://github.com/jsr-io/jsr/issues/24
 
-[^fresh-roadmap]: Roadmap to Fresh v2
+[^fresh-roadmap]:
+    Roadmap to Fresh v2
     https://github.com/denoland/fresh/issues/2363

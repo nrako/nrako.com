@@ -1,0 +1,119 @@
+---
+import ThemeToggle from '@/components/preact/theme-toggle'
+import GrGithub from '@/components/icons/GrGithub'
+import GrLinkedin from '@/components/icons/GrLinkedin'
+import TbAt from '@/components/icons/TbAt'
+import TbRss from '@/components/icons/TbRss'
+import '@/styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const { title = 'nrako.com', description = "nrako's personal website" } =
+  Astro.props
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" href="/favicon.ico" />
+    <script is:inline>
+      // Immediately detect theme before render to prevent flash
+      ;(function () {
+        const userTheme = sessionStorage.getItem('theme')
+        if (userTheme === 'dark' || userTheme === 'light') {
+          document.documentElement.classList.add(userTheme)
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+    <script is:inline src="/freshblog.js" defer type="module"></script>
+    <slot name="head" />
+  </head>
+  <body class="bg-white dark:bg-black text-black dark:text-white font-sans">
+    <header
+      class="flex gap-4 container mx-auto pt-8 text-3xl px-4 md:px-12 align-baseline"
+    >
+      <nav class="flex place-items-end flex-1 gap-4 [&>a:hover]:text-red-600">
+        <a href="/" aria-label="Home Base" title="Home Base">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            class="place-self-start"
+            stroke-width="2"
+            stroke="currentColor"
+          >
+            <path
+              d="M 2,2 L 22,2 L 22,12 L 12,22 L 2,12 Z"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </a>
+        <a href="/posts" aria-label="Blog" title="Posts" class="text-2xl">
+          Posts
+        </a>
+
+        <a
+          href="https://bsky.app/profile/nrako.com"
+          aria-label="Social"
+          title="Follow me and at-me on Bluesky"
+          class="ml-auto"
+        >
+          <TbAt />
+        </a>
+        <a
+          href="https://linkedin.com/in/nrako"
+          aria-label="LinkedIn"
+          title="Connect with me on LinkedIn"
+        >
+          <GrLinkedin />
+        </a>
+        <a
+          href="https://github.com/nrako"
+          title="Collaborate with me on GitHub"
+          aria-label="GitHub"
+        >
+          <GrGithub />
+        </a>
+      </nav>
+      <ThemeToggle client:load />
+    </header>
+    <main class="container mx-auto min-h-screen px-4 md:px-12 mt-20">
+      <slot />
+    </main>
+    <footer
+      class="text-sm flex justify-between container mx-auto my-4 px-4 md:px-12"
+    >
+      <div class="freshBlog-footer">
+        <TbRss />
+        <ul class="feed-links">
+          <li>
+            <a href="/feed/atom" title="Atom 1.0">Atom</a>
+          </li>
+          <li>
+            <a href="/feed/json" title="JSON Feed 1.0">JSON</a>
+          </li>
+          <li>
+            <a href="/feed/rss" title="RSS 2.0">RSS</a>
+          </li>
+        </ul>
+      </div>
+      <a
+        class="hover:underline decoration-red-600 underline-offset-2 decoration-2"
+        href="https://github.com/nrako/nrako.com"
+      >
+        Source
+      </a>
+    </footer>
+  </body>
+</html>

@@ -5,10 +5,26 @@
 .env.production.local
 .env.local
 
-# Fresh build directory
-_fresh/
-# npm + other dependencies
+# dependencies
 node_modules/
-vendor/
 
+# build output
+dist/
+.astro/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# Posts cache
 posts/.cache/
+
+# Generated manifest (created at build time)
+public/posts-manifest.json
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
