@@ -2,11 +2,21 @@
   "permissions": {
     "allow": [
       "Bash(deno fmt:*)",
-      "Bash(deno check:*)"
+      "Bash(deno check:*)",
+      "Bash(npx astro check:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.astro.build)"
     ]
   },
   "enabledMcpjsonServers": [
     "playwright-test",
-    "github"
+    "github",
+    "cloudflare-observability",
+    "cloudflare-bindings",
+    "cloudflare-radar",
+    "cloudflare-browser"
   ]
 }

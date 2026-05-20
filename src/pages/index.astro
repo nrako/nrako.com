@@ -1,0 +1,48 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import HeroText from '@/components/preact/hero-text'
+import Time from '@/components/Time.astro'
+import { getPosts, defaultOptions as options } from '@/lib/blogData'
+
+const posts = await getPosts(options)
+---
+
+<Layout title="nrako.com" description="nrako's personal website">
+  <div>
+    <div class="flex flex-col items-center justify-center pt-8 pb-32 gap-4">
+      <h1 class="text-4xl md:text-6xl font-bold">Hello, I'm Nicholas.</h1>
+      <HeroText client:load />
+    </div>
+
+    <section class="mt-8 container max-w-xl mx-auto">
+      <h1 class="text-2xl mt-4 mb-2">Recent Posts</h1>
+      <div class="grid divide-y">
+        {
+          posts.map((post) => (
+            <a class="group" href={`/posts/${post.slug}`}>
+              <article>
+                <header class="flex gap-x-4 justify-between flex-wrap py-4">
+                  <h2 class="font-semibold group-hover:text-red-600">
+                    {post.frontmatter.title}
+                  </h2>
+                  {post.frontmatter.date && (
+                    <Time
+                      class="flex-auto text-right"
+                      date={post.frontmatter.date}
+                      language={
+                        (post.frontmatter.parts?.language as
+                          | string
+                          | undefined) || 'en'
+                      }
+                    />
+                  )}
+                </header>
+              </article>
+            </a>
+          ))
+        }
+      </div>
+      <p class="text-center py-4">More to come soon... 🤞🏽</p>
+    </section>
+  </div>
+</Layout>

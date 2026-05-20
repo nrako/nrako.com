@@ -14,77 +14,27 @@ jobs:
       contents: read
 
     steps:
-      - name: Setup repo
-        uses: actions/checkout@v3
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v2.5.6
-
-      - name: Check types
-        run: deno check
-
-      - name: Run linter
-        run: deno lint
-
-      - name: Run tests
-        run: deno test -A --no-check --coverage
-        # run: deno test -A --no-check --coverage
-
-      # - name: Generate coverage
-      #   run: deno coverage --lcov coverage/ > cov.lcov
-
-      # - name: Upload coverage to Coveralls.io
-      #   uses: coverallsapp/github-action@master
-      #   with:
-      #     github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      #     path-to-lcov: cov.lcov
-
-  deploy:
-    name: Deploy & Lighthouse Check
-    needs: test
-    runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write # Needed for auth with Deno Deploy
-      contents: read # Needed to clone the repository
-      pull-requests: write
-      statuses: write
-
-    steps:
-      - name: Clone repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Deno
-        uses: denoland/setup-deno@v1
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.5.6
+          deno-version: v2.x
 
-      - name: Build step
-        run: 'deno task build'
+      - name: Install dependencies
+        run: deno install --allow-scripts --frozen
 
-      - name: Upload to Deno Deploy
-        id: deploy
-        uses: denoland/deployctl@v1
-        with:
-          project: 'nrakodotcom'
-          entrypoint: 'main.ts'
-          root: '.'
+      - name: Lint
+        run: deno task lint
 
-      # TODO: Add lighthouse check back
-      # - name: Run Lighthouse CI
-      #   uses: treosh/lighthouse-ci-action@v12
-      #   continue-on-error: true
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
-      #     LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-      #   with:
-      #     configPath: './lighthouserc.json'
-      #     urls: |
-      #       ${{ steps.deploy.outputs.url }}
-      #       ${{ steps.deploy.outputs.url }}/posts
-      #       ${{ steps.deploy.outputs.url }}/posts/hello_web
-      #     upoadArtifacts: true
-      #     temporaryPublicStorage: true
+      - name: Check formatting
+        run: deno task format:check
+
+      - name: Check types
+        run: deno task check
+
+      - name: Build
+        run: deno task build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

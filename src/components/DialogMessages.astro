@@ -1,0 +1,40 @@
+---
+import type { Messages } from '@/lib/processor'
+
+interface Props {
+  messages: Messages
+}
+
+const { messages } = Astro.props
+const hasMessages = messages.errors?.length || messages.warnings?.length
+---
+
+{
+  hasMessages && (
+    <dialog role="alertdialog" open class="freshBlog-dialogMessages">
+      {messages.errors && (
+        <dl class="freshBlog-dialogMessages-errors">
+          {messages.errors.map((error) => (
+            <>
+              <dt>{error.property}</dt>
+              <dd>{error.message}</dd>
+            </>
+          ))}
+        </dl>
+      )}
+      {messages.warnings && (
+        <dl>
+          {messages.warnings.map((warning) => (
+            <>
+              <dt>{warning.property}</dt>
+              <dd>{warning.message}</dd>
+            </>
+          ))}
+        </dl>
+      )}
+      <form method="dialog">
+        <button type="submit">Close</button>
+      </form>
+    </dialog>
+  )
+}

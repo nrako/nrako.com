@@ -1,0 +1,28 @@
+---
+import type { PageFrontmatter } from 'myst-frontmatter'
+import Author from './preact/author'
+
+interface Props {
+  authors: PageFrontmatter['authors']
+  affiliations?: PageFrontmatter['affiliations']
+  showLinks?: boolean
+}
+
+const { authors, affiliations, showLinks = false } = Astro.props
+---
+
+{
+  authors && authors.length > 0 && (
+    <section class="freshBlog-authors" aria-labelledby="freshBlog-authors">
+      <h2 id="freshBlog-authors">Authors</h2>
+      {authors.map((a) => (
+        <Author
+          client:load
+          author={a}
+          affiliations={affiliations}
+          showLinks={showLinks}
+        />
+      ))}
+    </section>
+  )
+}
