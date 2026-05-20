@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'preact/hooks'
-import VimReplaceText from './vim-replace-text'
+import VimReplaceText from './vim-replace-text.tsx'
 
 const titleOptions = [
   'Product Design Lead',
@@ -47,7 +47,8 @@ const longestCoding = findLongestOption(codingOptions)
 const longestHelp = findLongestOption(helpOptions)
 const longestHow = findLongestOption(howOptions)
 
-const longestText = `I am a ${longestTitle} based in Switzerland. I got into coding ${longestCoding}. I help cross-functional teams ${longestHelp} Mobile and Web apps ${longestHow}`
+const longestText =
+  `I am a ${longestTitle} based in Switzerland. I got into coding ${longestCoding}. I help cross-functional teams ${longestHelp} Mobile and Web apps ${longestHow}`
 
 interface PartState {
   text: string
@@ -82,7 +83,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         parts: state.parts.map((part, i) =>
-          i === partIndex ? { ...part, nextText } : part,
+          i === partIndex ? { ...part, nextText } : part
         ),
       }
     }
@@ -93,7 +94,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         parts: state.parts.map((part, i) =>
-          i === partIndex ? { text: nextText, nextText: '' } : part,
+          i === partIndex ? { text: nextText, nextText: '' } : part
         ),
       }
     }
@@ -137,8 +138,8 @@ export default function HeroText() {
       if (!isMounted) return
 
       // Move to next part
-      currentPartIndexRef.current =
-        (currentPartIndexRef.current + 1) % allOptions.length
+      currentPartIndexRef.current = (currentPartIndexRef.current + 1) %
+        allOptions.length
       const partIndex = currentPartIndexRef.current
 
       // Start animation - reducer handles picking different text
@@ -176,11 +177,12 @@ export default function HeroText() {
   return (
     <>
       <p
-        className="text-md md:text-2xl text-center max-w-2xl font-mono"
+        className='text-md md:text-2xl text-center max-w-2xl font-mono'
         style={{ minHeight }}
       >
         I am a{' '}
-        <VimReplaceText text={titlePart.text} newText={titlePart.nextText} />{' '}
+        <VimReplaceText text={titlePart.text} newText={titlePart.nextText} />
+        {' '}
         based in Switzerland. I got into coding{' '}
         <VimReplaceText text={codingPart.text} newText={codingPart.nextText} />.
         I help cross-functional teams{' '}
@@ -190,11 +192,11 @@ export default function HeroText() {
       </p>
       {/* Hidden container for measuring text heights */}
       <div
-        className="text-md md:text-2xl text-center max-w-2xl font-mono"
+        className='text-md md:text-2xl text-center max-w-2xl font-mono'
         ref={measurementRef}
         style={{ visibility: 'hidden', position: 'absolute', top: '-9999px' }}
-        aria-hidden="true"
-        role="presentation"
+        aria-hidden='true'
+        role='presentation'
       >
         {longestText}
       </div>

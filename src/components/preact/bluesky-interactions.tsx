@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks'
 import type { AppBskyFeedDefs } from '@atproto/api'
 import { getPostInteractions } from '@/lib/bluesky'
-import Reply from './reply'
+import Reply from './reply.tsx'
 import { formatCount } from '@/lib/intl'
 
 interface Props {
@@ -39,7 +39,7 @@ export default function BlueSkyInteractions({ postUri }: Props) {
 
   if (loading && !data) {
     return (
-      <div className="mt-8 text-gray-500 dark:text-gray-400">
+      <div className='mt-8 text-gray-500 dark:text-gray-400'>
         Loading reactions...
       </div>
     )
@@ -50,57 +50,64 @@ export default function BlueSkyInteractions({ postUri }: Props) {
   }
 
   const post = data.post
-  const replies =
-    data.replies?.filter(
-      (r): r is AppBskyFeedDefs.ThreadViewPost =>
-        !('notFound' in r) && !('blocked' in r),
-    ) ?? []
+  const replies = data.replies?.filter(
+    (r): r is AppBskyFeedDefs.ThreadViewPost =>
+      !('notFound' in r) && !('blocked' in r),
+  ) ?? []
 
   return (
-    <div className="mt-8 space-y-6 not-prose">
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Reactions</h2>
-        <div className="flex gap-4 text-gray-500 dark:text-gray-400">
+    <div className='mt-8 space-y-6 not-prose'>
+      <div className='space-y-4'>
+        <h2 className='text-2xl font-semibold'>Reactions</h2>
+        <div className='flex gap-4 text-gray-500 dark:text-gray-400'>
           <a
-            href={`https://bsky.app/profile/${post.author.handle}/post/${postUri.split('/').pop()}/reposted-by`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
+            href={`https://bsky.app/profile/${post.author.handle}/post/${
+              postUri.split('/').pop()
+            }/reposted-by`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='hover:underline'
           >
-            <span className="text-xl font-medium text-gray-600 dark:text-gray-300">
+            <span className='text-xl font-medium text-gray-600 dark:text-gray-300'>
               {formatCount(post.repostCount ?? 0)}
             </span>{' '}
             reposts
           </a>
           <a
-            href={`https://bsky.app/profile/${post.author.handle}/post/${postUri.split('/').pop()}/quotes`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
+            href={`https://bsky.app/profile/${post.author.handle}/post/${
+              postUri.split('/').pop()
+            }/quotes`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='hover:underline'
           >
-            <span className="text-xl font-medium text-gray-600 dark:text-gray-300">
+            <span className='text-xl font-medium text-gray-600 dark:text-gray-300'>
               {formatCount(post.quoteCount ?? 0)}
             </span>{' '}
             quotes
           </a>
           <a
-            href={`https://bsky.app/profile/${post.author.handle}/post/${postUri.split('/').pop()}/liked-by`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
+            href={`https://bsky.app/profile/${post.author.handle}/post/${
+              postUri.split('/').pop()
+            }/liked-by`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='hover:underline'
           >
-            <span className="text-xl font-medium text-gray-600 dark:text-gray-300">
+            <span className='text-xl font-medium text-gray-600 dark:text-gray-300'>
               {formatCount(post.likeCount ?? 0)}
             </span>{' '}
             likes
           </a>
           <a
-            href={`https://bsky.app/profile/${post.author.handle}/post/${postUri.split('/').pop()}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
+            href={`https://bsky.app/profile/${post.author.handle}/post/${
+              postUri.split('/').pop()
+            }`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='hover:underline'
           >
-            <span className="text-xl font-medium text-gray-600 dark:text-gray-300">
+            <span className='text-xl font-medium text-gray-600 dark:text-gray-300'>
               {formatCount(post.replyCount ?? 0)}
             </span>{' '}
             replies
@@ -109,10 +116,12 @@ export default function BlueSkyInteractions({ postUri }: Props) {
         <p>
           Reply on Bluesky{' '}
           <a
-            href={`https://bsky.app/profile/${post.author.handle}/post/${postUri.split('/').pop()}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            href={`https://bsky.app/profile/${post.author.handle}/post/${
+              postUri.split('/').pop()
+            }`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-blue-600 hover:underline'
           >
             here
           </a>{' '}
@@ -120,16 +129,14 @@ export default function BlueSkyInteractions({ postUri }: Props) {
         </p>
       </div>
       {replies.length > 0 && (
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {replies
             .sort(
               (a, b) =>
                 new Date(a.post.indexedAt).getTime() -
                 new Date(b.post.indexedAt).getTime(),
             )
-            .map((reply) => (
-              <Reply key={reply.post.uri} thread={reply} />
-            ))}
+            .map((reply) => <Reply key={reply.post.uri} thread={reply} />)}
         </div>
       )}
     </div>

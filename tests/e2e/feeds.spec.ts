@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 test.describe('RSS/Atom/JSON Feeds', () => {
   test('atom feed returns valid XML', async ({ request }) => {

@@ -53,7 +53,7 @@ the future — but for this post, what matters is that my quest for a new person
 website gave me the perfect pretext to explore this new stack.
 
 As a result, I also started a Blog plugin for Fresh
-http://github.com/nrako/fresh_blog_plugin. ⚠️ It's a work in progress
+<http://github.com/nrako/fresh_blog_plugin>. ⚠️ It's a work in progress
 🚧&thinsp;! And yes, there are other Fresh blog plugins, but none that make use
 of MyST.
 
@@ -82,10 +82,8 @@ make use of it here on my website.
 
 —my little safe space on the Web.
 
-[^issue-jsr]:
-    JSR issue for publishing JSX/TSX files
-    https://github.com/jsr-io/jsr/issues/24
+[^issue-jsr]: JSR issue for publishing JSX/TSX files
+    <https://github.com/jsr-io/jsr/issues/24>
 
-[^fresh-roadmap]:
-    Roadmap to Fresh v2
-    https://github.com/denoland/fresh/issues/2363
+[^fresh-roadmap]: Roadmap to Fresh v2
+    <https://github.com/denoland/fresh/issues/2363>

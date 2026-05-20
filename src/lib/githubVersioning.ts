@@ -1,6 +1,8 @@
-import type { InternalOptions, Post } from './blogData'
-import { calculateReadingTime } from './blogData'
-import processor from './processor'
+import type { InternalOptions, Post } from './blogData.ts'
+import { calculateReadingTime } from './blogData.ts'
+import processor from './processor.ts'
+import process from 'node:process'
+import { Buffer } from 'node:buffer'
 
 export interface CommitInfo {
   sha: string
@@ -11,23 +13,7 @@ export interface CommitInfo {
   verified: boolean
 }
 
-/**
- * Get GitHub token from environment.
- * Uses dynamic import for astro:env/server to work in both contexts:
- * - Build time: falls back to process.env
- * - SSR runtime: uses getSecret from astro:env/server
- */
-async function getGitHubToken(): Promise<string | undefined> {
-  // Try astro:env/server first (works in Astro SSR context)
-  try {
-    const { getSecret } = await import('astro:env/server')
-    const token = getSecret('GITHUB_TOKEN')
-    if (token) return token
-  } catch {
-    // Not in Astro context (build time), fall through
-  }
-
-  // Fallback for build time (set via loadEnv in integration)
+function getGitHubToken(): string | undefined {
   return process.env.GITHUB_TOKEN
 }
 
@@ -40,7 +26,7 @@ export async function getCommitHistory(
 ): Promise<CommitInfo[]> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 
-  const token = await getGitHubToken()
+  const token = getGitHubToken()
   const filePath = `posts/${slug}.md`
 
   if (!token) {
@@ -98,7 +84,7 @@ export async function getPostContentAtVersion(
 ): Promise<string | null> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 
-  const token = await getGitHubToken()
+  const token = getGitHubToken()
 
   if (!token) {
     console.error('GITHUB_TOKEN is required to fetch versioned content')
@@ -130,10 +116,9 @@ export async function getPostContentAtVersion(
 
     // GitHub returns base64-encoded content
     // Use Buffer in Node.js or atob in browser/CF Workers
-    const decodedContent =
-      typeof Buffer !== 'undefined'
-        ? Buffer.from(contentData.content, 'base64').toString('utf-8')
-        : atob(contentData.content)
+    const decodedContent = typeof Buffer !== 'undefined'
+      ? Buffer.from(contentData.content, 'base64').toString('utf-8')
+      : atob(contentData.content)
 
     return decodedContent
   } catch (error) {

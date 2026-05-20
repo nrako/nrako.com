@@ -29,5 +29,15 @@ public/posts-manifest.json
 *.log
 npm-debug.log*
 
+# Test artifacts
 playwright-report/
 test-results/
+
+# Lighthouse CI output
+.lighthouseci/
+
+# Generic local cache directories
+.cache/
+
+# npm artifacts (project is Deno-native; deno.lock is committed instead)
+package-lock.json

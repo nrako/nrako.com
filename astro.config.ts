@@ -1,7 +1,7 @@
-import { defineConfig, envField } from 'astro/config'
+import { defineConfig } from 'astro/config'
 import preact from '@astrojs/preact'
-import cloudflare from '@astrojs/cloudflare'
-import postsManifest from './src/integrations/posts-manifest'
+import deno from '@deno/astro-adapter'
+import postsManifest from './src/integrations/posts-manifest.ts'
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,21 +18,16 @@ export default defineConfig({
   // Static by default, opt-in to server rendering for versioned posts with prerender: false
   output: 'static',
 
-  // Environment variables schema
-  env: {
-    schema: {
-      GITHUB_TOKEN: envField.string({
-        context: 'server',
-        access: 'secret',
-        optional: true,
-      }),
-    },
-  },
+  // GITHUB_TOKEN is read directly from process.env (set via wrangler secret in
+  // prod, or .env locally via the posts-manifest integration). We deliberately
+  // do NOT declare it via `env.schema` / `astro:env`, because the Deno adapter
+  // does not yet implement Astro's `getSecret` feature — declaring the schema
+  // would surface a misleading config error at every build/check.
 
-  // Cloudflare Pages adapter
-  adapter: cloudflare({
-    imageService: 'cloudflare',
-  }),
+  // Deno adapter — produces a Deno-compatible server entry at dist/server/entry.mjs.
+  // start: false disables the built-in Deno.serve so we can mount the `handle`
+  // export inside a Cloudflare Worker fetch handler (see worker.ts).
+  adapter: deno({ start: false }),
 
   integrations: [
     // Preact integration for interactive islands

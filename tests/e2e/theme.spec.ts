@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 test.describe('Theme toggle', () => {
   test('theme toggle button is visible', async ({ page }) => {

@@ -42,8 +42,8 @@ export default function ThemeToggle() {
           ? 'light'
           : 'dark'
         : userTheme === 'light'
-          ? 'dark'
-          : 'light'
+        ? 'dark'
+        : 'light'
       globalThis.sessionStorage.setItem('theme', selectedTheme)
       return selectedTheme
     })
@@ -51,32 +51,28 @@ export default function ThemeToggle() {
 
   return (
     <button
-      type="button"
-      id="theme-toggle-button"
+      type='button'
+      id='theme-toggle-button'
       onClick={toggleTheme}
       disabled
-      title="Not available when JavaScript is disabled"
-      aria-label="Toggle Theme"
-      class="rounded-full [&:not(:disabled):hover]:text-red-600 disabled:text-gray-500 text-3xl cursor-pointer disabled:cursor-default"
+      title='Not available when JavaScript is disabled'
+      aria-label='Toggle Theme'
+      class='rounded-full [&:not(:disabled):hover]:text-red-600 disabled:text-gray-500 text-3xl cursor-pointer disabled:cursor-default'
     >
-      <span class="group-hover:hidden">
-        {!userTheme ? (
-          <TbSunMoon />
-        ) : userTheme === 'dark' ? (
-          <TbSunHigh />
-        ) : (
-          <TbMoonStars />
-        )}
+      <span class='group-hover:hidden'>
+        {!userTheme
+          ? <TbSunMoon />
+          : userTheme === 'dark'
+          ? <TbSunHigh />
+          : <TbMoonStars />}
       </span>
-      <span class="hidden group-hover:block">
+      <span class='hidden group-hover:block'>
         {userTheme === 'dark' ||
-        (userTheme === undefined &&
-          typeof globalThis.matchMedia !== 'undefined' &&
-          globalThis.matchMedia('(prefers-color-scheme: dark)')?.matches) ? (
-          <TbSunHigh />
-        ) : (
-          <TbMoonStars />
-        )}
+            (userTheme === undefined &&
+              typeof globalThis.matchMedia !== 'undefined' &&
+              globalThis.matchMedia('(prefers-color-scheme: dark)')?.matches)
+          ? <TbSunHigh />
+          : <TbMoonStars />}
       </span>
     </button>
   )

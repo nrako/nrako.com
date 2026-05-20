@@ -17,25 +17,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
         with:
-          node-version: '22'
-          cache: 'npm'
+          deno-version: v2.x
 
       - name: Install dependencies
-        run: npm ci
+        run: deno install --allow-scripts --frozen
 
       - name: Lint
-        run: npm run lint
+        run: deno task lint
 
       - name: Check formatting
-        run: npm run format:check
+        run: deno task format:check
 
       - name: Check types
-        run: npx astro check
+        run: deno task check
 
       - name: Build
-        run: npm run build
+        run: deno task build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

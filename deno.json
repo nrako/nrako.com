@@ -1,0 +1,73 @@
+{
+  "nodeModulesDir": "auto",
+  "unstable": ["sloppy-imports"],
+  "tasks": {
+    "dev": "deno run -A npm:astro dev",
+    "build": "deno run -A npm:astro build",
+    "check": "deno run -A ./scripts/deno-check.mjs",
+    "serve": "deno run -A ./scripts/deno-serve.mjs",
+    "preview": "deno run -A npm:wrangler dev --port 4321",
+    "deploy": "deno run -A npm:astro build && deno run -A npm:wrangler deploy",
+    "lint": "deno lint",
+    "format": "deno fmt",
+    "format:check": "deno fmt --check",
+    "test:e2e": "PW_DISABLE_TS_ESM=1 deno run -A npm:@playwright/test test",
+    "test:e2e:ui": "PW_DISABLE_TS_ESM=1 deno run -A npm:@playwright/test test --ui"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "lib": ["dom", "dom.iterable", "deno.ns", "deno.window"]
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": [
+      "src/",
+      "scripts/",
+      "tests/",
+      "posts/",
+      "*.ts",
+      "*.tsx",
+      "*.mjs",
+      "*.js",
+      "*.json",
+      "*.jsonc",
+      "*.md",
+      "*.astro"
+    ],
+    "exclude": [
+      "dist/",
+      ".astro/",
+      "node_modules/",
+      "playwright-report/",
+      "test-results/",
+      "package-lock.json"
+    ]
+  },
+  "lint": {
+    "include": ["src/", "scripts/", "tests/", "worker.ts", "astro.config.ts"],
+    "exclude": [
+      "dist/",
+      ".astro/",
+      "node_modules/",
+      "playwright-report/",
+      "test-results/"
+    ],
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"]
+    }
+  },
+  "exclude": [
+    "dist/",
+    ".astro/",
+    "node_modules/",
+    "playwright-report/",
+    "test-results/"
+  ]
+}

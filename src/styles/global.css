@@ -1,11 +1,15 @@
 @import 'tailwindcss';
-@plugin "@tailwindcss/typography";
+@plugin '@tailwindcss/typography';
 
 @theme inline {
   /* Font Families */
   --font-family-sans: Helvetica, Arial, system-ui, sans-serif;
   --font-family-mono:
-    'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    'SFMono-Regular',
+    Consolas,
+    'Liberation Mono',
+    Menlo,
+    monospace;
 }
 
 /* Dark mode with class-based toggle support */
@@ -289,9 +293,7 @@ a:hover {
   position: absolute;
   left: -1.1rem;
   top: 0;
-  transition:
-    opacity 0.3s,
-    color 0.3s;
+  transition: opacity 0.3s, color 0.3s;
   font-size: 1rem;
   line-height: 1rem;
 }
@@ -411,8 +413,9 @@ a:hover {
   position: absolute;
   top: calc(anchor(bottom) + 0.5rem);
   left: calc(anchor(left) - 1rem);
-  filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04))
-    drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(
+    0 4px 3px rgba(0, 0, 0, 0.1)
+  );
   font-size: 0.875rem;
   padding: 1rem;
   border-radius: 6px;

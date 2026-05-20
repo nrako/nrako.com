@@ -104,15 +104,15 @@ export default function VimReplaceText({
   return (
     <span className={`${isTextSelected ? 'vim-visual-mode' : ''}`}>
       {isCursorVisible && isVisualMode && !isCursorAtEnd && (
-        <span className="visual-cursor" />
+        <span className='visual-cursor' />
       )}
       {displayedText}
       {isCursorVisible &&
-        (!isVisualMode ? (
-          <span className="insert-cursor" />
-        ) : isVisualMode && isCursorAtEnd ? (
-          <span className="visual-cursor" />
-        ) : null)}
+        (!isVisualMode
+          ? <span className='insert-cursor' />
+          : isVisualMode && isCursorAtEnd
+          ? <span className='visual-cursor' />
+          : null)}
     </span>
   )
 }

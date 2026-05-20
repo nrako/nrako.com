@@ -1,6 +1,6 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
-import OrcidIcon from '../icons/orcid'
-import RorIcon from '../icons/ror'
+import OrcidIcon from '../icons/orcid.tsx'
+import RorIcon from '../icons/ror.tsx'
 import TbMail from '@/components/icons/TbMail'
 import TbBrandX from '@/components/icons/TbBrandX'
 
@@ -23,15 +23,16 @@ function Affiliation({
   }
   return (
     <>
-      {affiliation.name || affiliation.institution}{' '}
-      {affiliation.ror && (
+      {affiliation.name || affiliation.institution} {affiliation.ror && (
         <a
-          href={`https://ror.org/${affiliation.ror.replace(/(https?:\/\/)?ror\.org\//, '')}`}
-          target="_blank"
-          rel="noopener"
-          title="Research Organization Registry"
+          href={`https://ror.org/${
+            affiliation.ror.replace(/(https?:\/\/)?ror\.org\//, '')
+          }`}
+          target='_blank'
+          rel='noopener'
+          title='Research Organization Registry'
         >
-          <RorIcon width="1rem" height="1rem" className="inline-block" />
+          <RorIcon width='1rem' height='1rem' className='inline-block' />
         </a>
       )}
     </>
@@ -53,7 +54,7 @@ export default function Author({
       {showLinks && (
         <>
           <button
-            type="button"
+            type='button'
             id={`author-${author.id}`}
             popoverTarget={`author-popover-${author.id}`}
           >
@@ -64,38 +65,38 @@ export default function Author({
               <a
                 href={`mailto:${author.email}`}
                 title={`${author.name} <${author.email}>`}
-                target="_blank"
-                rel="noopener"
+                target='_blank'
+                rel='noopener'
               >
-                <TbMail className="text-base" />
+                <TbMail className='text-base' />
               </a>
             )}
             {author.orcid && (
               <a
                 href={`https://orcid.org/${author.orcid}`}
-                target="_blank"
-                rel="noopener"
-                title="ORCID (Open Researcher and Contributor ID)"
+                target='_blank'
+                rel='noopener'
+                title='ORCID (Open Researcher and Contributor ID)'
               >
                 <OrcidIcon size={16} />
               </a>
             )}
           </address>
-          <div popover="auto" id={`author-popover-${author.id}`}>
+          <div popover='auto' id={`author-popover-${author.id}`}>
             <h3>{author.name}</h3>
             <dl>
               {author.email && author.corresponding && (
                 <div>
                   <dt>
-                    <TbMail className="text-base" />
+                    <TbMail className='text-base' />
                     Email
                   </dt>
                   <dd>
                     <a
                       href={`mailto:${author.email}`}
                       title={`${author.name} <${author.email}>`}
-                      target="_blank"
-                      rel="noopener"
+                      target='_blank'
+                      rel='noopener'
                     >
                       {author.email}
                     </a>
@@ -111,9 +112,9 @@ export default function Author({
                   <dd>
                     <a
                       href={`https://orcid.org/${author.orcid}`}
-                      target="_blank"
-                      rel="noopener"
-                      title="ORCID (Open Researcher and Contributor ID)"
+                      target='_blank'
+                      rel='noopener'
+                      title='ORCID (Open Researcher and Contributor ID)'
                     >
                       {author.orcid}
                     </a>
@@ -123,14 +124,14 @@ export default function Author({
               {author.twitter && (
                 <div>
                   <dt>
-                    <TbBrandX className="text-base" />
+                    <TbBrandX className='text-base' />
                     Twitter
                   </dt>
                   <dd>
                     <a
                       href={`https://twitter.com/${author.twitter}`}
-                      target="_blank"
-                      rel="noopener"
+                      target='_blank'
+                      rel='noopener'
                       title={`Twitter: @${author.twitter}`}
                     >
                       @{author.twitter}

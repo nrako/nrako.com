@@ -4,23 +4,22 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "wrangler dev --port 4321",
-    "check": "astro check",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "dev": "deno task dev",
+    "build": "deno task build",
+    "preview": "deno task preview",
+    "deploy": "deno task deploy",
+    "check": "deno task check",
+    "lint": "deno task lint",
+    "format": "deno task format",
+    "test:e2e": "deno task test:e2e"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.12",
-    "@astrojs/preact": "^4.1.3",
+    "@astrojs/preact": "^5.1.3",
     "@atproto/api": "^0.13.19",
-    "@shikijs/rehype": "^3.20.0",
-    "@shikijs/transformers": "^3.20.0",
-    "astro": "^5.16.4",
+    "@deno/astro-adapter": "^0.5.1",
+    "@shikijs/rehype": "^4.1.0",
+    "@shikijs/transformers": "^4.1.0",
+    "astro": "^6.3.6",
     "feed": "^4.2.2",
     "hastscript": "^9.0.1",
     "linkedom": "^0.18.12",
@@ -34,42 +33,24 @@
     "rehype-katex": "^7.0.1",
     "rehype-parse": "^9.0.1",
     "rehype-stringify": "^10.0.1",
-    "shiki": "^1.24.4",
+    "shiki": "^4.1.0",
     "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.6",
-    "@playwright/test": "^1.49.1",
+    "@astrojs/check": "^0.9.9",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22",
-    "eslint": "^9",
-    "eslint-plugin-astro": "^1.5.0",
-    "playwright": "^1.49.1",
-    "prettier": "^3.6.2",
-    "prettier-plugin-astro": "^0.14.1",
+    "playwright": "^1.60.0",
+    "tailwindcss": "^4.3.0",
     "typescript": "^5",
-    "typescript-eslint": "^8.49.0",
+    "vite": "^7.0.0",
     "wrangler": "^4.54.0"
   },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "all",
-    "plugins": [
-      "prettier-plugin-astro"
-    ],
-    "overrides": [
-      {
-        "files": "*.astro",
-        "options": {
-          "parser": "astro"
-        }
-      }
-    ]
-  },
   "engines": {
-    "node": ">=22.0.0"
+    "deno": ">=2.7.0"
   }
 }

@@ -1,24 +1,43 @@
 # nrako.com
 
-Personal website for <a href="https://github.com/nrako">@nrako</a>.
+Personal website for [@nrako](https://github.com/nrako).
 
-## Run Code
+Built with [Astro](https://astro.build) v6 + Preact + TailwindCSS v4.
+Runs on [Deno](https://deno.com) (no npm CLI required) and deploys to
+[Cloudflare Workers](https://workers.cloudflare.com) via
+[@deno/astro-adapter](https://github.com/denoland/deno-astro-adapter).
 
-Follow the Fresh 🍋 "Getting Started" guide here:
-https://fresh.deno.dev/docs/getting-started
+## Prerequisites
 
-### Usage
+- Deno `>= 2.7` — <https://docs.deno.com/runtime/manual/getting_started/installation>
+- Node `>= 22` on PATH (only required by tooling that wraps Node bins)
 
-Make sure to install Deno: https://deno.land/manual/getting_started/installation
+## Setup
 
-Then start the project in development mode:
-
+```bash
+deno install --allow-scripts
 ```
-deno task dev
+
+This populates `node_modules/` from `deno.lock`. **Do not run `npm install`** —
+Deno owns `node_modules/` and npm's hoisting layout will conflict with it.
+
+## Common tasks
+
+```bash
+deno task dev            # Astro dev server on localhost:4321
+deno task build          # Production build (dist/client + dist/server)
+deno task preview        # wrangler dev against the built worker
+deno task serve          # Pure-Deno preview (Deno.serve + handle())
+deno task check          # Astro type check
+deno task lint           # deno lint
+deno task format         # deno fmt
+deno task test:e2e       # Playwright e2e (chromium/firefox/webkit/mobile-chrome)
+deno task deploy         # Build + wrangler deploy
 ```
 
-This will watch the project directory and restart as necessary.
+See [`CLAUDE.md`](./CLAUDE.md) for architecture notes, runtime caveats and
+deployment details.
 
 ## License
 
-See LICENSE.md file
+See [LICENSE.md](./LICENSE.md).

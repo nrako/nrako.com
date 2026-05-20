@@ -4,7 +4,7 @@
  */
 
 import type { PageFrontmatter } from 'myst-frontmatter'
-import type { CommitInfo } from './githubVersioning'
+import type { CommitInfo } from './githubVersioning.ts'
 
 export interface PostManifestEntry {
   slug: string

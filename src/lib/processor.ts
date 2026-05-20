@@ -21,7 +21,7 @@ import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import { h } from 'hastscript'
-import { defaultOptions, type InternalOptions } from './blogData'
+import { defaultOptions, type InternalOptions } from './blogData.ts'
 import { validatePageFrontmatter } from 'myst-frontmatter'
 
 export type ParseOptions = Pick<
@@ -43,13 +43,11 @@ async function parse(text: string, options: ParseOptions) {
   const file = new VFile()
   const mdast = mystParse(text, {
     markdownit: { linkify: true },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vfile: file as any,
   })
 
   const messages: Messages = {}
   const vfile = new VFile()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { frontmatter: rawPageFrontmatter } = getFrontmatter(
     vfile as any,
     mdast,
@@ -75,7 +73,6 @@ async function parse(text: string, options: ParseOptions) {
   // For the mdast that we show, duplicate, strip positions and dump to yaml
   // Also run some of the transforms, like the links
   const mdastPre = JSON.parse(JSON.stringify(mdast))
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(unified() as any)
     .use(basicTransformationsPlugin, {})
     .use(inlineMathSimplificationPlugin)

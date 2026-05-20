@@ -23,7 +23,7 @@ export default function ReactionCount({ count, label }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1 text-gray-500">
+    <div className='flex items-center gap-1 text-gray-500'>
       <Icon />
       <span>{formatCount(count)}</span>
     </div>

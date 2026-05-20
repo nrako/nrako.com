@@ -1,14 +1,15 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
-import type { Messages } from './processor'
-import type { CommitInfo } from './githubVersioning'
-import type { PostManifestEntry, PostsManifest } from './manifest'
+import type { Messages } from './processor.ts'
+import type { CommitInfo } from './githubVersioning.ts'
+import type { PostManifestEntry, PostsManifest } from './manifest.ts'
 import { extname, join } from 'node:path'
-import processor from './processor'
+import processor from './processor.ts'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { parseHTML } from 'linkedom'
-import { getCommitHistory, isDraftVersion } from './githubVersioning'
-import { getPostFromManifest, getAllPostsFromManifest } from './manifest'
+import { getCommitHistory, isDraftVersion } from './githubVersioning.ts'
+import { getAllPostsFromManifest, getPostFromManifest } from './manifest.ts'
+import process from 'node:process'
 
 // 200 word-per-minute is on the lower range of the average reading speed 200-300 wpm
 const WPM = 200
@@ -91,11 +92,11 @@ export interface InternalOptions {
    */
   versioning:
     | {
-        provider: 'github'
-        mainBranch: string
-        repoOwner: string
-        repoName: string
-      }
+      provider: 'github'
+      mainBranch: string
+      repoOwner: string
+      repoName: string
+    }
     | undefined
 }
 
