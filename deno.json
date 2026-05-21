@@ -1,18 +1,44 @@
 {
   "nodeModulesDir": "auto",
   "unstable": ["sloppy-imports"],
+  "env": {
+    "ASTRO_TELEMETRY_DISABLED": "1"
+  },
   "tasks": {
-    "dev": "deno run -A npm:astro dev",
-    "build": "deno run -A npm:astro build",
-    "check": "deno run -A ./scripts/deno-check.mjs",
-    "serve": "deno run -A ./scripts/deno-serve.mjs",
-    "preview": "deno run -A npm:wrangler dev --port 4321",
-    "deploy": "deno run -A npm:astro build && deno run -A npm:wrangler deploy",
+    "dev": {
+      "description": "Astro dev server (project-scoped FS)",
+      "command": "BROWSERSLIST_ROOT_PATH=$PWD deno run --no-prompt --allow-read=.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro --allow-write=.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:astro dev"
+    },
+    "build": {
+      "description": "Production build (project-scoped FS)",
+      "command": "BROWSERSLIST_ROOT_PATH=$PWD deno run --no-prompt --allow-read=.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro --allow-write=.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:astro build"
+    },
+    "check": {
+      "description": "Type check via @astrojs/check (Deno-native wrapper)",
+      "command": "BROWSERSLIST_ROOT_PATH=$PWD deno run --no-prompt --allow-read=.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro --allow-write=.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro --allow-env --allow-net --allow-run --allow-sys --allow-ffi ./scripts/deno-check.mjs"
+    },
+    "serve": {
+      "description": "Pure-Deno preview of dist/server, no FFI/run (genuinely sandboxed)",
+      "command": "deno run --no-prompt --allow-read=./dist --allow-net --allow-env ./scripts/deno-serve.mjs"
+    },
+    "preview": {
+      "description": "wrangler dev against the built worker",
+      "command": "deno run --no-prompt --allow-read=.,$TMPDIR,$HOME/.wrangler,$HOME/Library/Caches/deno --allow-write=.,$TMPDIR,$HOME/.wrangler,$HOME/Library/Caches/deno --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:wrangler dev --port 4321"
+    },
+    "deploy": {
+      "description": "Build + wrangler deploy",
+      "command": "deno task build && deno run --no-prompt --allow-read=.,$TMPDIR,$HOME/.wrangler,$HOME/.config/.wrangler,$HOME/Library/Caches/deno --allow-write=.,$TMPDIR,$HOME/.wrangler,$HOME/.config/.wrangler,$HOME/Library/Caches/deno --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:wrangler deploy"
+    },
     "lint": "deno lint",
     "format": "deno fmt",
     "format:check": "deno fmt --check",
-    "test:e2e": "PW_DISABLE_TS_ESM=1 deno run -A npm:@playwright/test test",
-    "test:e2e:ui": "PW_DISABLE_TS_ESM=1 deno run -A npm:@playwright/test test --ui"
+    "test:e2e": {
+      "description": "Playwright e2e (uses dev server; full scope for browser launch)",
+      "command": "PW_DISABLE_TS_ESM=1 deno run --no-prompt --allow-read --allow-write=.,$TMPDIR --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:@playwright/test test"
+    },
+    "test:e2e:ui": {
+      "command": "PW_DISABLE_TS_ESM=1 deno run --no-prompt --allow-read --allow-write=.,$TMPDIR --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:@playwright/test test --ui"
+    }
   },
   "compilerOptions": {
     "jsx": "react-jsx",

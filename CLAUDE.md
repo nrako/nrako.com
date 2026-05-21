@@ -15,12 +15,40 @@ Personal website for nrako built with **Astro v6**, Preact, and TailwindCSS v4. 
 - **Adapter**: `@deno/astro-adapter` with `start: false` — emits a `handle()` function the Worker mounts
 - **Deploy**: `npm:wrangler deploy` (Cloudflare Workers)
 
-Do not run `npm install`. Always use `deno install --allow-scripts` to populate `node_modules/` (Deno's symlink layout is incompatible with subsequent npm installs).
+Do not run `npm install`. Always use `deno install` to populate `node_modules/` (Deno's symlink layout is incompatible with subsequent npm installs).
+
+### Security model
+
+The honest threat model for a Deno + npm build, in order of value:
+
+**The controls that actually matter (install-time, before any dep code runs):**
+
+- **`deno install` runs WITHOUT `--allow-scripts`.** No npm postinstall script executes. This is the single highest-value control — postinstall is the real supply-chain propagation vector (it's how the Shai-Hulud worm spread), and it runs before the lockfile is even consulted. Native binaries we need (sharp, workerd, fsevents) ship as separate prebuilt-binary deps, so postinstall was never required. To re-enable an audited script: `deno install --allow-scripts=npm:foo`.
+- **`deno.lock` integrity hashes.** Deno verifies every npm tarball against the locked hash on each install; a tampered package is rejected automatically. Free, automatic.
+
+**The build-time ceiling (be honest about this):** `dev` / `build` / `preview` / `deploy` / `test:e2e` all grant `--allow-ffi` (and `--allow-run`) because rollup/esbuild/sharp/workerd load native `.node` binaries. **Once `--allow-ffi` is granted, Deno's other permission scoping is bypassable** — a malicious dep can `dlopen` libc and call `getenv()` / `open()` directly, sidestepping `--allow-env` / `--allow-read`. Verified: an FFI call reads an env var that `--deny-env` "blocks". So on FFI tasks we are trusting the pinned dependency tree, full stop. That trust is anchored at install time (no postinstall + lockfile), not at runtime flags.
+
+**What the runtime flags still buy (defense-in-depth, low cost):**
+
+- `--allow-read` / `--allow-write` scoped to `.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro` — blocks a _lazy / untargeted_ dependency that naively reads `~/.ssh` via `node:fs`. A targeted attacker uses FFI and walks around it; mass-compromise malware often doesn't bother, so this has some real-world value at near-zero maintenance cost.
+- `--allow-env` is **open** (no deny-list). We deliberately dropped `--deny-env`: it's defeated by FFI anyway (proven), and maintaining a secret-name blocklist was high-effort for false confidence.
+- `--allow-net` is open. Host allowlisting is too brittle for npm/GitHub/CF tooling.
+- `--no-prompt` so a permission failure terminates instead of prompting. Without it, Vite's lockfile/workspace FS walks trigger a cascade of "Allow?" prompts that train you to press `A`. With it, tools that catch stat errors (Vite does) treat denied paths as "absent" and continue; others abort cleanly.
+
+**`serve` is the one genuinely-sandboxed task:** it runs the built SSR bundle (pure JS — no native deps), so it gets only `--allow-read=./dist --allow-net --allow-env`, no FFI/run. Here the scoping is a real boundary, not theater.
+
+**Filesystem-walk workarounds** (only needed because read access is scoped):
+
+- `pnpm-workspace.yaml` (empty) stops Vite's `searchForWorkspaceRoot` walking up past the project root.
+- `pnpm-lock.yaml` (empty) stops Vite's `getLockfileHash` `lookupFile()` walk (it otherwise walks to `/` looking for `package-lock.json`, `yarn.lock`, `bun.lockb`, `.rush/temp/shrinkwrap-deps.json`, …). Also gives Vite a stable dep-cache hash input.
+- `BROWSERSLIST_ROOT_PATH=$PWD` (inline per task) stops browserslist's own ancestor walk.
+
+Neither marker file is used at runtime — they're signposts. We don't use pnpm.
 
 ## Commands
 
 ```bash
-deno install --allow-scripts  # First-time setup
+deno install                  # First-time setup (NO --allow-scripts; see Security)
 deno task dev                 # Astro dev server (localhost:4321)
 deno task build               # Production build → dist/{client,server}
 deno task preview             # wrangler dev against the built worker
@@ -85,4 +113,4 @@ deno task deploy              # Build + wrangler deploy
 - `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`) — we deliberately don't declare it via `env.schema` / `astro:env`. `@deno/astro-adapter` doesn't yet implement Astro's `getSecret` feature, and declaring the schema would emit a misleading config error at every build/check. Set it via `wrangler secret put GITHUB_TOKEN` in prod, or `.env` locally (loaded by the `posts-manifest` integration).
 - Deno's strict resolver requires every bare import in `src/` to appear in `package.json` `dependencies`/`devDependencies` (transitive npm deps are resolved automatically; direct imports in our own source are not).
 - `deno task check` runs `scripts/deno-check.mjs`, which calls `@astrojs/check`'s `check()` API directly. Going through the Astro CLI (`deno run -A npm:astro check`) under Deno exits 0 silently — diagnostics never print and TS errors are not reported (verified by injecting `const _err: number = 'not a number'`). Calling the package API directly works correctly and propagates exit codes.
-- `deno task test:e2e` sets `PW_DISABLE_TS_ESM=1`. Playwright's `loadConfig` calls `require("node:module").register` to wire up its TS-ESM loader; that API isn't implemented in Deno's Node compat layer, so Playwright misreads it as "Node <18.19" and refuses to load. With the env var set, Playwright skips that loader and Deno's own TS handling loads `playwright.config.ts` fine. Browsers install via `PW_DISABLE_TS_ESM=1 deno run -A npm:playwright install chromium` (browser cache lives in `~/Library/Caches/ms-playwright`, shared with any Node-installed Playwright).
+- `deno task test:e2e` sets `PW_DISABLE_TS_ESM=1`. Playwright's `loadConfig` calls `require("node:module").register` to wire up its TS-ESM loader; that API isn't implemented in Deno's Node compat layer, so Playwright misreads it as "Node <18.19" and refuses to load. With the env var set, Playwright skips that loader and Deno's own TS handling loads `playwright.config.ts` fine. Browsers install via `PW_DISABLE_TS_ESM=1 deno run --allow-read --allow-write --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`, shared with any Node-installed Playwright).

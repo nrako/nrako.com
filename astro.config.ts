@@ -51,6 +51,15 @@ export default defineConfig({
     css: {
       postcss: './postcss.config.mjs',
     },
+    // Pin Vite's workspace root to the project so it doesn't walk up
+    // the filesystem looking for pnpm-workspace.yaml / lerna.json / etc.
+    // Lets us run with --allow-read=. (no parent-dir access required).
+    server: {
+      fs: {
+        allow: [import.meta.dirname ?? '.'],
+        strict: true,
+      },
+    },
     // Exclude dev dependencies and heavy MyST deps from SSR bundle
     ssr: {
       external: [

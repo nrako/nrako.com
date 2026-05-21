@@ -52,5 +52,8 @@
   },
   "engines": {
     "deno": ">=2.7.0"
-  }
+  },
+  "browserslist": [
+    "defaults and supports es6-module"
+  ]
 }

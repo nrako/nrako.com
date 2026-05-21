@@ -22,8 +22,13 @@ jobs:
         with:
           deno-version: v2.x
 
+      # NOTE: postinstall scripts are intentionally NOT approved here. Native
+      # binaries (sharp, workerd, fsevents) ship as separate prebuilt deps
+      # (@img/sharp-*, @cloudflare/workerd-*) that don't require postinstall.
+      # If a dep ever needs --allow-scripts, allowlist it explicitly:
+      # `deno install --allow-scripts=npm:foo --frozen`.
       - name: Install dependencies
-        run: deno install --allow-scripts --frozen
+        run: deno install --frozen
 
       - name: Lint
         run: deno task lint
