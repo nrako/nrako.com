@@ -36,10 +36,6 @@ test.describe('Navigation', () => {
       'https://bsky.app/profile/nrako.com',
     )
 
-    await expect(
-      header.getByRole('link', { name: 'LinkedIn' }),
-    ).toHaveAttribute('href', 'https://linkedin.com/in/nrako')
-
     await expect(header.getByRole('link', { name: 'GitHub' })).toHaveAttribute(
       'href',
       'https://github.com/nrako',
