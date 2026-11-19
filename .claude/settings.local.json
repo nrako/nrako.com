@@ -1,12 +1,27 @@
 {
   "permissions": {
     "allow": [
-      "Bash(deno fmt:*)",
-      "Bash(deno check:*)"
+      "Bash(pnpm run format:*)",
+      "Bash(pnpm exec prettier:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm exec eslint:*)",
+      "Bash(pnpm run check:*)",
+      "Bash(pnpm exec astro check:*)",
+      "Bash(pnpm astro check:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm remove:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.astro.build)"
     ]
   },
   "enabledMcpjsonServers": [
     "playwright-test",
-    "github"
+    "github",
+    "cloudflare-observability",
+    "cloudflare-bindings",
+    "cloudflare-radar",
+    "cloudflare-browser"
   ]
 }

@@ -1,24 +1,46 @@
 # nrako.com
 
-Personal website for <a href="https://github.com/nrako">@nrako</a>.
+Personal website for [@nrako](https://github.com/nrako).
 
-## Run Code
+Built with [Astro](https://astro.build) v7 + Preact + TailwindCSS v4.
+Runs on [Node.js](https://nodejs.org) with [pnpm](https://pnpm.io) and deploys
+to [Cloudflare Workers](https://workers.cloudflare.com) via
+[@astrojs/cloudflare](https://docs.astro.build/en/guides/integrations-guide/cloudflare/).
 
-Follow the Fresh 🍋 "Getting Started" guide here:
-https://fresh.deno.dev/docs/getting-started
+## Prerequisites
 
-### Usage
+Node.js and pnpm, at the versions pinned in [`mise.toml`](./mise.toml). With
+[mise](https://mise.jdx.dev):
 
-Make sure to install Deno: https://deno.land/manual/getting_started/installation
-
-Then start the project in development mode:
-
+```bash
+mise install
 ```
-deno task dev
+
+## Setup
+
+```bash
+pnpm install
 ```
 
-This will watch the project directory and restart as necessary.
+Dependency install scripts do not run; see the security notes in
+[`CLAUDE.md`](./CLAUDE.md).
+
+## Common tasks
+
+```bash
+pnpm run dev             # Astro dev server on localhost:4321
+pnpm run build           # Production build (dist/client + dist/server)
+pnpm run preview         # Preview the built Worker locally in workerd
+pnpm run check           # Astro type check
+pnpm run lint            # ESLint
+pnpm run format          # Prettier
+pnpm run test:e2e        # Playwright e2e (chromium/firefox/webkit/mobile-chrome)
+pnpm run deploy          # Build + wrangler deploy
+```
+
+See [`CLAUDE.md`](./CLAUDE.md) for architecture notes, runtime caveats and
+deployment details.
 
 ## License
 
-See LICENSE.md file
+See [LICENSE.md](./LICENSE.md).

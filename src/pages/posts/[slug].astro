@@ -1,0 +1,96 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import Time from '@/components/Time.astro'
+import ReadTime from '@/components/ReadTime.astro'
+import DialogMessages from '@/components/DialogMessages.astro'
+import Authors from '@/components/Authors.astro'
+import PostVersions from '@/components/PostVersions.astro'
+import BlueSkyInteractions from '@/components/preact/bluesky-interactions'
+import { getPost, getPosts, defaultOptions as options } from '@/lib/blogData'
+
+export async function getStaticPaths() {
+  const posts = await getPosts(options)
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+  }))
+}
+
+const { slug } = Astro.params
+const post = await getPost(slug, options)
+
+if (!post) {
+  return Astro.redirect('/404')
+}
+
+const displayMessages = import.meta.env.DEV
+
+// Log messages in development
+if (displayMessages) {
+  post.messages.errors?.forEach((error) => console.error(post.slug, error))
+  post.messages.warnings?.forEach((warning) => console.warn(post.slug, warning))
+}
+---
+
+<Layout title={`${post.frontmatter.title} - ${options.title}`}>
+  <Fragment slot="head">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+    />
+  </Fragment>
+
+  {displayMessages && <DialogMessages messages={post.messages} />}
+
+  <article
+    class="freshBlog-post prose prose-md md:prose-lg mx-auto dark:prose-invert"
+  >
+    <header>
+      <h1>{post.frontmatter.title}</h1>
+      {
+        post.frontmatter.subtitle && (
+          <p class="freshBlog-post-subtitle">{post.frontmatter.subtitle}</p>
+        )
+      }
+      <div class="freshBlog-post-meta" aria-label="Post Metadata">
+        {
+          options.showAuthors !== 'never' && post.frontmatter.authors && (
+            <Authors
+              authors={post.frontmatter.authors}
+              affiliations={post.frontmatter.affiliations}
+              showLinks
+            />
+          )
+        }
+        {
+          post.frontmatter.date && (
+            <Time date={post.frontmatter.date} language={options.language} />
+          )
+        }
+        {
+          post.versions && post.versions.length > 1 && (
+            <PostVersions slug={post.slug} versions={post.versions} />
+          )
+        }
+        <ReadTime value={post.readingTimeMinutes} />
+      </div>
+    </header>
+    <div
+      class="freshBlog-post-content"
+      data-light-theme="light"
+      data-dark-theme="dark"
+      set:html={post.content}
+    />
+    {
+      post.frontmatter.site?.bskyUri && (
+        <>
+          <hr />
+          <BlueSkyInteractions
+            client:load
+            postUri={post.frontmatter.site.bskyUri}
+          />
+        </>
+      )
+    }
+  </article>
+</Layout>

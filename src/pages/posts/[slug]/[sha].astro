@@ -1,0 +1,117 @@
+---
+export const prerender = false
+
+import Layout from '@/layouts/Layout.astro'
+import Time from '@/components/Time.astro'
+import ReadTime from '@/components/ReadTime.astro'
+import DialogMessages from '@/components/DialogMessages.astro'
+import Authors from '@/components/Authors.astro'
+import PostVersions from '@/components/PostVersions.astro'
+import { defaultOptions as options } from '@/lib/blogData'
+import { getPostFromManifest } from '@/lib/manifest'
+import { getPostAtVersion } from '@/lib/githubVersioning'
+
+const { slug, sha } = Astro.params
+
+if (!slug || !sha) {
+  return new Response('Not found', { status: 404 })
+}
+
+// Get post metadata from manifest (no filesystem needed)
+const manifestEntry = await getPostFromManifest(slug)
+
+if (!manifestEntry) {
+  return new Response('Post not found', { status: 404 })
+}
+
+const latestCommit = manifestEntry.versions?.[0]
+
+// Redirect to the URL without the SHA if the provided SHA matches the latest
+if (sha === latestCommit?.shortSha) {
+  return Astro.redirect(`/posts/${slug}`, 307)
+}
+
+// Fetch the versioned content from GitHub (uses Cache API for caching)
+const post = await getPostAtVersion(slug, sha, options)
+
+if (!post) {
+  return new Response('Version not found', { status: 404 })
+}
+
+// Merge manifest versions with fetched post
+post.versions = manifestEntry.versions
+
+const displayMessages = import.meta.env.DEV
+
+// Log messages in development
+if (displayMessages) {
+  post.messages.errors?.forEach((error) => console.error(post.slug, error))
+  post.messages.warnings?.forEach((warning) => console.warn(post.slug, warning))
+}
+---
+
+<Layout title={`${post.frontmatter.title} (${sha}) - ${options.title}`}>
+  <Fragment slot="head">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+    />
+  </Fragment>
+
+  {displayMessages && <DialogMessages messages={post.messages} />}
+
+  <article
+    class="freshBlog-post prose prose-md md:prose-lg mx-auto dark:prose-invert"
+  >
+    <header>
+      <h1>{post.frontmatter.title}</h1>
+      {
+        post.frontmatter.subtitle && (
+          <p class="freshBlog-post-subtitle">{post.frontmatter.subtitle}</p>
+        )
+      }
+      <div class="freshBlog-post-meta" aria-label="Post Metadata">
+        {
+          options.showAuthors !== 'never' && post.frontmatter.authors && (
+            <Authors
+              authors={post.frontmatter.authors}
+              affiliations={post.frontmatter.affiliations}
+              showLinks
+            />
+          )
+        }
+        {
+          post.frontmatter.date && (
+            <Time date={post.frontmatter.date} language={options.language} />
+          )
+        }
+        {
+          post.versions && post.versions.length > 1 && (
+            <PostVersions slug={post.slug} versions={post.versions} />
+          )
+        }
+        <ReadTime value={post.readingTimeMinutes} />
+      </div>
+      <dialog
+        role="alertdialog"
+        open
+        class="freshBlog-dialogMessages not-prose"
+      >
+        You are looking at version{' '}
+        <a
+          href={`https://github.com/${options.versioning?.repoOwner}/${options.versioning?.repoName}/commit/${sha}`}
+        >
+          {sha}
+        </a>. Click <a href={`/posts/${post.slug}`}>here</a> to go back to the latest
+        version.
+      </dialog>
+    </header>
+    <div
+      class="freshBlog-post-content"
+      data-light-theme="light"
+      data-dark-theme="dark"
+      set:html={post.content}
+    />
+  </article>
+</Layout>

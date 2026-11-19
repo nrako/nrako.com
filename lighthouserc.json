@@ -8,11 +8,7 @@
       ],
       "settings": {
         "chromeFlags": "--no-sandbox",
-        "skipAudits": [
-          "unminified-css",
-          "unminified-js",
-          "is-crawlable"
-        ]
+        "skipAudits": ["unminified-css", "unminified-js", "is-crawlable"]
       }
     },
     "assert": {

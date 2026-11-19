@@ -1,0 +1,62 @@
+---
+import type { CommitInfo } from '@/lib/githubVersioning'
+import { defaultOptions as options } from '@/lib/blogData'
+import Time from './Time.astro'
+
+interface Props {
+  slug: string
+  versions: CommitInfo[]
+}
+
+const { slug, versions } = Astro.props
+
+if (!versions || versions.length === 0) return null
+
+const latestVersion = versions[0]
+const lastEditedDate = latestVersion?.date
+  ? new Date(latestVersion.date).toLocaleString()
+  : 'Unknown'
+---
+
+<section class="not-prose">
+  <button
+    type="button"
+    id="versions-button"
+    popovertarget="versions-popover"
+    title={`Edited on ${lastEditedDate}`}
+  >
+    {versions.length} edits
+  </button>
+
+  <div popover id="versions-popover">
+    <h3>Version History</h3>
+    <ul>
+      {
+        versions.map((version) => (
+          <li class="version-item">
+            <div class="flex gap-2">
+              {version.sha === 'draft' ? (
+                <strong>Draft</strong>
+              ) : (
+                <a
+                  href={`/posts/${slug}/${version.shortSha}`}
+                  title={`View version ${version.shortSha}`}
+                >
+                  <strong>{version.shortSha}</strong>
+                </a>
+              )}
+              <Time date={version.date} language={options.language} />
+              {version.author && (
+                <>
+                  <span>by {version.author}</span>
+                  {version.verified && <span>(Verified)</span>}
+                </>
+              )}
+            </div>
+            <p>{version.message.split('\n')[0]}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
