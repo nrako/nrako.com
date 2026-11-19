@@ -8,7 +8,7 @@ export default tseslint.config(
       'dist/',
       'node_modules/',
       '.astro/',
-      '.wrangler/',
+      '**/.wrangler/',
       'playwright-report/',
       'test-results/',
       'public/',

@@ -140,6 +140,10 @@ export const defaultOptions: InternalOptions = {
 export async function getPosts(
   options: InternalOptions = defaultOptions,
 ): Promise<Post[]> {
+  // Git does not track empty directories: with nothing published, the
+  // content directory does not exist in a fresh clone.
+  if (!existsSync(options.contentDir)) return []
+
   const files = readdirSync(options.contentDir, { withFileTypes: true })
   const promises = []
 
