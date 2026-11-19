@@ -106,6 +106,7 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.
 - Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects; the JavaScript engine keeps the pipeline usable from an on-demand route.
 - Feed `Content-Type` headers live in `public/_headers`: the feeds are prerendered to extensionless files, so the type set in `src/pages/feed/[type].ts` only applies in dev. Keep both in sync.
+- `public/robots.txt` allows search engines, opts out of AI training and AI answers (Content Signals), and turns away a fixed list of AI training and SEO crawlers. It only states preferences; blocking is done in the Cloudflare dashboard (Security > Settings > Bot traffic), which is not versioned here. If Cloudflare's Bot Preference Sync is enabled, its managed directives are prepended to this file at the edge.
 - Host-level redirects cannot go in `public/_redirects` (Cloudflare does not support domain-level rules there), hence the separate `www-redirect` Worker.
 - TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
 - Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
