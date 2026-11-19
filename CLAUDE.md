@@ -98,6 +98,7 @@ Prerendered pages need Node because they read posts with `node:fs`. Code reachab
 - Preact islands use `client:load`
 - Post versioning: manifest at build time + Cloudflare Cache API at runtime
 - Versioning needs `GITHUB_TOKEN` (set via wrangler secret in prod, `.env` locally)
+- Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects, so it cannot be used on the SSR route.
 - TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
 - Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
 - `prettier-plugin-astro` stays on 0.14.x: 1.x reflows text inside inline elements (`<a>Atom</a>` becomes multi-line), which adds rendered whitespace under `compressHTML: true`. Revisit both settings together.

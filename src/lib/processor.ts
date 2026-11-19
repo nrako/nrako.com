@@ -14,7 +14,13 @@ import {
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 import { mystToHtml } from 'myst-to-html'
-import rehypeShiki from '@shikijs/rehype'
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import {
+  bundledLanguages,
+  createHighlighter,
+  createJavaScriptRegexEngine,
+  type Highlighter,
+} from 'shiki'
 import rehypeStringify from 'rehype-stringify'
 import rehypeParse from 'rehype-parse'
 import rehypeExternalLinks from 'rehype-external-links'
@@ -37,6 +43,34 @@ interface Message {
 export interface Messages {
   errors?: Message[]
   warnings?: Message[]
+}
+
+const highlighters = new Map<string, Promise<Highlighter>>()
+
+/**
+ * Returns a shared Shiki highlighter for the given themes, with every bundled
+ * language available.
+ *
+ * Shiki's default Oniguruma engine decodes its WASM binary at module scope,
+ * which workerd rejects ("Disallowed operation called within global scope"),
+ * so the versioned-post SSR route could not render. The JavaScript regex
+ * engine needs no WASM and runs in both Node and workerd.
+ */
+function getHighlighter(
+  themes: ParseOptions['highlighter']['themes'],
+): Promise<Highlighter> {
+  const themeNames = Object.values(themes)
+  const key = themeNames.join('|')
+  let highlighter = highlighters.get(key)
+  if (!highlighter) {
+    highlighter = createHighlighter({
+      themes: themeNames,
+      langs: Object.keys(bundledLanguages),
+      engine: createJavaScriptRegexEngine(),
+    })
+    highlighters.set(key, highlighter)
+  }
+  return highlighter
 }
 
 async function parse(text: string, options: ParseOptions) {
@@ -89,9 +123,11 @@ async function parse(text: string, options: ParseOptions) {
     },
   })
 
+  const highlighter = await getHighlighter(options.highlighter.themes)
+
   const r = await unified()
     .use(rehypeParse, { fragment: true })
-    .use(rehypeShiki, {
+    .use(rehypeShikiFromHighlighter, highlighter, {
       ...options.highlighter,
       transformers: [transformerNotationDiff()],
     })
