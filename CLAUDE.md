@@ -77,7 +77,7 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Workers** (`workers/`): `www-redirect/` — standalone Worker bound to `www.nrako.com` that redirects to `nrako.com` with a 301. It has its own `wrangler.jsonc` and is not part of the Astro build.
 
-**Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter).
+**Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter). Nothing is published at the moment, so the directory does not exist; create it with the first post. The post pages, version pages and their e2e tests only apply once a post exists.
 
 ## Runtime environments
 

@@ -11,7 +11,21 @@ test.describe('Homepage', () => {
     ).toBeVisible()
   })
 
+  test('has no posts section when nothing is published', async ({ page }) => {
+    test.skip(
+      (await page.getByRole('article').count()) > 0,
+      'a post is published',
+    )
+
+    await expect(page.getByRole('heading', { name: 'Posts' })).toHaveCount(0)
+  })
+
   test('lists posts that link to their page', async ({ page }) => {
+    test.skip(
+      (await page.getByRole('article').count()) === 0,
+      'no post is published',
+    )
+
     await expect(page.getByRole('heading', { name: 'Posts' })).toBeVisible()
 
     const firstPost = page.getByRole('article').first()
