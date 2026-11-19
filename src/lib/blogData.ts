@@ -92,11 +92,11 @@ export interface InternalOptions {
    */
   versioning:
     | {
-      provider: 'github'
-      mainBranch: string
-      repoOwner: string
-      repoName: string
-    }
+        provider: 'github'
+        mainBranch: string
+        repoOwner: string
+        repoName: string
+      }
     | undefined
 }
 

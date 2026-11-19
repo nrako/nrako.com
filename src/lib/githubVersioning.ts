@@ -116,9 +116,10 @@ export async function getPostContentAtVersion(
 
     // GitHub returns base64-encoded content
     // Use Buffer in Node.js or atob in browser/CF Workers
-    const decodedContent = typeof Buffer !== 'undefined'
-      ? Buffer.from(contentData.content, 'base64').toString('utf-8')
-      : atob(contentData.content)
+    const decodedContent =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(contentData.content, 'base64').toString('utf-8')
+        : atob(contentData.content)
 
     return decodedContent
   } catch (error) {

@@ -31,8 +31,7 @@ const posts = await getPosts(options)
                       date={post.frontmatter.date}
                       language={
                         (post.frontmatter.parts?.language as
-                          | string
-                          | undefined) || 'en'
+                          string | undefined) || 'en'
                       }
                     />
                   )}
