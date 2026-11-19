@@ -42,7 +42,7 @@ pnpm run check                # Astro type check
 pnpm run lint                 # ESLint
 pnpm run format               # Prettier (write)
 pnpm run format:check         # Prettier (check)
-pnpm run test:e2e             # Playwright e2e
+pnpm run test:e2e             # Build, then Playwright e2e against the preview
 pnpm run deploy               # Build + wrangler deploy
 ```
 
@@ -118,5 +118,5 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Use `export const prerender = false` for SSR pages. The first one turns the deployment from assets-only into assets plus a Worker.
 - `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`). Vite only exposes `VITE_*` variables through `import.meta.env`, so the `server-env` integration hoists the token from `.env`. It is not needed at runtime: the deployed site has no Worker secret.
 - Playwright browsers install via `pnpm exec playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`).
-- Playwright starts `pnpm run dev` on port 4321 and reuses any server already listening there outside CI; make sure no other project occupies that port before running e2e locally.
-- Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately. Playwright's `webServer` then reports "exited early": start the server first (`pnpm run dev`), run the tests (the running server is reused), then stop it with `pnpm exec astro dev stop` (`astro preview stop` for preview).
+- `pnpm run test:e2e` builds the site and runs Playwright against `astro preview` on port 4390 (override with `E2E_PORT`), on chromium, firefox, webkit and mobile-chrome. It always starts its own server and fails if the port is taken. The tests target the production build, not the dev server: the dev server compiles pages and browser scripts on demand, which made first loads time out at random.
+- Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately (stop them with `pnpm exec astro dev stop` / `astro preview stop`). Pass `--ignore-lock` to keep the server in the foreground, as the Playwright config does.
