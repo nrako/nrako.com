@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "deploy": "pnpm run build && wrangler deploy"
+    "deploy": "pnpm run build && wrangler deploy && wrangler deploy --config workers/www-redirect/wrangler.jsonc"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.7",

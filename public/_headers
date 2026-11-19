@@ -1,0 +1,11 @@
+# The feeds are prerendered to files without an extension, so Cloudflare cannot
+# infer their type and the Content-Type set in src/pages/feed/[type].ts is lost
+# at build time. Keep these values in sync with that file.
+/feed/atom
+  Content-Type: application/atom+xml; charset=utf-8
+
+/feed/rss
+  Content-Type: application/rss+xml; charset=utf-8
+
+/feed/json
+  Content-Type: application/json; charset=utf-8

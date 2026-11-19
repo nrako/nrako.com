@@ -21,15 +21,11 @@
   "observability": {
     "enabled": true,
   },
-  // Custom domains (Cloudflare handles DNS and SSL automatically)
+  // Custom domain (Cloudflare handles DNS and SSL automatically).
+  // www.nrako.com belongs to the redirect Worker in workers/www-redirect.
   "routes": [
     {
       "pattern": "nrako.com",
-      "custom_domain": true,
-      "zone_name": "nrako.com",
-    },
-    {
-      "pattern": "www.nrako.com",
       "custom_domain": true,
       "zone_name": "nrako.com",
     },

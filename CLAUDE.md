@@ -75,6 +75,8 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Integrations** (`src/integrations/`): `server-env.ts` — copies `GITHUB_TOKEN` from `.env` onto `process.env` for the prerendered pages.
 
+**Workers** (`workers/`): `www-redirect/` — standalone Worker bound to `www.nrako.com` that redirects to `nrako.com` with a 301. It has its own `wrangler.jsonc` and is not part of the Astro build.
+
 **Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter).
 
 ## Runtime environments
@@ -94,6 +96,7 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
    - `dist/server/` — Worker modules, only when a route is rendered on demand (empty today)
 2. `wrangler.jsonc` holds the project settings (name, compatibility date/flags, custom domains). `astro build` merges it into the generated `wrangler.json` and writes `.wrangler/deploy/config.json`, which redirects `wrangler deploy` to the generated config.
 3. `wrangler deploy` uploads `dist/client/`. With every page prerendered the deployment is assets-only: no Worker code runs, and a request that matches no asset gets `404.html` (`not_found_handling: "404-page"`). With an on-demand route, the adapter also uploads a Worker, which receives the requests that match no asset.
+4. `pnpm run deploy` then deploys the `www-redirect` Worker (`wrangler deploy --config workers/www-redirect/wrangler.jsonc`). The site only owns the `nrako.com` custom domain; `www.nrako.com` belongs to that Worker.
 
 ## Key Patterns
 
@@ -102,6 +105,8 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Versioning needs `GITHUB_TOKEN` at build time (`.env` locally, `secrets.GITHUB_TOKEN` in CI). Without it the build succeeds with no version history and no version pages. A listed version that cannot be fetched fails the build.
 - The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.
 - Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects; the JavaScript engine keeps the pipeline usable from an on-demand route.
+- Feed `Content-Type` headers live in `public/_headers`: the feeds are prerendered to extensionless files, so the type set in `src/pages/feed/[type].ts` only applies in dev. Keep both in sync.
+- Host-level redirects cannot go in `public/_redirects` (Cloudflare does not support domain-level rules there), hence the separate `www-redirect` Worker.
 - TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
 - Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
 - `prettier-plugin-astro` stays on 0.14.x: 1.x reflows text inside inline elements (`<a>Atom</a>` becomes multi-line), which adds rendered whitespace under `compressHTML: true`. Revisit both settings together.

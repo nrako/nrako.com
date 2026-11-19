@@ -1,0 +1,18 @@
+{
+  // Worker that redirects www.nrako.com to nrako.com (see index.ts).
+  // Deployed by `pnpm run deploy` after the site itself.
+  "name": "nrako-website-www-redirect",
+  "main": "./index.ts",
+  "compatibility_date": "2026-05-01",
+  "workers_dev": false,
+  "observability": {
+    "enabled": true,
+  },
+  "routes": [
+    {
+      "pattern": "www.nrako.com",
+      "custom_domain": true,
+      "zone_name": "nrako.com",
+    },
+  ],
+}
