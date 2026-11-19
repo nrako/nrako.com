@@ -29,9 +29,11 @@ export default function postsManifestIntegration(): AstroIntegration {
     name: 'posts-manifest',
     hooks: {
       'astro:config:setup': ({ command }) => {
-        // Dev and preview need the token too (for the versioned-post SSR
-        // page). Build mode is also covered here, plus again in
-        // astro:build:start in case env vars changed between hooks.
+        // Dev needs the token too: prerendered post pages run in Node and
+        // fetch their version history. (On-demand routes run in workerd,
+        // where the Cloudflare Vite plugin exposes `.env` / `.dev.vars`
+        // values as Worker secrets.) Build mode is also covered here, plus
+        // again in astro:build:start in case env vars changed between hooks.
         hoistServerEnv(command === 'build' ? 'production' : 'development')
       },
       'astro:build:start': async ({ logger }) => {

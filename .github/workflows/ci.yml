@@ -17,29 +17,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
+      # Version comes from the `packageManager` field in package.json.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      # NOTE: postinstall scripts are intentionally NOT approved here. Native
-      # binaries (sharp, workerd, fsevents) ship as separate prebuilt deps
-      # (@img/sharp-*, @cloudflare/workerd-*) that don't require postinstall.
-      # If a dep ever needs --allow-scripts, allowlist it explicitly:
-      # `deno install --allow-scripts=npm:foo --frozen`.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      # Dependency lifecycle scripts never run: pnpm only runs the ones allowed
+      # in pnpm-workspace.yaml (`allowBuilds`), and none are.
       - name: Install dependencies
-        run: deno install --frozen
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: deno task lint
+        run: pnpm run lint
 
       - name: Check formatting
-        run: deno task format:check
+        run: pnpm run format:check
 
       - name: Check types
-        run: deno task check
+        run: pnpm run check
 
       - name: Build
-        run: deno task build
+        run: pnpm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

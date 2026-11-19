@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config'
 import preact from '@astrojs/preact'
-import deno from '@deno/astro-adapter'
+import cloudflare from '@astrojs/cloudflare'
+import tailwindcss from '@tailwindcss/vite'
 import postsManifest from './src/integrations/posts-manifest.ts'
 
 // https://astro.build/config
@@ -18,16 +19,26 @@ export default defineConfig({
   // Static by default, opt-in to server rendering for versioned posts with prerender: false
   output: 'static',
 
-  // GITHUB_TOKEN is read directly from process.env (set via wrangler secret in
-  // prod, or .env locally via the posts-manifest integration). We deliberately
-  // do NOT declare it via `env.schema` / `astro:env`, because the Deno adapter
-  // does not yet implement Astro's `getSecret` feature — declaring the schema
-  // would surface a misleading config error at every build/check.
+  // GITHUB_TOKEN is read directly from process.env: the same library code runs
+  // at build time in Node (posts-manifest integration, outside Vite, where
+  // `astro:env` virtual modules do not exist) and at request time in workerd
+  // (where `nodejs_compat` populates process.env from the Worker's secrets).
 
-  // Deno adapter — produces a Deno-compatible server entry at dist/server/entry.mjs.
-  // start: false disables the built-in Deno.serve so we can mount the `handle`
-  // export inside a Cloudflare Worker fetch handler (see worker.ts).
-  adapter: deno({ start: false }),
+  // Cloudflare Workers adapter. On-demand routes always run in workerd.
+  adapter: cloudflare({
+    // Prerendered pages read posts from disk (node:fs) and run the MyST
+    // pipeline, so they are built in Node rather than workerd.
+    prerenderEnvironment: 'node',
+    // No astro:assets images are used; do not provision an Images binding.
+    imageService: 'passthrough',
+  }),
+
+  // Keep HTML-aware whitespace handling (the Astro 6 default). Astro 7 defaults
+  // to 'jsx', which strips the spaces between adjacent inline elements.
+  compressHTML: true,
+
+  // Sessions are not used; do not provision a SESSION KV namespace.
+  session: false,
 
   integrations: [
     // Preact integration for interactive islands
@@ -46,38 +57,8 @@ export default defineConfig({
     ],
   },
 
-  // Vite configuration for Tailwind CSS v4
+  // Tailwind CSS v4
   vite: {
-    css: {
-      postcss: './postcss.config.mjs',
-    },
-    // Pin Vite's workspace root to the project so it doesn't walk up
-    // the filesystem looking for pnpm-workspace.yaml / lerna.json / etc.
-    // Lets us run with --allow-read=. (no parent-dir access required).
-    server: {
-      fs: {
-        allow: [import.meta.dirname ?? '.'],
-        strict: true,
-      },
-    },
-    // Exclude dev dependencies and heavy MyST deps from SSR bundle
-    ssr: {
-      external: [
-        'playwright',
-        'playwright-core',
-        '@playwright/test',
-        'fsevents',
-        'lightningcss',
-      ],
-    },
-    optimizeDeps: {
-      exclude: [
-        'playwright',
-        'playwright-core',
-        '@playwright/test',
-        'fsevents',
-        'lightningcss',
-      ],
-    },
+    plugins: [tailwindcss()],
   },
 })

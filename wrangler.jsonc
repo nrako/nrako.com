@@ -1,35 +1,34 @@
 {
   // Wrangler configuration for Cloudflare Workers.
-  // Astro is built via @deno/astro-adapter; this Worker wraps the generated
-  // dist/server/entry.mjs through ./worker.ts.
+  // The Worker entry is provided by @astrojs/cloudflare; `astro build` emits
+  // the deployable configuration that `wrangler deploy` picks up.
   // https://developers.cloudflare.com/workers/wrangler/configuration/
   "name": "nrako-website",
-  "main": "./worker.ts",
+  "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-05-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   // Enable workers.dev subdomain for preview URLs
   "workers_dev": true,
-  // Static assets (prerendered HTML, JS, CSS, images) emitted by Astro client build
+  // Static assets (prerendered HTML, JS, CSS, images) emitted by Astro.
+  // Requests that match no asset fall through to the Worker (SSR routes).
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist/client",
-    // Try assets first; fall through to the Worker for SSR routes
-    "not_found_handling": "single-page-application"
+    "directory": "./dist",
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   // Custom domains (Cloudflare handles DNS and SSL automatically)
   "routes": [
     {
       "pattern": "nrako.com",
       "custom_domain": true,
-      "zone_name": "nrako.com"
+      "zone_name": "nrako.com",
     },
     {
       "pattern": "www.nrako.com",
       "custom_domain": true,
-      "zone_name": "nrako.com"
-    }
-  ]
+      "zone_name": "nrako.com",
+    },
+  ],
 }

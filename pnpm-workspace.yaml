@@ -1,0 +1,6 @@
+# Dependency lifecycle scripts are denied explicitly. esbuild and workerd ship
+# their native binaries as prebuilt optional dependencies, so their install
+# scripts are not needed. To allow an audited script, set its entry to `true`.
+allowBuilds:
+  esbuild: false
+  workerd: false

@@ -4,65 +4,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal website for nrako built with **Astro v6**, Preact, and TailwindCSS v4. Features a blog system using MyST markdown. Runs on Deno (no npm CLI required) and deploys to Cloudflare Workers.
+Personal website for nrako built with **Astro v7**, Preact, and TailwindCSS v4. Features a blog system using MyST markdown. Builds on Node.js with pnpm and deploys to Cloudflare Workers.
 
 ## Toolchain
 
-- **Runtime / package manager**: Deno >= 2.7 (owns `node_modules/` via `nodeModulesDir: "auto"`)
-- **Formatter**: `deno fmt` (replaces Prettier)
-- **Linter**: `deno lint` (replaces ESLint)
-- **Builder**: Astro v6 via `npm:astro` invoked through Deno
-- **Adapter**: `@deno/astro-adapter` with `start: false` — emits a `handle()` function the Worker mounts
-- **Deploy**: `npm:wrangler deploy` (Cloudflare Workers)
+- **Runtime**: Node.js >= 22.23.4 (CI uses Node 24)
+- **Package manager**: pnpm 11 (pinned by `packageManager` in `package.json`; `pnpm-lock.yaml` is committed)
+- **Formatter**: Prettier + `prettier-plugin-astro` (config in `package.json`)
+- **Linter**: ESLint flat config (`eslint.config.js`): `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`
+- **Builder**: Astro v7 (Vite 8)
+- **Adapter**: `@astrojs/cloudflare` — provides the Worker entry (`@astrojs/cloudflare/entrypoints/server`)
+- **Deploy**: `wrangler deploy` (Cloudflare Workers)
 
-Do not run `npm install`. Always use `deno install` to populate `node_modules/` (Deno's symlink layout is incompatible with subsequent npm installs).
+Use pnpm for every dependency change. Do not use `npm install`.
 
 ### Security model
 
-The honest threat model for a Deno + npm build, in order of value:
+Supply-chain trust is anchored at install time:
 
-**The controls that actually matter (install-time, before any dep code runs):**
+- **No dependency lifecycle scripts.** pnpm only runs install scripts allowed in `pnpm-workspace.yaml` (`allowBuilds`). `esbuild` and `workerd` are explicitly denied there; their native binaries ship as prebuilt optional dependencies, so the scripts are not needed. To allow an audited script, set its entry to `true`.
+- **`pnpm-lock.yaml` integrity hashes.** CI installs with `--frozen-lockfile`; a tampered tarball is rejected.
 
-- **`deno install` runs WITHOUT `--allow-scripts`.** No npm postinstall script executes. This is the single highest-value control — postinstall is the real supply-chain propagation vector (it's how the Shai-Hulud worm spread), and it runs before the lockfile is even consulted. Native binaries we need (sharp, workerd, fsevents) ship as separate prebuilt-binary deps, so postinstall was never required. To re-enable an audited script: `deno install --allow-scripts=npm:foo`.
-- **`deno.lock` integrity hashes.** Deno verifies every npm tarball against the locked hash on each install; a tampered package is rejected automatically. Free, automatic.
+There is no runtime sandbox: `dev` / `build` / `preview` / `test:e2e` / `deploy` run dependency code with the invoking user's full permissions. Treat the pinned dependency tree as trusted code and review lockfile changes accordingly.
 
-**The build-time ceiling (be honest about this):** `dev` / `build` / `preview` / `deploy` / `test:e2e` all grant `--allow-ffi` (and `--allow-run`) because rollup/esbuild/sharp/workerd load native `.node` binaries. **Once `--allow-ffi` is granted, Deno's other permission scoping is bypassable** — a malicious dep can `dlopen` libc and call `getenv()` / `open()` directly, sidestepping `--allow-env` / `--allow-read`. Verified: an FFI call reads an env var that `--deny-env` "blocks". So on FFI tasks we are trusting the pinned dependency tree, full stop. That trust is anchored at install time (no postinstall + lockfile), not at runtime flags.
-
-**What the runtime flags still buy (defense-in-depth, low cost):**
-
-- `--allow-read` / `--allow-write` scoped to `.,$TMPDIR,$HOME/Library/Caches/deno,$HOME/Library/Preferences/astro` — blocks a _lazy / untargeted_ dependency that naively reads `~/.ssh` via `node:fs`. A targeted attacker uses FFI and walks around it; mass-compromise malware often doesn't bother, so this has some real-world value at near-zero maintenance cost.
-- `--allow-env` is **open** (no deny-list). We deliberately dropped `--deny-env`: it's defeated by FFI anyway (proven), and maintaining a secret-name blocklist was high-effort for false confidence.
-- `--allow-net` is open. Host allowlisting is too brittle for npm/GitHub/CF tooling.
-- `--no-prompt` so a permission failure terminates instead of prompting. Without it, Vite's lockfile/workspace FS walks trigger a cascade of "Allow?" prompts that train you to press `A`. With it, tools that catch stat errors (Vite does) treat denied paths as "absent" and continue; others abort cleanly.
-
-**`serve` is the one genuinely-sandboxed task:** it runs the built SSR bundle (pure JS — no native deps), so it gets only `--allow-read=./dist --allow-net --allow-env`, no FFI/run. Here the scoping is a real boundary, not theater.
-
-**Filesystem-walk workarounds** (only needed because read access is scoped):
-
-- `pnpm-workspace.yaml` (empty) stops Vite's `searchForWorkspaceRoot` walking up past the project root.
-- `pnpm-lock.yaml` (empty) stops Vite's `getLockfileHash` `lookupFile()` walk (it otherwise walks to `/` looking for `package-lock.json`, `yarn.lock`, `bun.lockb`, `.rush/temp/shrinkwrap-deps.json`, …). Also gives Vite a stable dep-cache hash input.
-- `BROWSERSLIST_ROOT_PATH=$PWD` (inline per task) stops browserslist's own ancestor walk.
-
-Neither marker file is used at runtime — they're signposts. We don't use pnpm.
+`astro build` copies local `.env` values into `dist/server/.dev.vars` so `astro preview` can use them. `dist/` is gitignored and `wrangler deploy` uploads only the Worker modules and `dist/client/`; never publish `dist/server/` by other means.
 
 ## Commands
 
 ```bash
-deno install                  # First-time setup (NO --allow-scripts; see Security)
-deno task dev                 # Astro dev server (localhost:4321)
-deno task build               # Production build → dist/{client,server}
-deno task preview             # wrangler dev against the built worker
-deno task serve               # Pure-Deno preview (Deno.serve + handle())
-deno task check               # Astro type check
-deno task lint                # deno lint
-deno task format              # deno fmt
-deno task test:e2e            # Playwright e2e
-deno task deploy              # Build + wrangler deploy
+pnpm install                  # First-time setup (no install scripts run)
+pnpm run dev                  # Astro dev server (localhost:4321)
+pnpm run build                # Production build → dist/{client,server}
+pnpm run preview              # Preview the built Worker locally in workerd
+pnpm run check                # Astro type check
+pnpm run lint                 # ESLint
+pnpm run format               # Prettier (write)
+pnpm run format:check         # Prettier (check)
+pnpm run test:e2e             # Playwright e2e
+pnpm run deploy               # Build + wrangler deploy
 ```
 
 ## Architecture
 
-**Astro v6** with `output: 'static'`, server-rendering opt-in via `prerender: false` on individual pages.
+**Astro v7** with `output: 'static'`, server-rendering opt-in via `prerender: false` on individual pages.
 
 **Pages** (`src/pages/`):
 
@@ -91,26 +75,39 @@ deno task deploy              # Build + wrangler deploy
 
 **Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter).
 
+## Runtime environments
+
+| Code                                  | Runs in                               |
+| ------------------------------------- | ------------------------------------- |
+| Astro config, integrations            | Node                                  |
+| Prerendered pages (dev + build)       | Node (`prerenderEnvironment: 'node'`) |
+| On-demand routes (dev, preview, prod) | workerd                               |
+
+Prerendered pages need Node because they read posts with `node:fs`. Code reachable from `posts/[slug]/[sha].astro` must run in workerd: no filesystem, no async work at module scope.
+
 ## Deployment Pipeline
 
-1. `deno task build` runs Astro v6 via Deno. The `@deno/astro-adapter` produces:
-   - `dist/client/` — prerendered HTML + assets (served by CF `assets` binding)
-   - `dist/server/entry.mjs` — exports `handle(request)` for SSR routes
-2. `worker.ts` is the Cloudflare Worker entry: it installs a minimal `globalThis.Deno` shim (only `env.get` is referenced by the adapter), then forwards `fetch` requests to `handle()`. The CF `assets` binding is checked first per `not_found_handling: "single-page-application"`; only SSR routes reach the Worker.
-3. `wrangler deploy` uploads `worker.ts` (esbuild-bundled with `nodejs_compat`) plus `dist/client/`.
+1. `pnpm run build` runs `astro build`. The Cloudflare adapter produces:
+   - `dist/client/` — prerendered HTML + assets (served by the CF `assets` binding)
+   - `dist/server/` — Worker modules (`entry.mjs`, `chunks/`) and the generated `wrangler.json`
+2. `wrangler.jsonc` holds the project settings (name, compatibility date/flags, custom domains). `astro build` merges it into `dist/server/wrangler.json` and writes `.wrangler/deploy/config.json`, which redirects `wrangler deploy` to the generated config.
+3. `wrangler deploy` uploads the Worker modules plus `dist/client/`. Requests that match a static asset never reach the Worker; everything else does.
 
 ## Key Patterns
 
 - Preact islands use `client:load`
 - Post versioning: manifest at build time + Cloudflare Cache API at runtime
 - Versioning needs `GITHUB_TOKEN` (set via wrangler secret in prod, `.env` locally)
-- TailwindCSS v4 via `@tailwindcss/postcss` + `@import "tailwindcss"` in CSS (no config file)
-- Code style enforced by `deno fmt`: no semicolons, single quotes, 80 char line width
+- TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
+- Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
+- `prettier-plugin-astro` stays on 0.14.x: 1.x reflows text inside inline elements (`<a>Atom</a>` becomes multi-line), which adds rendered whitespace under `compressHTML: true`. Revisit both settings together.
+- `compressHTML: true` keeps the Astro 6 whitespace handling; the Astro 7 default (`'jsx'`) strips spaces between adjacent inline elements.
+- `session: false` and `imageService: 'passthrough'`: the site uses neither sessions nor `astro:assets`, so no KV namespace or Images binding is provisioned on deploy.
 
 ## Development Notes
 
 - Use `export const prerender = false` for SSR pages
-- `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`) — we deliberately don't declare it via `env.schema` / `astro:env`. `@deno/astro-adapter` doesn't yet implement Astro's `getSecret` feature, and declaring the schema would emit a misleading config error at every build/check. Set it via `wrangler secret put GITHUB_TOKEN` in prod, or `.env` locally (loaded by the `posts-manifest` integration).
-- Deno's strict resolver requires every bare import in `src/` to appear in `package.json` `dependencies`/`devDependencies` (transitive npm deps are resolved automatically; direct imports in our own source are not).
-- `deno task check` runs `scripts/deno-check.mjs`, which calls `@astrojs/check`'s `check()` API directly. Going through the Astro CLI (`deno run -A npm:astro check`) under Deno exits 0 silently — diagnostics never print and TS errors are not reported (verified by injecting `const _err: number = 'not a number'`). Calling the package API directly works correctly and propagates exit codes.
-- `deno task test:e2e` sets `PW_DISABLE_TS_ESM=1`. Playwright's `loadConfig` calls `require("node:module").register` to wire up its TS-ESM loader; that API isn't implemented in Deno's Node compat layer, so Playwright misreads it as "Node <18.19" and refuses to load. With the env var set, Playwright skips that loader and Deno's own TS handling loads `playwright.config.ts` fine. Browsers install via `PW_DISABLE_TS_ESM=1 deno run --allow-read --allow-write --allow-env --allow-net --allow-run --allow-sys --allow-ffi npm:playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`, shared with any Node-installed Playwright).
+- `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`), not through `astro:env`: the same library code runs in the `posts-manifest` integration (Node, outside Vite, where `astro:env` virtual modules do not exist) and in workerd (where `nodejs_compat` populates `process.env` from Worker secrets). Set it via `wrangler secret put GITHUB_TOKEN` in prod, or `.env` locally — the integration hoists it for the Node side, the Cloudflare Vite plugin exposes it to workerd.
+- Playwright browsers install via `pnpm exec playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`).
+- Playwright starts `pnpm run dev` on port 4321 and reuses any server already listening there outside CI; make sure no other project occupies that port before running e2e locally.
+- Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately. Playwright's `webServer` then reports "exited early": start the server first (`pnpm run dev`), run the tests (the running server is reused), then stop it with `pnpm exec astro dev stop` (`astro preview stop` for preview).

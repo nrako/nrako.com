@@ -39,5 +39,5 @@ test-results/
 # Generic local cache directories
 .cache/
 
-# npm artifacts (project is Deno-native; deno.lock is committed instead)
+# npm artifacts (project uses pnpm; pnpm-lock.yaml is committed instead)
 package-lock.json
