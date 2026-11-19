@@ -5,19 +5,15 @@ test.describe('Homepage', () => {
     await page.goto('/')
   })
 
-  test('displays hero greeting', async ({ page }) => {
+  test('displays the site name as the main heading', async ({ page }) => {
     await expect(
-      page.getByRole('heading', { name: "Hello, I'm Nicholas." }),
+      page.getByRole('heading', { level: 1, name: 'nrako' }),
     ).toBeVisible()
   })
 
-  test('displays recent posts section', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: 'Recent Posts' }),
-    ).toBeVisible()
-  })
+  test('lists posts that link to their page', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Posts' })).toBeVisible()
 
-  test('recent posts are clickable and navigate to post', async ({ page }) => {
     const firstPost = page.getByRole('article').first()
     const postTitle = await firstPost.getByRole('heading').textContent()
 

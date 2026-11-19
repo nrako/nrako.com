@@ -63,7 +63,7 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Preact Islands** (`src/components/preact/`, mounted with `client:load`):
 
-- `hero-text.tsx`, `vim-replace-text.tsx`, `theme-toggle.tsx`
+- `theme-toggle.tsx`
 - Bluesky: `bluesky-interactions.tsx`, `author.tsx`, `reply.tsx`, `avatar.tsx`, `post-embed.tsx`, `reaction-bar.tsx`
 
 **Blog System** (`src/lib/`):
