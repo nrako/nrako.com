@@ -8,8 +8,9 @@ Personal website for nrako built with **Astro v7**, Preact, and TailwindCSS v4. 
 
 ## Toolchain
 
-- **Runtime**: Node.js >= 22.23.4 (CI uses Node 24)
-- **Package manager**: pnpm 11 (pinned by `packageManager` in `package.json`; `pnpm-lock.yaml` is committed)
+- **Tool versions**: `mise.toml` pins Node.js and pnpm for local development and CI (`jdx/mise-action`). Change versions there only.
+- **Runtime**: Node.js 26 (LTS)
+- **Package manager**: pnpm 11 (`pnpm-lock.yaml` is committed)
 - **Formatter**: Prettier + `prettier-plugin-astro` (config in `package.json`)
 - **Linter**: ESLint flat config (`eslint.config.js`): `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`
 - **Builder**: Astro v7 (Vite 8)
@@ -32,6 +33,7 @@ There is no runtime sandbox: `dev` / `build` / `preview` / `test:e2e` / `deploy`
 ## Commands
 
 ```bash
+mise install                  # Node.js + pnpm at the versions in mise.toml
 pnpm install                  # First-time setup (no install scripts run)
 pnpm run dev                  # Astro dev server (localhost:4321)
 pnpm run build                # Production build → dist/{client,server}

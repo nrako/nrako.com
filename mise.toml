@@ -1,0 +1,5 @@
+# Tool versions for local development and CI (jdx/mise-action reads this file).
+
+[tools]
+node = "26.13.1"
+pnpm = "11.25.0"

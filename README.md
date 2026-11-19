@@ -9,8 +9,12 @@ to [Cloudflare Workers](https://workers.cloudflare.com) via
 
 ## Prerequisites
 
-- Node `>= 22.23.4`
-- pnpm `11` (version pinned by `packageManager` in `package.json`)
+Node.js and pnpm, at the versions pinned in [`mise.toml`](./mise.toml). With
+[mise](https://mise.jdx.dev):
+
+```bash
+mise install
+```
 
 ## Setup
 
