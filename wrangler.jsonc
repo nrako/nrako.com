@@ -10,10 +10,13 @@
   // Enable workers.dev subdomain for preview URLs
   "workers_dev": true,
   // Static assets (prerendered HTML, JS, CSS, images) emitted by Astro.
-  // Requests that match no asset fall through to the Worker (SSR routes).
+  // Every page is prerendered today, so the deployment is assets-only: a
+  // request that matches no asset gets 404.html. With on-demand routes, such
+  // requests reach the Worker first.
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
+    "not_found_handling": "404-page",
   },
   "observability": {
     "enabled": true,

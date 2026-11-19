@@ -14,7 +14,7 @@ Personal website for nrako built with **Astro v7**, Preact, and TailwindCSS v4. 
 - **Formatter**: Prettier + `prettier-plugin-astro` (config in `package.json`)
 - **Linter**: ESLint flat config (`eslint.config.js`): `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`
 - **Builder**: Astro v7 (Vite 8)
-- **Adapter**: `@astrojs/cloudflare` — provides the Worker entry (`@astrojs/cloudflare/entrypoints/server`)
+- **Adapter**: `@astrojs/cloudflare` — generates the deploy configuration, and the Worker entry (`@astrojs/cloudflare/entrypoints/server`) when a route is rendered on demand
 - **Deploy**: `wrangler deploy` (Cloudflare Workers)
 
 Use pnpm for every dependency change. Do not use `npm install`.
@@ -28,7 +28,7 @@ Supply-chain trust is anchored at install time:
 
 There is no runtime sandbox: `dev` / `build` / `preview` / `test:e2e` / `deploy` run dependency code with the invoking user's full permissions. Treat the pinned dependency tree as trusted code and review lockfile changes accordingly.
 
-`astro build` copies local `.env` values into `dist/server/.dev.vars` so `astro preview` can use them. `dist/` is gitignored and `wrangler deploy` uploads only the Worker modules and `dist/client/`; never publish `dist/server/` by other means.
+When a route is rendered on demand, `astro build` copies local `.env` values into `dist/server/.dev.vars` so `astro preview` can use them. `dist/` is gitignored and `wrangler deploy` uploads only the Worker modules and `dist/client/`; never publish `dist/server/` by other means.
 
 ## Commands
 
@@ -37,7 +37,7 @@ mise install                  # Node.js + pnpm at the versions in mise.toml
 pnpm install                  # First-time setup (no install scripts run)
 pnpm run dev                  # Astro dev server (localhost:4321)
 pnpm run build                # Production build → dist/{client,server}
-pnpm run preview              # Preview the built Worker locally in workerd
+pnpm run preview              # Preview the production build locally in workerd
 pnpm run check                # Astro type check
 pnpm run lint                 # ESLint
 pnpm run format               # Prettier (write)
@@ -48,14 +48,15 @@ pnpm run deploy               # Build + wrangler deploy
 
 ## Architecture
 
-**Astro v7** with `output: 'static'`, server-rendering opt-in via `prerender: false` on individual pages.
+**Astro v7** with `output: 'static'`. Every page is prerendered; server rendering is opt-in via `prerender: false` on individual pages and none uses it today.
 
 **Pages** (`src/pages/`):
 
 - `index.astro` — Homepage (static)
 - `posts/index.astro` — Blog listing (static)
 - `posts/[slug].astro` — Single post (static, prerendered)
-- `posts/[slug]/[sha].astro` — Versioned post (SSR)
+- `posts/[slug]/[sha].astro` — Post at an older commit (static, one page per version)
+- `404.astro` — Not-found page (static)
 - `feed/[type].ts` — RSS/Atom/JSON feed endpoints (static)
 
 **Layouts** (`src/layouts/`): `Layout.astro` (root, with header/footer/theme toggle).
@@ -67,13 +68,12 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Blog System** (`src/lib/`):
 
-- `blogData.ts` — Post loading, caching, reading time
+- `blogData.ts` — Post loading, reading time
 - `processor.ts` — MyST markdown processing with Shiki syntax highlighting
-- `githubVersioning.ts` — Post version history from GitHub commits
+- `githubVersioning.ts` — Post version history and old versions from the GitHub API
 - `bluesky.ts` — Bluesky API integration
-- `manifest.ts` — Build-time posts manifest reader
 
-**Integrations** (`src/integrations/`): `posts-manifest.ts` — emits `public/posts-manifest.json` at build start so SSR pages can read post metadata without filesystem access on Cloudflare Workers.
+**Integrations** (`src/integrations/`): `server-env.ts` — copies `GITHUB_TOKEN` from `.env` onto `process.env` for the prerendered pages.
 
 **Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter).
 
@@ -85,22 +85,23 @@ pnpm run deploy               # Build + wrangler deploy
 | Prerendered pages (dev + build)       | Node (`prerenderEnvironment: 'node'`) |
 | On-demand routes (dev, preview, prod) | workerd                               |
 
-Prerendered pages need Node because they read posts with `node:fs`. Code reachable from `posts/[slug]/[sha].astro` must run in workerd: no filesystem, no async work at module scope.
+Prerendered pages need Node because they read posts with `node:fs`. There is no on-demand route today. Code reachable from one would have to run in workerd: no filesystem, no async work at module scope, and 10 ms of CPU per request on the Workers Free plan.
 
 ## Deployment Pipeline
 
 1. `pnpm run build` runs `astro build`. The Cloudflare adapter produces:
-   - `dist/client/` — prerendered HTML + assets (served by the CF `assets` binding)
-   - `dist/server/` — Worker modules (`entry.mjs`, `chunks/`) and the generated `wrangler.json`
-2. `wrangler.jsonc` holds the project settings (name, compatibility date/flags, custom domains). `astro build` merges it into `dist/server/wrangler.json` and writes `.wrangler/deploy/config.json`, which redirects `wrangler deploy` to the generated config.
-3. `wrangler deploy` uploads the Worker modules plus `dist/client/`. Requests that match a static asset never reach the Worker; everything else does.
+   - `dist/client/` — prerendered HTML + assets, plus the generated `wrangler.json`
+   - `dist/server/` — Worker modules, only when a route is rendered on demand (empty today)
+2. `wrangler.jsonc` holds the project settings (name, compatibility date/flags, custom domains). `astro build` merges it into the generated `wrangler.json` and writes `.wrangler/deploy/config.json`, which redirects `wrangler deploy` to the generated config.
+3. `wrangler deploy` uploads `dist/client/`. With every page prerendered the deployment is assets-only: no Worker code runs, and a request that matches no asset gets `404.html` (`not_found_handling: "404-page"`). With an on-demand route, the adapter also uploads a Worker, which receives the requests that match no asset.
 
 ## Key Patterns
 
 - Preact islands use `client:load`
-- Post versioning: manifest at build time + Cloudflare Cache API at runtime
-- Versioning needs `GITHUB_TOKEN` (set via wrangler secret in prod, `.env` locally)
-- Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects, so it cannot be used on the SSR route.
+- Post versioning: the commit history and every older version are fetched from the GitHub API at build time and prerendered. A new commit to a post shows up after the next build and deploy.
+- Versioning needs `GITHUB_TOKEN` at build time (`.env` locally, `secrets.GITHUB_TOKEN` in CI). Without it the build succeeds with no version history and no version pages. A listed version that cannot be fetched fails the build.
+- The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.
+- Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects; the JavaScript engine keeps the pipeline usable from an on-demand route.
 - TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
 - Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
 - `prettier-plugin-astro` stays on 0.14.x: 1.x reflows text inside inline elements (`<a>Atom</a>` becomes multi-line), which adds rendered whitespace under `compressHTML: true`. Revisit both settings together.
@@ -109,8 +110,8 @@ Prerendered pages need Node because they read posts with `node:fs`. Code reachab
 
 ## Development Notes
 
-- Use `export const prerender = false` for SSR pages
-- `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`), not through `astro:env`: the same library code runs in the `posts-manifest` integration (Node, outside Vite, where `astro:env` virtual modules do not exist) and in workerd (where `nodejs_compat` populates `process.env` from Worker secrets). Set it via `wrangler secret put GITHUB_TOKEN` in prod, or `.env` locally — the integration hoists it for the Node side, the Cloudflare Vite plugin exposes it to workerd.
+- Use `export const prerender = false` for SSR pages. The first one turns the deployment from assets-only into assets plus a Worker.
+- `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`). Vite only exposes `VITE_*` variables through `import.meta.env`, so the `server-env` integration hoists the token from `.env`. It is not needed at runtime: the deployed site has no Worker secret.
 - Playwright browsers install via `pnpm exec playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`).
 - Playwright starts `pnpm run dev` on port 4321 and reuses any server already listening there outside CI; make sure no other project occupies that port before running e2e locally.
 - Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately. Playwright's `webServer` then reports "exited early": start the server first (`pnpm run dev`), run the tests (the running server is reused), then stop it with `pnpm exec astro dev stop` (`astro preview stop` for preview).

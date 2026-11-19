@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config'
 import preact from '@astrojs/preact'
 import cloudflare from '@astrojs/cloudflare'
 import tailwindcss from '@tailwindcss/vite'
-import postsManifest from './src/integrations/posts-manifest.ts'
+import serverEnv from './src/integrations/server-env.ts'
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,15 +16,11 @@ export default defineConfig({
     format: 'file',
   },
 
-  // Static by default, opt-in to server rendering for versioned posts with prerender: false
+  // Every page is prerendered; opt in to server rendering with prerender: false
   output: 'static',
 
-  // GITHUB_TOKEN is read directly from process.env: the same library code runs
-  // at build time in Node (posts-manifest integration, outside Vite, where
-  // `astro:env` virtual modules do not exist) and at request time in workerd
-  // (where `nodejs_compat` populates process.env from the Worker's secrets).
-
-  // Cloudflare Workers adapter. On-demand routes always run in workerd.
+  // Cloudflare Workers adapter. On-demand routes always run in workerd; there
+  // are none today, so the Worker only answers requests that match no asset.
   adapter: cloudflare({
     // Prerendered pages read posts from disk (node:fs) and run the MyST
     // pipeline, so they are built in Node rather than workerd.
@@ -43,8 +39,8 @@ export default defineConfig({
   integrations: [
     // Preact integration for interactive islands
     preact(),
-    // Generate posts manifest at build time for SSR pages
-    postsManifest(),
+    // Expose GITHUB_TOKEN from .env to the prerendered pages
+    serverEnv(),
   ],
 
   // Image optimization

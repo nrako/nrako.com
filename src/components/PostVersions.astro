@@ -39,7 +39,11 @@ const lastEditedDate = latestVersion?.date
                 <strong>Draft</strong>
               ) : (
                 <a
-                  href={`/posts/${slug}/${version.shortSha}`}
+                  href={
+                    version === latestVersion
+                      ? `/posts/${slug}`
+                      : `/posts/${slug}/${version.shortSha}`
+                  }
                   title={`View version ${version.shortSha}`}
                 >
                   <strong>{version.shortSha}</strong>
