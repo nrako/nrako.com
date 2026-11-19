@@ -19,9 +19,6 @@ dist/
 # Posts cache
 posts/.cache/
 
-# Generated manifest (created at build time)
-public/posts-manifest.json
-
 # Claude Code local settings (machine-specific permissions and MCP approvals)
 .claude/settings.local.json
 

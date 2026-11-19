@@ -151,75 +151,7 @@ export async function isDraftVersion(
 }
 
 /**
- * Cache key for versioned posts
- */
-function getCacheKey(slug: string, sha: string): string {
-  return `https://nrako.com/cache/posts/${slug}/${sha}`
-}
-
-/**
- * Try to get cached content using Cloudflare Cache API.
- * Returns null if not in cache or Cache API not available.
- */
-async function getCachedContent(
-  slug: string,
-  sha: string,
-): Promise<Post | null> {
-  // Cache API is only available in Cloudflare Workers
-  if (typeof caches === 'undefined') {
-    return null
-  }
-
-  try {
-    const cache = caches.default
-    const cacheKey = getCacheKey(slug, sha)
-    const response = await cache.match(cacheKey)
-
-    if (response) {
-      return response.json()
-    }
-  } catch (error) {
-    console.error('Cache read error:', error)
-  }
-
-  return null
-}
-
-/**
- * Store content in Cloudflare Cache API.
- * Cache for 1 year since versioned content never changes.
- */
-async function setCachedContent(
-  slug: string,
-  sha: string,
-  post: Post,
-): Promise<void> {
-  // Cache API is only available in Cloudflare Workers
-  if (typeof caches === 'undefined') {
-    return
-  }
-
-  try {
-    const cache = caches.default
-    const cacheKey = getCacheKey(slug, sha)
-
-    const response = new Response(JSON.stringify(post), {
-      headers: {
-        'Content-Type': 'application/json',
-        // Cache for 1 year - versioned content is immutable
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    })
-
-    await cache.put(cacheKey, response)
-  } catch (error) {
-    console.error('Cache write error:', error)
-  }
-}
-
-/**
  * Fetches and processes a post at a specific version (SHA).
- * Uses Cloudflare Cache API for caching in production.
  */
 export async function getPostAtVersion(
   slug: string,
@@ -228,29 +160,16 @@ export async function getPostAtVersion(
 ): Promise<Post | null> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 
-  // Try cache first
-  const cached = await getCachedContent(slug, sha)
-  if (cached) {
-    return cached
-  }
-
-  // Fetch from GitHub
   const content = await getPostContentAtVersion(slug, sha, options)
   if (!content) return null
 
-  // Process the markdown content
   const { frontmatter, html, messages } = await processor(content, options)
 
-  const post: Post = {
+  return {
     slug,
     frontmatter,
     content: html,
     messages,
     readingTimeMinutes: calculateReadingTime(html),
   }
-
-  // Cache the processed content
-  await setCachedContent(slug, sha, post)
-
-  return post
 }

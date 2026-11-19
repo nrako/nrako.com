@@ -1,14 +1,11 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
 import type { Messages } from './processor.ts'
 import type { CommitInfo } from './githubVersioning.ts'
-import type { PostManifestEntry, PostsManifest } from './manifest.ts'
 import { extname, join } from 'node:path'
 import processor from './processor.ts'
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { createHash } from 'node:crypto'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { parseHTML } from 'linkedom'
 import { getCommitHistory, isDraftVersion } from './githubVersioning.ts'
-import { getAllPostsFromManifest, getPostFromManifest } from './manifest.ts'
 import process from 'node:process'
 
 // 200 word-per-minute is on the lower range of the average reading speed 200-300 wpm
@@ -137,89 +134,10 @@ export const defaultOptions: InternalOptions = {
 }
 
 /**
- * Check if filesystem is available (build time or dev, not CF Workers runtime)
- */
-function isFilesystemAvailable(): boolean {
-  try {
-    // In Cloudflare Workers, existsSync won't work
-    return typeof existsSync === 'function'
-  } catch {
-    return false
-  }
-}
-
-/**
- * Get all posts.
- * - At build time / dev: reads from filesystem
- * - At SSR runtime (CF Workers): reads from manifest
+ * Get all posts, newest first. Reads the filesystem, so it only runs in Node
+ * (build and dev), never in workerd.
  */
 export async function getPosts(
-  options: InternalOptions = defaultOptions,
-): Promise<Post[]> {
-  // Try filesystem first (works at build time and dev)
-  if (isFilesystemAvailable()) {
-    try {
-      return await getPostsFromFilesystem(options)
-    } catch {
-      // Filesystem failed, fall through to manifest
-    }
-  }
-
-  // Fall back to manifest (SSR runtime in CF Workers)
-  const manifestPosts = await getAllPostsFromManifest()
-  if (manifestPosts.length > 0) {
-    return manifestPosts.map((entry) => ({
-      slug: entry.slug,
-      frontmatter: entry.frontmatter,
-      content: '', // Content not needed for listings
-      messages: { errors: [], warnings: [] },
-      readingTimeMinutes: entry.readingTimeMinutes,
-      versions: entry.versions,
-    }))
-  }
-
-  return []
-}
-
-/**
- * Get a single post by slug.
- * - At build time / dev: reads from filesystem
- * - At SSR runtime (CF Workers): uses manifest for metadata
- */
-export async function getPost(
-  slug: string,
-  options: InternalOptions = defaultOptions,
-): Promise<Post | null> {
-  // Try filesystem first (works at build time and dev)
-  if (isFilesystemAvailable()) {
-    try {
-      return await getPostFromFilesystem(slug, options)
-    } catch {
-      // Filesystem failed, fall through to manifest
-    }
-  }
-
-  // Fall back to manifest (SSR runtime in CF Workers)
-  // Note: For versioned posts, use getPostAtVersion from githubVersioning
-  const manifestEntry = await getPostFromManifest(slug)
-  if (manifestEntry) {
-    return {
-      slug: manifestEntry.slug,
-      frontmatter: manifestEntry.frontmatter,
-      content: '', // Content must be fetched separately for SSR
-      messages: { errors: [], warnings: [] },
-      readingTimeMinutes: manifestEntry.readingTimeMinutes,
-      versions: manifestEntry.versions,
-    }
-  }
-
-  return null
-}
-
-/**
- * Read all posts from the filesystem (build-time only)
- */
-export async function getPostsFromFilesystem(
   options: InternalOptions = defaultOptions,
 ): Promise<Post[]> {
   const files = readdirSync(options.contentDir, { withFileTypes: true })
@@ -229,7 +147,7 @@ export async function getPostsFromFilesystem(
     if (fileOrFolder.isDirectory()) continue
     if (extname(fileOrFolder.name) !== '.md') continue
     const slug = fileOrFolder.name.replace('.md', '')
-    promises.push(getPostFromFilesystem(slug, options))
+    promises.push(getPost(slug, options))
   }
 
   const posts = (await Promise.all(promises)) as Post[]
@@ -242,9 +160,10 @@ export async function getPostsFromFilesystem(
 }
 
 /**
- * Read a single post from the filesystem (build-time only)
+ * Get a single post by slug. Reads the filesystem, so it only runs in Node
+ * (build and dev), never in workerd.
  */
-export async function getPostFromFilesystem(
+export async function getPost(
   slug: string,
   options: InternalOptions = defaultOptions,
 ): Promise<Post | null> {
@@ -283,50 +202,6 @@ export async function getPostFromFilesystem(
   }
 
   return metadata
-}
-
-/**
- * Generate a hash for a file's content
- */
-export function getHashForFile(filePath: string): string {
-  const file = readFileSync(filePath)
-  return createHash('sha256').update(file).digest('hex').substring(0, 16)
-}
-
-/**
- * Generate the posts manifest (called at build time)
- */
-export async function generateManifest(
-  options: InternalOptions = defaultOptions,
-): Promise<PostsManifest> {
-  const posts = await getPostsFromFilesystem(options)
-
-  const manifestEntries: PostManifestEntry[] = posts.map((post) => ({
-    slug: post.slug,
-    frontmatter: post.frontmatter,
-    readingTimeMinutes: post.readingTimeMinutes,
-    versions: post.versions ?? [],
-    contentHash: getHashForFile(join(options.contentDir, `${post.slug}.md`)),
-  }))
-
-  return {
-    generatedAt: new Date().toISOString(),
-    posts: manifestEntries,
-  }
-}
-
-/**
- * Write the manifest to a file (called at build time)
- */
-export async function writeManifest(
-  outputPath: string,
-  options: InternalOptions = defaultOptions,
-): Promise<void> {
-  const manifest = await generateManifest(options)
-  writeFileSync(outputPath, JSON.stringify(manifest, null, 2))
-  console.log(
-    `[manifest] Generated posts-manifest.json with ${manifest.posts.length} posts`,
-  )
 }
 
 /**
