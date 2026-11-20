@@ -42,7 +42,7 @@ pnpm run check                # Astro type check
 pnpm run lint                 # ESLint
 pnpm run format               # Prettier (write)
 pnpm run format:check         # Prettier (check)
-pnpm run test:e2e             # Playwright e2e
+pnpm run test:e2e             # Build, then Playwright e2e against the preview
 pnpm run deploy               # Build + wrangler deploy
 ```
 
@@ -106,6 +106,7 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.
 - Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects; the JavaScript engine keeps the pipeline usable from an on-demand route.
 - Feed `Content-Type` headers live in `public/_headers`: the feeds are prerendered to extensionless files, so the type set in `src/pages/feed/[type].ts` only applies in dev. Keep both in sync.
+- `public/robots.txt` allows search engines, opts out of AI training and AI answers (Content Signals), and turns away a fixed list of AI training and SEO crawlers. It only states preferences; blocking is done in the Cloudflare dashboard (Security > Settings > Bot traffic), which is not versioned here. If Cloudflare's Bot Preference Sync is enabled, its managed directives are prepended to this file at the edge.
 - Host-level redirects cannot go in `public/_redirects` (Cloudflare does not support domain-level rules there), hence the separate `www-redirect` Worker.
 - TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
 - Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
@@ -118,5 +119,5 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Use `export const prerender = false` for SSR pages. The first one turns the deployment from assets-only into assets plus a Worker.
 - `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`). Vite only exposes `VITE_*` variables through `import.meta.env`, so the `server-env` integration hoists the token from `.env`. It is not needed at runtime: the deployed site has no Worker secret.
 - Playwright browsers install via `pnpm exec playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`).
-- Playwright starts `pnpm run dev` on port 4321 and reuses any server already listening there outside CI; make sure no other project occupies that port before running e2e locally.
-- Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately. Playwright's `webServer` then reports "exited early": start the server first (`pnpm run dev`), run the tests (the running server is reused), then stop it with `pnpm exec astro dev stop` (`astro preview stop` for preview).
+- `pnpm run test:e2e` builds the site and runs Playwright against `astro preview` on port 4390 (override with `E2E_PORT`), on chromium, firefox, webkit and mobile-chrome. It always starts its own server and fails if the port is taken. The tests target the production build, not the dev server: the dev server compiles pages and browser scripts on demand, which made first loads time out at random.
+- Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately (stop them with `pnpm exec astro dev stop` / `astro preview stop`). Pass `--ignore-lock` to keep the server in the foreground, as the Playwright config does.

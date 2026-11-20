@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// The tests run against the production build, served locally by `astro
+// preview` on a dedicated port. Astro's default port (4321) is often taken by
+// another local project, and a server found there could be the wrong site.
+const port = Number(process.env.E2E_PORT ?? 4390)
+const baseURL = `http://localhost:${port}`
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -12,7 +18,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL,
     // sets actions and navigation timeouts to not wait the full test timeout
     // of 10s no action or navigation should take longer thant 3s
     // https://playwright.dev/docs/test-timeouts
@@ -46,8 +52,17 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'pnpm run dev',
-    url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
+    // Build, then serve the result. The dev server is not used: it compiles
+    // pages and browser scripts on demand, which made first loads exceed the
+    // navigation timeout at random when four browsers run in parallel.
+    //
+    // --ignore-lock keeps the server in the foreground: under a coding agent
+    // Astro otherwise starts it as a background process and returns at once,
+    // which Playwright reads as the server having exited.
+    command: `pnpm run build && pnpm run preview --port ${port} --ignore-lock`,
+    url: baseURL,
+    // Always build and start a fresh server, never test a stale build
+    reuseExistingServer: false,
+    timeout: 120 * 1000,
   },
 })
