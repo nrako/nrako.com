@@ -28,7 +28,9 @@ export interface InternalOptions {
    */
   language: string
   /**
-   * Path to folder containing the markdown (*.md) files
+   * Path to folder containing the markdown (*.md) files. The `POSTS_DIR`
+   * environment variable overrides it, which the e2e tests use to build the
+   * site from fixture posts.
    * @default { './posts' }
    */
   contentDir: string
@@ -112,7 +114,7 @@ export const defaultOptions: InternalOptions = {
   title: "Nicholas's Posts",
   description: 'All my posts as seen on nrako.com',
   language: 'en',
-  contentDir: './posts',
+  contentDir: process.env.POSTS_DIR || './posts',
   favicon: '/favicon.ico',
   copyright: 'Copyright 2024 www.nrako.com',
   generator: 'Feed (https://github.com/jpmonette/feed) for Node.js',

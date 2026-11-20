@@ -43,6 +43,7 @@ pnpm run lint                 # ESLint
 pnpm run format               # Prettier (write)
 pnpm run format:check         # Prettier (check)
 pnpm run test:e2e             # Build, then Playwright e2e against the preview
+pnpm run test:e2e:fixtures    # Same, with the site built from tests/fixtures/posts
 pnpm run deploy               # Build + wrangler deploy
 ```
 
@@ -52,8 +53,8 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Pages** (`src/pages/`):
 
-- `index.astro` — Homepage (static)
-- `posts/index.astro` — Blog listing (static)
+- `index.astro` — Homepage (static): the site name and the post listing
+- `posts/index.astro` — Post listing (static), linked as "Posts" in the header. It lists the same posts as the homepage and says so when nothing is published
 - `posts/[slug].astro` — Single post (static, prerendered)
 - `posts/[slug]/[sha].astro` — Post at an older commit (static, one page per version)
 - `404.astro` — Not-found page (static)
@@ -77,7 +78,7 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Workers** (`workers/`): `www-redirect/` — standalone Worker bound to `www.nrako.com` that redirects to `nrako.com` with a 301. It has its own `wrangler.jsonc` and is not part of the Astro build.
 
-**Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter). Nothing is published at the moment, so the directory does not exist; create it with the first post. The post pages, version pages and their e2e tests only apply once a post exists.
+**Content**: Blog posts in `posts/*.md` (MyST markdown + frontmatter). Nothing is published at the moment, so the directory does not exist; create it with the first post. The post pages and version pages only exist once a post does.
 
 ## Runtime environments
 
@@ -120,4 +121,5 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - `GITHUB_TOKEN` is read directly from `process.env` (via `node:process`). Vite only exposes `VITE_*` variables through `import.meta.env`, so the `server-env` integration hoists the token from `.env`. It is not needed at runtime: the deployed site has no Worker secret.
 - Playwright browsers install via `pnpm exec playwright install` (browser cache lives in `~/Library/Caches/ms-playwright`).
 - `pnpm run test:e2e` builds the site and runs Playwright against `astro preview` on port 4390 (override with `E2E_PORT`), on chromium, firefox, webkit and mobile-chrome. It always starts its own server and fails if the port is taken. The tests target the production build, not the dev server: the dev server compiles pages and browser scripts on demand, which made first loads time out at random.
+- `POSTS_DIR` overrides the directory the posts are read from. `pnpm run test:e2e:fixtures` sets it to `tests/fixtures/posts`, which is how the post tests run while nothing is published. `pnpm run test:e2e` builds from `posts/` and skips the tests that need a post or a fixture. Run both. Version history is always looked up under `posts/` on GitHub, so fixture posts have none.
 - Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately (stop them with `pnpm exec astro dev stop` / `astro preview stop`). Pass `--ignore-lock` to keep the server in the foreground, as the Playwright config does.

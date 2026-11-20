@@ -1,0 +1,47 @@
+---
+import type { Post } from '@/lib/blogData'
+import { defaultOptions as options } from '@/lib/blogData'
+import Time from './Time.astro'
+import ReadTime from './ReadTime.astro'
+import Authors from './Authors.astro'
+import PostVersions from './PostVersions.astro'
+
+interface Props {
+  post: Post
+}
+
+const { post } = Astro.props
+const { frontmatter } = post
+---
+
+<header>
+  <h1>{frontmatter.title}</h1>
+  {
+    frontmatter.subtitle && (
+      <p class="freshBlog-post-subtitle">{frontmatter.subtitle}</p>
+    )
+  }
+  <div class="freshBlog-post-meta" aria-label="Post Metadata">
+    {
+      options.showAuthors !== 'never' && frontmatter.authors && (
+        <Authors
+          authors={frontmatter.authors}
+          affiliations={frontmatter.affiliations}
+          showLinks
+        />
+      )
+    }
+    {
+      frontmatter.date && (
+        <Time date={frontmatter.date} language={options.language} />
+      )
+    }
+    {
+      post.versions && post.versions.length > 1 && (
+        <PostVersions slug={post.slug} versions={post.versions} />
+      )
+    }
+    <ReadTime value={post.readingTimeMinutes} />
+  </div>
+  <slot />
+</header>

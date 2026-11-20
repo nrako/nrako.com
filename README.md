@@ -35,6 +35,7 @@ pnpm run check           # Astro type check
 pnpm run lint            # ESLint
 pnpm run format          # Prettier
 pnpm run test:e2e        # Playwright e2e (chromium/firefox/webkit/mobile-chrome)
+pnpm run test:e2e:fixtures  # Same, with the site built from fixture posts
 pnpm run deploy          # Build + wrangler deploy
 ```
 

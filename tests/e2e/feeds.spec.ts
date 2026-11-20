@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { skipWithoutFixturePosts } from './fixtures'
 
 test.describe('RSS/Atom/JSON Feeds', () => {
   test('atom feed returns valid XML', async ({ request }) => {
@@ -33,5 +34,23 @@ test.describe('RSS/Atom/JSON Feeds', () => {
     expect(body).toHaveProperty('version')
     expect(body).toHaveProperty('title')
     expect(body).toHaveProperty('items')
+  })
+
+  test('the feed points at the post listing', async ({ request }) => {
+    const body = await (await request.get('/feed/json')).json()
+
+    expect(body.home_page_url).toBe('https://nrako.com/posts')
+  })
+
+  test('the feed lists the posts, newest first', async ({ request }) => {
+    skipWithoutFixturePosts()
+
+    const body = await (await request.get('/feed/json')).json()
+    const urls = body.items.map((item: { url: string }) => item.url)
+
+    expect(urls).toEqual([
+      'https://nrako.com/posts/fixture-post',
+      'https://nrako.com/posts/fixture-short-post',
+    ])
   })
 })

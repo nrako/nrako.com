@@ -19,8 +19,8 @@ const posts = await getPosts(options)
           <div class="grid divide-y">
             {posts.map((post) => (
               <a class="group" href={`/posts/${post.slug}`}>
-                <article>
-                  <header class="flex gap-x-4 justify-between flex-wrap py-4">
+                <article class="py-4">
+                  <header class="flex gap-x-4 justify-between flex-wrap">
                     <h3 class="font-semibold group-hover:text-red-600">
                       {post.frontmatter.title}
                     </h3>
@@ -35,6 +35,11 @@ const posts = await getPosts(options)
                       />
                     )}
                   </header>
+                  {post.frontmatter.description && (
+                    <p class="mt-1 text-gray-600 dark:text-gray-400">
+                      {post.frontmatter.description}
+                    </p>
+                  )}
                 </article>
               </a>
             ))}
