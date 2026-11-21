@@ -1,10 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro'
-import Time from '@/components/Time.astro'
-import ReadTime from '@/components/ReadTime.astro'
 import DialogMessages from '@/components/DialogMessages.astro'
-import Authors from '@/components/Authors.astro'
-import PostVersions from '@/components/PostVersions.astro'
+import PostHeader from '@/components/PostHeader.astro'
 import { defaultOptions as options, getPosts } from '@/lib/blogData'
 import { getPostAtVersion, type CommitInfo } from '@/lib/githubVersioning'
 
@@ -66,37 +63,9 @@ if (displayMessages) {
   {displayMessages && <DialogMessages messages={post.messages} />}
 
   <article
-    class="freshBlog-post prose prose-md md:prose-lg mx-auto dark:prose-invert"
+    class="freshBlog-post prose prose-md md:prose-lg mx-auto max-w-(--column) dark:prose-invert"
   >
-    <header>
-      <h1>{post.frontmatter.title}</h1>
-      {
-        post.frontmatter.subtitle && (
-          <p class="freshBlog-post-subtitle">{post.frontmatter.subtitle}</p>
-        )
-      }
-      <div class="freshBlog-post-meta" aria-label="Post Metadata">
-        {
-          options.showAuthors !== 'never' && post.frontmatter.authors && (
-            <Authors
-              authors={post.frontmatter.authors}
-              affiliations={post.frontmatter.affiliations}
-              showLinks
-            />
-          )
-        }
-        {
-          post.frontmatter.date && (
-            <Time date={post.frontmatter.date} language={options.language} />
-          )
-        }
-        {
-          post.versions && post.versions.length > 1 && (
-            <PostVersions slug={post.slug} versions={post.versions} />
-          )
-        }
-        <ReadTime value={post.readingTimeMinutes} />
-      </div>
+    <PostHeader post={post}>
       <dialog
         role="alertdialog"
         open
@@ -110,7 +79,7 @@ if (displayMessages) {
         </a>. Click <a href={`/posts/${post.slug}`}>here</a> to go back to the latest
         version.
       </dialog>
-    </header>
+    </PostHeader>
     <div
       class="freshBlog-post-content"
       data-light-theme="light"

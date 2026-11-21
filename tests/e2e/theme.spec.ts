@@ -24,15 +24,17 @@ test.describe('Theme toggle', () => {
 
   test('theme preference persists across page navigation', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
-    await page.goto('/', { waitUntil: 'networkidle' })
+    // The not-found page: a second page that exists whatever is published
+    await page.goto('/this-page-does-not-exist', { waitUntil: 'networkidle' })
 
     const toggleButton = page.getByRole('button', { name: 'Toggle Theme' })
     await expect(toggleButton).toBeEnabled({ timeout: 15000 })
     await toggleButton.click()
     await expect(page.locator('html')).toHaveClass(/dark/)
 
-    await page.getByRole('link', { name: 'Blog' }).click()
+    await page.getByRole('link', { name: 'Home Base' }).click()
 
+    await expect(page).toHaveURL('/')
     await expect(page.locator('html')).toHaveClass(/dark/)
   })
 

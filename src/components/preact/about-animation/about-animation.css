@@ -1,0 +1,890 @@
+/*
+ * Animated introduction. Every duration is divided by
+ * --aa-speed, which the island sets from the `speed` query parameter, so the
+ * CSS transitions keep pace with the script.
+ */
+
+.about-animation {
+  --aa-speed: 1;
+  --aa-dim: #6b7280;
+  /* The page's text and background colours */
+  --aa-ink: #000;
+  --aa-paper: #fff;
+  /* Mixed from the ink, not from `currentColor`: dimmed text must not get a
+     fainter background than the rest */
+  --aa-line: color-mix(in srgb, var(--aa-ink) 22%, transparent);
+  --aa-wash: color-mix(in srgb, var(--aa-ink) 6%, transparent);
+  /* The colours of the Vim animation the homepage used to have */
+  --aa-vim: rgb(255 0 255 / 0.8);
+  --aa-select: rgb(0 0 255 / 0.6);
+  --aa-component: #7f77dd;
+  --aa-guide: #d4537e;
+  --aa-flow: #378add;
+  --aa-amin: #7f77dd;
+  --aa-dave: #1d9e75;
+  /* Height kept free for the stage: the tallest scene, which is the prompt.
+     Its answer wraps on four lines on a phone, two on a wider screen. */
+  --aa-room: 13rem;
+  /*
+   * What the hand's drag across the canvas leaves out: its own width and a
+   * margin at each edge
+   */
+  --aa-drag-inset: 1.875rem;
+
+  margin-top: 1.5rem;
+  /* Reached through a link to its anchor */
+  scroll-margin-top: 6rem;
+  transition: min-height calc(600ms / var(--aa-speed)) ease;
+}
+
+.dark .about-animation {
+  --aa-dim: #9ca3af;
+  --aa-ink: #fff;
+  --aa-paper: #000;
+  /* On black, the same share of white reads fainter than black on white */
+  --aa-wash: color-mix(in srgb, var(--aa-ink) 13%, transparent);
+}
+
+@media (min-width: 40rem) {
+  .about-animation {
+    --aa-room: 9.75rem;
+  }
+}
+
+.about-animation[data-phase='playing'] {
+  /* The stage, then the controls under it */
+  min-height: calc(var(--aa-room) + 2.2rem);
+  transition: none;
+}
+
+.aa-sentence {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--aa-dim);
+}
+
+/* Coming back after the sequence, not on page load */
+.about-animation[data-played][data-phase='idle'] .aa-sentence {
+  animation: aa-fade-in calc(500ms / var(--aa-speed)) ease both;
+}
+
+/* Kept for screen readers while the decorative stage plays */
+.about-animation[data-phase='playing'] .aa-sentence {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.aa-stage {
+  min-height: var(--aa-room);
+}
+
+.aa-scene {
+  animation: aa-fade-in calc(350ms / var(--aa-speed)) ease both;
+}
+
+/*
+ * The scenes with Vim's last line fill the stage, so that the line sits at
+ * its bottom whatever the text above, like the last line of a terminal.
+ */
+.aa-editor,
+.aa-prompt {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--aa-room);
+}
+
+.aa-controls {
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--aa-dim);
+}
+
+.aa-controls button {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* --- Text, carets and selections ---------------------------------------- */
+
+.aa-buffer,
+.aa-answer {
+  margin: 0;
+  /* Keeps the last line at a distance when the text fills the stage */
+  padding-bottom: 0.75rem;
+  min-height: 1.6em;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.aa-caret {
+  position: relative;
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  /* Takes no room, so text does not move when the caret comes and goes */
+  margin-right: -2px;
+  vertical-align: text-bottom;
+  background: var(--aa-vim);
+  animation: aa-blink 1s steps(2, start) infinite;
+}
+
+/* Where the completion list hangs when it does not follow the caret */
+.aa-anchor {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1.2em;
+  vertical-align: text-bottom;
+}
+
+/* A plain text field's caret, where the editor's colour has no place */
+.aa-caret-plain {
+  width: 1px;
+  margin-right: -1px;
+  background: currentColor;
+}
+
+.aa-block {
+  background: var(--aa-vim);
+  color: #fff;
+}
+
+.aa-selected {
+  background: var(--aa-select);
+  color: #fff;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/*
+ * A model's prediction after the caret, with the key that would accept it;
+ * then the same prediction turned down, with the key that was pressed.
+ */
+.aa-ghost,
+.aa-refused {
+  color: var(--aa-dim);
+  opacity: 0.75;
+}
+
+.aa-refused::after {
+  content: 'Esc';
+  background: var(--aa-dim);
+  color: var(--aa-paper);
+}
+
+.aa-ghost::after {
+  content: 'Tab';
+}
+
+.aa-ghost::after,
+.aa-refused::after {
+  margin-left: 0.6em;
+  padding: 0.05em 0.4em;
+  border: 1px solid currentColor;
+  border-radius: 0.25em;
+  font-family: system-ui, sans-serif;
+  font-size: 0.65em;
+  vertical-align: 0.15em;
+}
+
+.aa-peer {
+  background: color-mix(in srgb, var(--aa-amin) 30%, transparent);
+  outline: 1.5px solid var(--aa-amin);
+}
+
+/* The typefaces the title goes through in scene 2. System fonts only. */
+.aa-font-0 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.aa-font-1 {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.aa-font-2 {
+  font-family: 'American Typewriter', Rockwell, 'Courier New', serif;
+  font-weight: 700;
+}
+
+/* --- Completion list, as editors drew it twenty years ago --------------- */
+
+.aa-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1;
+  /* The caret blinks through `visibility`; the list must not blink with it */
+  visibility: visible;
+  width: max-content;
+  min-width: 10rem;
+  margin-top: 2px;
+  border: 1px solid #7a7a7a;
+  background: #fff;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.25);
+  color: #000;
+  font-family: Tahoma, Verdana, 'Segoe UI', sans-serif;
+  font-size: 0.8125rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Shows `--aa-rows` lines; the list behind it moves up by `--aa-top` lines */
+.aa-popup-window {
+  display: flex;
+  height: calc(var(--aa-rows) * 1.5em);
+  overflow: hidden;
+}
+
+.aa-popup-list {
+  flex: 1;
+  translate: 0 calc(var(--aa-top) * -1.5em);
+  transition: translate calc(140ms / var(--aa-speed)) ease-out;
+}
+
+.aa-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 1.5em;
+  padding: 0 0.6rem 0 0.3rem;
+}
+
+.aa-popup-detail {
+  margin-left: auto;
+  padding-left: 1rem;
+  color: #6b6b6b;
+  font-variant-numeric: tabular-nums;
+}
+
+.aa-popup-item[data-selected] .aa-popup-detail {
+  color: #c9d2ee;
+}
+
+.aa-popup-bar {
+  position: relative;
+  flex: none;
+  width: 0.6rem;
+  border-left: 1px solid #c8c8c8;
+  background: #ececec;
+}
+
+.aa-popup-thumb {
+  position: absolute;
+  inset-inline: 1px;
+  background: #9a9a9a;
+  transition: top calc(140ms / var(--aa-speed)) ease-out;
+}
+
+.aa-popup-item::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid #3c3489;
+  background: #afa9ec;
+}
+
+.aa-popup-item[data-selected] {
+  background: #0a246a;
+  color: #fff;
+}
+
+/* --- Vim's last line ---------------------------------------------------- */
+
+/*
+ * What a shell command printed, on top of Vim's last line and part of the
+ * same area: a count, which must not jump as it grows.
+ */
+.aa-output {
+  margin: auto 0 0;
+  min-height: 1.6em;
+  padding: 0.1rem 0.5rem 0;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.aa-output:not(:empty) {
+  background: var(--aa-wash);
+}
+
+.aa-output + .aa-status {
+  margin-top: 0;
+}
+
+.aa-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 1.7em;
+  margin-top: auto;
+  padding: 0.1rem 0.5rem;
+  background: var(--aa-wash);
+  color: var(--aa-dim);
+  font-size: 0.8125rem;
+  visibility: hidden;
+}
+
+.aa-status[data-on] {
+  visibility: visible;
+}
+
+/* Without keys to show, a long command gets the whole line */
+.aa-status span:empty {
+  display: none;
+}
+
+/* --- Canvas: the design frame, then the shared board next to it --------- */
+
+.aa-canvas {
+  position: relative;
+  height: 8.5rem;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--aa-wash);
+}
+
+/*
+ * The view is dragged by hand, so it moves exactly as far as the hand does:
+ * from the right edge to the left one, `--aa-drag-inset` short of the full
+ * width. The design zone is that much narrower, so the board ends up centred
+ * and the design frame out of view.
+ */
+.aa-world {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  transition: transform calc(1000ms / var(--aa-speed))
+    cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.aa-canvas[data-panned] .aa-world {
+  /* Half of the world is the width of the view */
+  transform: translateX(calc(-50% + var(--aa-drag-inset)));
+}
+
+.aa-zone {
+  display: grid;
+  place-items: center;
+  width: 50%;
+  height: 100%;
+}
+
+.aa-zone:not(.aa-board) {
+  width: calc(50% - var(--aa-drag-inset));
+}
+
+.aa-frame-wrap {
+  position: relative;
+  width: min(17.5rem, calc(100% - 2rem));
+}
+
+/*
+ * The screens before and after the design frame, as wireframes, and the
+ * links of the flow. Beside the frame and as tall as it is. A phone has room
+ * for the link out only, drawn shorter so that it stays out of the board.
+ */
+.aa-flow {
+  position: absolute;
+  bottom: 0;
+  height: 4.5rem;
+  overflow: visible;
+  fill: var(--aa-wash);
+  stroke: var(--aa-line);
+}
+
+.aa-flow-before {
+  right: 100%;
+  display: none;
+}
+
+.aa-flow-after {
+  left: 100%;
+}
+
+.aa-flow-after .aa-wire {
+  display: none;
+}
+
+/* The line and its arrow only: the dot it starts from keeps its shape */
+.aa-flow-after .aa-link path {
+  transform: scaleX(0.65);
+}
+
+.aa-wire-frame {
+  fill: var(--aa-paper);
+}
+
+.aa-link {
+  fill: var(--aa-paper);
+  stroke: var(--aa-flow);
+  stroke-width: 1.25;
+}
+
+.aa-link path {
+  fill: none;
+}
+
+@media (min-width: 40rem) {
+  .aa-flow-before {
+    display: block;
+  }
+
+  .aa-flow-after .aa-wire {
+    display: inline;
+  }
+
+  .aa-flow-after .aa-link path {
+    transform: none;
+  }
+}
+
+.aa-frame-label {
+  margin-bottom: 2px;
+  color: var(--aa-dim);
+  font-size: 0.6875rem;
+}
+
+.aa-frame {
+  position: relative;
+  height: 4.5rem;
+  border: 1px solid var(--aa-line);
+}
+
+.aa-component {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 1px 6px;
+  outline: 1px solid var(--aa-component);
+  font-size: 0.9375rem;
+  white-space: nowrap;
+  /* Dropped off-centre, then snapped to the middle of the frame */
+  translate: calc(-50% - 1.6rem) calc(-50% - 0.9rem);
+  transition: translate calc(700ms / var(--aa-speed))
+    cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.aa-canvas[data-snapped] .aa-component {
+  translate: -50% -50%;
+}
+
+.aa-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--aa-component);
+  background: #fff;
+}
+
+.aa-handle-nw {
+  top: -4px;
+  left: -4px;
+}
+
+.aa-handle-ne {
+  top: -4px;
+  right: -4px;
+}
+
+.aa-handle-sw {
+  bottom: -4px;
+  left: -4px;
+}
+
+.aa-handle-se {
+  right: -4px;
+  bottom: -4px;
+}
+
+.aa-guide {
+  position: absolute;
+  background: var(--aa-guide);
+  opacity: 0;
+  transition: opacity calc(200ms / var(--aa-speed));
+}
+
+.aa-guide-v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+}
+
+.aa-guide-h {
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+/* The guides show once the component has reached the centre */
+.aa-canvas[data-guides] .aa-guide {
+  opacity: 1;
+  transition-delay: calc(600ms / var(--aa-speed));
+}
+
+.aa-board {
+  background-image: radial-gradient(var(--aa-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/*
+ * The board's content, and the box the cursors are placed in. In pixels,
+ * like the underline path.
+ */
+.aa-board-inner {
+  position: relative;
+  width: 280px;
+  height: 76px;
+}
+
+.aa-marker {
+  height: 38px;
+  /* Marker Felt ships with macOS and iOS, where its bold cut is the wide
+     marker; Caveat Brush is the bundled fallback and has a single weight. */
+  font-family: 'Marker Felt', 'Caveat Brush', cursive;
+  font-size: 27px;
+  font-synthesis: none;
+  font-weight: 700;
+  line-height: 38px;
+  white-space: nowrap;
+}
+
+.aa-underline {
+  position: absolute;
+  top: 38px;
+  left: 0;
+  overflow: visible;
+  opacity: 0;
+}
+
+.aa-underline path {
+  fill: none;
+  stroke: currentColor;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.5;
+  transition: stroke-dashoffset calc(1000ms / var(--aa-speed))
+    cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.aa-canvas[data-dave='draw'] .aa-underline {
+  opacity: 1;
+}
+
+.aa-canvas[data-dave='draw'] .aa-underline path {
+  stroke-dashoffset: 0;
+}
+
+/*
+ * The word dropped in front of the title. It waits off the left edge, where
+ * the design frame is, and travels with Amin's cursor: same duration, same
+ * easing, and positions that keep the arrow on its lower right.
+ */
+.aa-note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--aa-amin);
+  font-family: 'Marker Felt', 'Caveat Brush', cursive;
+  font-size: 17px;
+  line-height: 22px;
+  opacity: 0;
+  white-space: nowrap;
+  translate: -240px 4px;
+  transition:
+    translate calc(550ms / var(--aa-speed)) cubic-bezier(0.4, 0, 0.2, 1),
+    rotate calc(180ms / var(--aa-speed)) cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.aa-canvas[data-note='held'] .aa-note,
+.aa-canvas[data-note='placed'] .aa-note {
+  opacity: 1;
+  /* Up and to the left of the title's first letter, clear of it */
+  translate: -28px -22px;
+}
+
+/* Let go: it settles askew */
+.aa-canvas[data-note='placed'] .aa-note {
+  rotate: -8deg;
+}
+
+/* --- Cursors ------------------------------------------------------------ */
+
+.aa-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition:
+    translate calc(550ms / var(--aa-speed)) cubic-bezier(0.4, 0, 0.2, 1),
+    opacity calc(250ms / var(--aa-speed));
+}
+
+/* A point: the tip of the arrow. The arrow and the name hang from it. */
+.aa-pen {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.aa-pen svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+
+.aa-cursor-name {
+  position: absolute;
+  top: 15px;
+  left: 11px;
+  padding: 0 6px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.aa-amin .aa-cursor-name {
+  background: var(--aa-amin);
+}
+
+.aa-dave .aa-cursor-name {
+  background: var(--aa-dave);
+}
+
+.aa-amin {
+  color: var(--aa-amin);
+  translate: 300px -50px;
+}
+
+.aa-canvas[data-amin='in'] .aa-amin {
+  opacity: 1;
+  translate: 212px -18px;
+}
+
+.aa-canvas[data-amin='word'] .aa-amin {
+  opacity: 1;
+  translate: 58px 28px;
+}
+
+.aa-canvas[data-amin='away'] .aa-amin {
+  opacity: 1;
+  translate: 205px -28px;
+}
+
+/* On the waiting word, off the left edge, then where it is dropped */
+.aa-canvas[data-amin='fetch'] .aa-amin {
+  opacity: 1;
+  translate: -170px 20px;
+}
+
+.aa-canvas[data-amin='drop'] .aa-amin {
+  opacity: 1;
+  translate: 42px -6px;
+}
+
+.aa-dave {
+  color: var(--aa-dave);
+  translate: 300px 120px;
+}
+
+.aa-canvas[data-dave='in'] .aa-dave {
+  opacity: 1;
+  translate: 206px 58px;
+}
+
+/* The start of the underline: the path takes over from here */
+.aa-canvas[data-dave='line'] .aa-dave,
+.aa-canvas[data-dave='draw'] .aa-dave {
+  opacity: 1;
+  translate: 0 38px;
+}
+
+.aa-dave .aa-pen {
+  offset-distance: 0%;
+  offset-rotate: 0deg;
+  transition: offset-distance calc(1000ms / var(--aa-speed))
+    cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.aa-canvas[data-dave='draw'] .aa-dave .aa-pen {
+  offset-distance: 100%;
+}
+
+/* Same duration and easing as the view it drags: they move as one */
+.aa-hand {
+  position: absolute;
+  top: 60%;
+  left: calc(100% - var(--aa-drag-inset) + 0.25rem);
+  opacity: 0;
+  transition:
+    left calc(1000ms / var(--aa-speed)) cubic-bezier(0.65, 0, 0.35, 1),
+    opacity calc(200ms / var(--aa-speed)),
+    scale calc(150ms / var(--aa-speed));
+}
+
+.aa-canvas[data-hand='open'] .aa-hand,
+.aa-canvas[data-hand='grab'] .aa-hand {
+  opacity: 1;
+}
+
+.aa-canvas[data-hand='grab'] .aa-hand {
+  scale: 0.85;
+}
+
+.aa-canvas[data-panned] .aa-hand {
+  left: 0.25rem;
+}
+
+/* --- The agent: a prompt in a terminal ---------------------------------- */
+
+/*
+ * Folds the agent's own lines away, with the space under them, when Vim
+ * takes over: the question in the transcript, and the input line.
+ */
+.aa-prompt-fold {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows calc(350ms / var(--aa-speed)) ease,
+    opacity calc(250ms / var(--aa-speed)) ease;
+}
+
+.aa-prompt-fold[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.aa-prompt-fold-inner {
+  min-height: 0;
+  padding-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.aa-prompt-fold:not([data-open]) .aa-prompt-fold-inner {
+  padding-bottom: 0;
+}
+
+.aa-shell,
+.aa-agent-input,
+.aa-agent-asked,
+.aa-busy {
+  margin: 0;
+}
+
+/*
+ * The input line sits at the bottom of the agent's screen, between two
+ * rules. Vim's last line is not there while the agent has the screen.
+ */
+.aa-agent-bar {
+  margin-top: auto;
+}
+
+.aa-agent-bar .aa-prompt-fold-inner {
+  padding-bottom: 0;
+}
+
+.aa-agent-input {
+  padding: 0.3rem 0;
+  border-block: 1px solid var(--aa-line);
+}
+
+.aa-prompt[data-agent] .aa-status {
+  display: none;
+}
+
+.aa-agent-mark {
+  margin-right: 0.6em;
+  color: var(--aa-dim);
+}
+
+/* A terminal's block cursor */
+.aa-agent-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.15em;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: aa-blink 1s steps(2, start) infinite;
+}
+
+.aa-agent-asked,
+.aa-busy {
+  color: var(--aa-dim);
+}
+
+/* Before the answer, in its place */
+.aa-busy {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+/*
+ * The frames sit side by side, each one em wide, behind a window of one em
+ * that steps from one to the next.
+ */
+.aa-spinner {
+  display: inline-block;
+  width: 1em;
+  overflow: hidden;
+}
+
+.aa-spinner-frames {
+  display: flex;
+  width: 10em;
+  animation: aa-spin 800ms steps(10) infinite;
+}
+
+.aa-spinner-frames span {
+  flex: none;
+  width: 1em;
+  text-align: center;
+}
+
+/* No empty line where the answer will be before its first word */
+.aa-answer:empty {
+  display: none;
+}
+
+/* The agent marks what it says; the mark goes when the text is Vim's */
+.aa-prompt[data-agent] .aa-answer::before {
+  content: '●';
+  margin-right: 0.6em;
+  color: var(--aa-dim);
+}
+
+@keyframes aa-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@keyframes aa-spin {
+  to {
+    translate: -10em 0;
+  }
+}
+
+@keyframes aa-fade-in {
+  from {
+    opacity: 0;
+  }
+}
