@@ -1,7 +1,7 @@
 ---
 import AboutLink from '@/components/AboutLink.astro'
 import ThemeToggle from '@/components/preact/theme-toggle'
-import GrGithub from '@/components/icons/GrGithub'
+import TbGitBranch from '@/components/icons/TbGitBranch'
 import TbAt from '@/components/icons/TbAt'
 import TbRss from '@/components/icons/TbRss'
 import '@/styles/global.css'
@@ -74,10 +74,10 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
           </a>
           <a
             href="https://github.com/nrako"
-            title="Collaborate with me on GitHub"
-            aria-label="GitHub"
+            title="Collaborate with me on code"
+            aria-label="Code"
           >
-            <GrGithub />
+            <TbGitBranch />
           </a>
         </nav>
         <ThemeToggle client:load />
