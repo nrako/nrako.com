@@ -38,6 +38,42 @@ test.describe('Introduction', () => {
     await expect(page.getByText(sentence)).toBeVisible()
   })
 
+  test('the link reads "About" and adds its words under the mouse', async ({
+    page,
+  }) => {
+    await page.goto('/posts')
+
+    const link = aboutMe(page)
+    const words = link.locator('.about-suffix')
+    await expect(link).toHaveText('About', { useInnerText: true })
+
+    await link.hover()
+    await expect(words).toHaveText('Me')
+    await expect(words).toHaveText('Myself')
+    await expect(words).toHaveText('I')
+
+    await page.mouse.move(0, 400)
+    await expect(link).toHaveText('About', { useInnerText: true })
+  })
+
+  test('the link reads "About..." while the introduction plays', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    const link = aboutMe(page)
+    await link.click()
+    // Away from the link: its words are for a mouse resting on it
+    await page.mouse.move(0, 400)
+
+    await expect(link).toHaveText('About...', { useInnerText: true })
+
+    await page.getByRole('button', { name: 'Skip' }).click()
+
+    await expect(link).toHaveText('About', { useInnerText: true })
+  })
+
   test('plays through every scene and ends on the sentence', async ({
     page,
   }) => {

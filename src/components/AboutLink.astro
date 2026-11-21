@@ -1,0 +1,165 @@
+---
+/**
+ * The header link to the homepage's animation. It reads "About". Pointed at
+ * with a mouse or focused from the keyboard, it adds "Me", then "Myself",
+ * then "I", each morphing into the next through a few frames of noise. While
+ * the animation plays, it reads "About..." with the dots animated.
+ *
+ * Its accessible name stays "About Me" whatever it shows.
+ */
+---
+
+<a
+  href="/#about"
+  class="about-link text-xl sm:text-2xl whitespace-nowrap"
+  aria-label="About Me"
+  >About<span class="about-suffix" aria-hidden="true"></span><span
+    class="about-dots"
+    aria-hidden="true"><i>.</i><i>.</i><i>.</i></span
+  ></a
+>
+
+<style>
+  .about-suffix:not(:empty) {
+    margin-left: 0.25em;
+  }
+
+  /* Colour fringes while a word is noise */
+  .about-suffix[data-glitch] {
+    text-shadow:
+      0.05em 0 #0ff,
+      -0.05em 0 #f0f;
+  }
+
+  .about-dots {
+    display: none;
+  }
+
+  /* The homepage's animation sets this on the document while it plays */
+  :global(html[data-about-playing]) .about-dots {
+    display: inline;
+  }
+
+  :global(html[data-about-playing]) .about-suffix {
+    display: none;
+  }
+
+  .about-dots i {
+    font-style: normal;
+    animation: about-dot 1.2s ease-in-out infinite both;
+  }
+
+  .about-dots i:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .about-dots i:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes about-dot {
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+
+    40% {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  const WORDS = ['Me', 'Myself', 'I']
+  const NOISE = '░▒▓█▚▞<>/#_'
+  /** Milliseconds per frame of noise, frames per morph, and rest on a word */
+  const FRAME = 45
+  const FRAMES = 7
+  const HOLD = 900
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+  const noise = () => NOISE[Math.floor(Math.random() * NOISE.length)]
+
+  for (const link of document.querySelectorAll<HTMLElement>('.about-link')) {
+    const suffix = link.querySelector<HTMLElement>('.about-suffix')
+    if (!suffix) continue
+
+    let timer = 0
+    let shown = ''
+    let active = false
+
+    /**
+     * Turns what is shown into `target`: the length slides from one to the
+     * other while the letters of `target` settle from the left, the rest
+     * being noise.
+     */
+    const morph = (target: string, then?: () => void) => {
+      const from = shown
+      let frame = 0
+      const step = () => {
+        frame++
+        if (frame >= FRAMES) {
+          shown = target
+          suffix.textContent = target
+          delete suffix.dataset.glitch
+          then?.()
+          return
+        }
+        const progress = frame / FRAMES
+        const length = Math.round(
+          from.length + (target.length - from.length) * progress,
+        )
+        const settled = Math.floor(target.length * progress)
+        let text = ''
+        for (let i = 0; i < length; i++) {
+          text += i < settled ? target[i] : noise()
+        }
+        suffix.textContent = text
+        suffix.dataset.glitch = ''
+        timer = window.setTimeout(step, FRAME)
+      }
+      step()
+    }
+
+    const cycle = (index: number) => {
+      morph(WORDS[index], () => {
+        timer = window.setTimeout(() => cycle((index + 1) % WORDS.length), HOLD)
+      })
+    }
+
+    const start = () => {
+      if (active) return
+      active = true
+      window.clearTimeout(timer)
+      if (reducedMotion.matches) {
+        shown = WORDS[0]
+        suffix.textContent = shown
+        return
+      }
+      cycle(0)
+    }
+
+    const stop = () => {
+      if (!active) return
+      active = false
+      window.clearTimeout(timer)
+      if (reducedMotion.matches) {
+        shown = ''
+        suffix.textContent = ''
+        delete suffix.dataset.glitch
+        return
+      }
+      morph('')
+    }
+
+    // A finger has nothing to hover with: the words are for a mouse
+    link.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') start()
+    })
+    link.addEventListener('pointerleave', stop)
+    link.addEventListener('focus', () => {
+      if (link.matches(':focus-visible')) start()
+    })
+    link.addEventListener('blur', stop)
+  }
+</script>

@@ -102,6 +102,13 @@ export default function AboutAnimation() {
     return () => controller.abort()
   }, [run])
 
+  // The header link shows that the animation is playing
+  useEffect(() => {
+    const root = document.documentElement
+    root.toggleAttribute('data-about-playing', phase === 'playing')
+    return () => root.removeAttribute('data-about-playing')
+  }, [phase])
+
   const skip = () => {
     stop.current?.()
     setPhase('idle')

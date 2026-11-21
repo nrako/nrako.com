@@ -1,4 +1,5 @@
 ---
+import AboutLink from '@/components/AboutLink.astro'
 import ThemeToggle from '@/components/preact/theme-toggle'
 import GrGithub from '@/components/icons/GrGithub'
 import TbAt from '@/components/icons/TbAt'
@@ -69,9 +70,7 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
           Posts
         </a>
         {/* The homepage plays its introduction when this anchor is reached */}
-        <a href="/#about" class="text-xl sm:text-2xl whitespace-nowrap">
-          About Me
-        </a>
+        <AboutLink />
         <a
           href="https://bsky.app/profile/nrako.com"
           aria-label="Social"

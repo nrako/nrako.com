@@ -60,12 +60,12 @@ pnpm run deploy               # Build + wrangler deploy
 - `404.astro` — Not-found page (static)
 - `feed/[type].ts` — RSS/Atom/JSON feed endpoints (static)
 
-**Layouts** (`src/layouts/`): `Layout.astro` (root, with header/footer/theme toggle). Its header links "Posts" to `/posts` and "About Me" to `/#about` on every page.
+**Layouts** (`src/layouts/`): `Layout.astro` (root, with header/footer/theme toggle). Its header links "Posts" to `/posts` and "About" to `/#about` on every page. The latter is `components/AboutLink.astro`: named "About Me" for assistive technology, it adds "Me", "Myself", "I" in turn under a mouse or keyboard focus, and reads "About..." while the homepage animation plays (`data-about-playing` on `<html>`, set by the island).
 
 **Preact Islands** (`src/components/preact/`, mounted with `client:load`):
 
 - `theme-toggle.tsx`
-- `about-animation/` — the introduction on the homepage. It shows one sentence and plays the animated sequence only when a link to `#about` is followed on the homepage, or when the homepage is reached with that anchor, which is what "About Me" does from other pages. `script.ts` is the sequence of scenes and its timing, `views.tsx` renders a scene, `about-animation.css` holds the transitions. `?speed=2` plays it twice as fast and `?from=<chapter>` starts it at a chapter (`CHAPTERS` in `script.ts`), both for tuning
+- `about-animation/` — the introduction on the homepage. It shows one sentence and plays the animated sequence only when a link to `#about` is followed on the homepage, or when the homepage is reached with that anchor, which is what the "About" link does from other pages. `script.ts` is the sequence of scenes and its timing, `views.tsx` renders a scene, `about-animation.css` holds the transitions. `?speed=2` plays it twice as fast and `?from=<chapter>` starts it at a chapter (`CHAPTERS` in `script.ts`), both for tuning
 - Bluesky: `bluesky-interactions.tsx`, `author.tsx`, `reply.tsx`, `avatar.tsx`, `post-embed.tsx`, `reaction-bar.tsx`
 
 **Blog System** (`src/lib/`):
