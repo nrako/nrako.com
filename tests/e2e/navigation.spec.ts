@@ -8,6 +8,31 @@ test.describe('Navigation', () => {
 
     await expect(header.getByRole('link', { name: 'Home Base' })).toBeVisible()
     await expect(header.getByRole('link', { name: 'Blog' })).toBeVisible()
+    await expect(header.getByRole('link', { name: 'About Me' })).toBeVisible()
+  })
+
+  test('the header fits on one line on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/')
+
+    const boxes = await page
+      .getByRole('banner')
+      .getByRole('link')
+      .evaluateAll((links) =>
+        links.map((link) => {
+          const box = link.getBoundingClientRect()
+          return { right: box.right, height: box.height }
+        }),
+      )
+
+    // No link is pushed out of the viewport and no label wraps
+    for (const box of boxes) {
+      expect(box.right).toBeLessThanOrEqual(375)
+      expect(box.height).toBeLessThan(45)
+    }
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(375)
   })
 
   test('navigates to posts page', async ({ page }) => {

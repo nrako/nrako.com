@@ -53,18 +53,19 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Pages** (`src/pages/`):
 
-- `index.astro` — Homepage (static): the site name and the post listing
+- `index.astro` — Homepage (static): the site name, one sentence about the author with its animated introduction, and the post listing
 - `posts/index.astro` — Post listing (static), linked as "Posts" in the header. It lists the same posts as the homepage and says so when nothing is published
 - `posts/[slug].astro` — Single post (static, prerendered)
 - `posts/[slug]/[sha].astro` — Post at an older commit (static, one page per version)
 - `404.astro` — Not-found page (static)
 - `feed/[type].ts` — RSS/Atom/JSON feed endpoints (static)
 
-**Layouts** (`src/layouts/`): `Layout.astro` (root, with header/footer/theme toggle).
+**Layouts** (`src/layouts/`): `Layout.astro` (root, with header/footer/theme toggle). Its header links "Posts" to `/posts` and "About Me" to `/#about` on every page.
 
 **Preact Islands** (`src/components/preact/`, mounted with `client:load`):
 
 - `theme-toggle.tsx`
+- `about-animation/` — the introduction on the homepage. It shows one sentence and plays the animated sequence only when a link to `#about` is followed on the homepage, or when the homepage is reached with that anchor, which is what "About Me" does from other pages. `script.ts` is the sequence of scenes and its timing, `views.tsx` renders a scene, `about-animation.css` holds the transitions. `?speed=2` plays it twice as fast and `?from=<chapter>` starts it at a chapter (`CHAPTERS` in `script.ts`), both for tuning
 - Bluesky: `bluesky-interactions.tsx`, `author.tsx`, `reply.tsx`, `avatar.tsx`, `post-embed.tsx`, `reaction-bar.tsx`
 
 **Blog System** (`src/lib/`):

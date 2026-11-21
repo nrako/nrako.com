@@ -37,9 +37,11 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
   </head>
   <body class="bg-white dark:bg-black text-black dark:text-white font-sans">
     <header
-      class="flex gap-4 container mx-auto pt-8 text-3xl px-4 md:px-12 align-baseline"
+      class="flex gap-3 sm:gap-4 container mx-auto pt-8 text-3xl px-4 md:px-12 align-baseline"
     >
-      <nav class="flex place-items-end flex-1 gap-4 [&>a:hover]:text-red-600">
+      <nav
+        class="flex place-items-end flex-1 gap-3 sm:gap-4 [&>a:hover]:text-red-600"
+      >
         <a href="/" aria-label="Home Base" title="Home Base">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -58,10 +60,18 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
               stroke-linejoin="round"></path>
           </svg>
         </a>
-        <a href="/posts" aria-label="Blog" title="Posts" class="text-2xl">
+        <a
+          href="/posts"
+          aria-label="Blog"
+          title="Posts"
+          class="text-xl sm:text-2xl"
+        >
           Posts
         </a>
-
+        {/* The homepage plays its introduction when this anchor is reached */}
+        <a href="/#about" class="text-xl sm:text-2xl whitespace-nowrap">
+          About Me
+        </a>
         <a
           href="https://bsky.app/profile/nrako.com"
           aria-label="Social"
