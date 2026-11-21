@@ -5,6 +5,13 @@ import TbGitBranch from '@/components/icons/TbGitBranch'
 import TbAt from '@/components/icons/TbAt'
 import TbRss from '@/components/icons/TbRss'
 import '@/styles/global.css'
+import '@fontsource-variable/fustat/wght.css'
+import '@fontsource-variable/source-sans-3/wght.css'
+import '@fontsource-variable/source-code-pro/wght.css'
+// Every page sets text in Fustat and a heading or the name in Source Sans 3:
+// their Latin files are fetched at once, not after the stylesheet
+import textLatin from '@fontsource-variable/fustat/files/fustat-latin-wght-normal.woff2?url'
+import headingLatin from '@fontsource-variable/source-sans-3/files/source-sans-3-latin-wght-normal.woff2?url'
 
 interface Props {
   title?: string
@@ -22,6 +29,20 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" href="/favicon.ico" />
+    <link
+      rel="preload"
+      href={textLatin}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={headingLatin}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <script is:inline>
       // Immediately detect theme before render to prevent flash
       ;(function () {
@@ -86,7 +107,7 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
     <main class="container mx-auto min-h-screen px-4 md:px-12 mt-20">
       <slot />
     </main>
-    <footer class="text-sm container mx-auto my-4 px-4 md:px-12">
+    <footer class="site-footer container mx-auto my-4 px-4 md:px-12">
       <div class="mx-auto flex max-w-(--column) justify-between">
         <div class="freshBlog-footer">
           <TbRss />

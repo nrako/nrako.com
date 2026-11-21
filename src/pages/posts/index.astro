@@ -7,8 +7,8 @@ const posts = await getPosts(options)
 ---
 
 <Layout title="Posts | nrako.com" description="All posts on nrako.com">
-  <div class="fresh-blog prose dark:prose-invert mx-auto max-w-(--column)">
-    {!posts.length && <p>No posts yet.</p>}
+  <div class="mx-auto max-w-(--column)">
+    {!posts.length && <p class="text-(--muted)">No posts yet.</p>}
     {
       posts.map((post) => (
         <PostCard

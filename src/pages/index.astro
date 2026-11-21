@@ -10,25 +10,23 @@ const posts = await getPosts(options)
 <Layout title="nrako.com" description="nrako's personal website">
   <div class="mx-auto max-w-(--column)">
     <header class="pt-8 pb-16">
-      <h1 class="text-3xl md:text-4xl font-bold">nrako</h1>
+      <h1 class="site-name">nrako</h1>
       <AboutAnimation client:load />
     </header>
 
     {
       posts.length > 0 && (
         <section>
-          <h2 class="text-xl mb-2">Posts</h2>
-          <div class="grid divide-y">
+          {/* "Opinions below." introduces the list: its title is not shown */}
+          <h2 class="sr-only">Posts</h2>
+          <div>
             {posts.map((post) => (
-              <a class="group" href={`/posts/${post.slug}`}>
-                <article class="py-4">
-                  <header class="flex gap-x-4 justify-between flex-wrap">
-                    <h3 class="font-semibold group-hover:text-red-600">
-                      {post.frontmatter.title}
-                    </h3>
+              <a class="post-entry" href={`/posts/${post.slug}`}>
+                <article>
+                  <header class="post-entry-head">
+                    <h3 class="post-entry-title">{post.frontmatter.title}</h3>
                     {post.frontmatter.date && (
                       <Time
-                        class="flex-auto text-right"
                         date={post.frontmatter.date}
                         language={
                           (post.frontmatter.parts?.language as
@@ -38,7 +36,7 @@ const posts = await getPosts(options)
                     )}
                   </header>
                   {post.frontmatter.description && (
-                    <p class="mt-1 text-gray-600 dark:text-gray-400">
+                    <p class="post-entry-description">
                       {post.frontmatter.description}
                     </p>
                   )}

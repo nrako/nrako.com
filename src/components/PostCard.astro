@@ -13,10 +13,10 @@ interface Props {
 const { url, frontmatter, language = 'en', showAuthors = false } = Astro.props
 ---
 
-<a class="freshBlog-postCard" href={url}>
+<a class="freshBlog-postCard post-entry" href={url}>
   <article>
-    <header>
-      <h2>{frontmatter.title}</h2>
+    <header class="post-entry-head">
+      <h2 class="post-entry-title">{frontmatter.title}</h2>
       {
         showAuthors && frontmatter.authors && (
           <Authors
@@ -27,8 +27,10 @@ const { url, frontmatter, language = 'en', showAuthors = false } = Astro.props
       }
       {frontmatter.date && <Time date={frontmatter.date} language={language} />}
     </header>
-    <section>
-      {frontmatter.description}
-    </section>
+    {
+      frontmatter.description && (
+        <p class="post-entry-description">{frontmatter.description}</p>
+      )
+    }
   </article>
 </a>
