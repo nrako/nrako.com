@@ -22,6 +22,78 @@
   }
 }
 
+/*
+ * The column the header and every page's content share: the measure of a
+ * post, 65 characters of its text.
+ */
+:root {
+  --column: 46rem;
+}
+
+/*
+ * The header sits in that column, and what it draws sits between two lines:
+ * the baseline of its text links and the top of their capitals. Every icon
+ * is as tall as a capital and centred between the two.
+ */
+.site-header {
+  /* The size of the text links, and the height of their capitals: 0.716 em
+     in Helvetica and in Arial */
+  --nav-size: 1.4375rem;
+  --nav-cap: calc(var(--nav-size) * 0.716);
+  /* The home plate's height in capitals: at 1, it is as tall as a capital,
+     its tip on the baseline; at 2, its shoulders would be on the baseline
+     and its tip under it */
+  --plate: 1;
+  /* The other icons are drawn inside their box, on 20 of its 24 units, the
+     stroke included: the box is that much taller than a capital so that
+     what is drawn is as tall as one */
+  --nav-icon: calc(var(--nav-cap) * 24 / 20);
+  font-size: var(--nav-size);
+}
+
+@media (min-width: 40rem) {
+  .site-header {
+    --nav-size: 1.725rem;
+  }
+}
+
+.site-header-row,
+.site-header nav {
+  display: flex;
+  align-items: baseline;
+}
+
+.site-header-row {
+  max-width: var(--column);
+  margin-inline: auto;
+}
+
+.site-header nav {
+  flex: 1;
+}
+
+/* An inline icon's baseline is its lower margin edge: the margin under it
+   centres the icon on the capitals, whatever its height */
+.site-header svg {
+  display: inline-block;
+  width: var(--nav-icon);
+  height: var(--nav-icon);
+  margin-bottom: calc((var(--nav-cap) - var(--nav-icon)) / 2);
+  vertical-align: baseline;
+}
+
+/* Drawn for a larger size: at this one their stroke needs a little more
+   weight to match the home plate's */
+.site-header svg:not(.home-plate) {
+  stroke-width: 2.3;
+}
+
+/* Centred on the column's left edge, which its tip points at */
+.site-header .home-plate {
+  --nav-icon: calc(var(--plate) * var(--nav-cap));
+  margin-left: calc(var(--nav-icon) / -2);
+}
+
 /* Popover dark mode support */
 [popover] {
   @apply dark:bg-slate-800 dark:text-white;
