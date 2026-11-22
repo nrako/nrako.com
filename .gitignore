@@ -33,9 +33,6 @@ npm-debug.log*
 playwright-report/
 test-results/
 
-# Lighthouse CI output
-.lighthouseci/
-
 # Generic local cache directories
 .cache/
 
