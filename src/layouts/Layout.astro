@@ -1,6 +1,8 @@
 ---
 import AboutLink from '@/components/AboutLink.astro'
 import ThemeToggle from '@/components/preact/theme-toggle'
+import ReadingSettings from '@/components/preact/reading-settings'
+import { readingSettings } from '@/lib/reading'
 import TbGitBranch from '@/components/icons/TbGitBranch'
 import TbAt from '@/components/icons/TbAt'
 import TbRss from '@/components/icons/TbRss'
@@ -8,6 +10,11 @@ import '@/styles/global.css'
 import '@fontsource-variable/fustat/wght.css'
 import '@fontsource-variable/source-sans-3/wght.css'
 import '@fontsource-variable/source-code-pro/wght.css'
+// The reading faces: declared on every page, fetched only once chosen
+import '@fontsource-variable/source-serif-4/opsz.css'
+import '@fontsource-variable/source-serif-4/opsz-italic.css'
+import '@fontsource-variable/atkinson-hyperlegible-next/wght.css'
+import '@fontsource-variable/atkinson-hyperlegible-next/wght-italic.css'
 // Every page sets text in Fustat and a heading or the name in Source Sans 3:
 // their Latin files are fetched at once, not after the stylesheet
 import textLatin from '@fontsource-variable/fustat/files/fustat-latin-wght-normal.woff2?url'
@@ -54,9 +61,23 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
         }
       })()
     </script>
+    <script is:inline define:vars={{ readingSettings }}>
+      // The reader's typeface and text size, before render (`lib/reading.ts`)
+      for (const setting of Object.values(readingSettings)) {
+        let value = null
+        try {
+          value = localStorage.getItem(setting.storageKey)
+        } catch {
+          // Storage unavailable: the defaults apply
+        }
+        if (value !== setting.default && setting.values.includes(value)) {
+          document.documentElement.setAttribute(setting.attribute, value)
+        }
+      }
+    </script>
     <slot name="head" />
   </head>
-  <body class="bg-white dark:bg-black text-black dark:text-white font-sans">
+  <body class="font-sans">
     <header class="site-header container mx-auto pt-8 px-4 md:px-12">
       <div class="site-header-row gap-3 sm:gap-4">
         <nav class="gap-3 sm:gap-4 [&>a:hover]:text-red-600">
@@ -100,6 +121,7 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
             <TbGitBranch />
           </a>
         </nav>
+        <ReadingSettings client:load />
         <ThemeToggle client:load />
       </div>
     </header>

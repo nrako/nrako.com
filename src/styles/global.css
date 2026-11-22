@@ -4,6 +4,13 @@
 @theme inline {
   --font-sans: var(--type-text);
   --font-mono: var(--type-mono);
+  /* Tailwind's weights are the site's (`--weight-*`) */
+  --font-weight-extralight: var(--weight-extralight);
+  --font-weight-light: var(--weight-light);
+  --font-weight-normal: var(--weight-normal);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
 }
 
 /* Dark mode with class-based toggle support */
@@ -11,12 +18,9 @@
 
 @layer base {
   body {
-    @apply bg-white text-black;
-  }
-
-  .dark body,
-  body:is(.dark *) {
-    @apply bg-black text-white;
+    background: var(--ground);
+    color: var(--ink);
+    font-weight: var(--weight-normal);
   }
 }
 
@@ -25,7 +29,7 @@
  * post, 65 characters of its text.
  */
 :root {
-  --column: 46rem;
+  --column: calc(46rem * var(--reading-scale));
 }
 
 /*
@@ -46,12 +50,18 @@
   /* The text face's capital height, in em: the header aligns its icons on it */
   --type-cap: 0.7;
 
-  --size-meta: calc(0.875rem * var(--type-scale));
-  --size-ui: calc(1rem * var(--type-scale));
-  --size-text: calc(1.125rem * var(--type-scale));
-  --size-heading-text: calc(1.125rem * var(--type-heading-scale));
-  --size-heading: calc(1.5rem * var(--type-heading-scale));
-  --size-title: calc(2.25rem * var(--type-heading-scale));
+  --size-meta: calc(0.875rem * var(--type-scale) * var(--reading-scale));
+  --size-ui: calc(1rem * var(--type-scale) * var(--reading-scale));
+  --size-text: calc(1.125rem * var(--type-scale) * var(--reading-scale));
+  --size-heading-text: calc(
+    1.125rem * var(--type-heading-scale) * var(--reading-scale)
+  );
+  --size-heading: calc(
+    1.5rem * var(--type-heading-scale) * var(--reading-scale)
+  );
+  --size-title: calc(
+    2.25rem * var(--type-heading-scale) * var(--reading-scale)
+  );
   --size-name: calc(clamp(3.75rem, 17vw, 5.5rem) * var(--type-heading-scale));
 
   --muted: #6b7280;
@@ -62,6 +72,112 @@
 
 .dark {
   --muted: #9ca3af;
+}
+
+/*
+ * Colours: the page is ink on a ground. The reader's background
+ * (`data-reading-background`) picks full contrast or a softer pair: an
+ * off-white with a hint of paper in light mode, a dark grey in dark mode.
+ * No more tint than that: the warmth of a screen is the screen's setting.
+ * Each pair keeps at least 7:1. What is drawn in `currentColor` follows the
+ * ink. A raised surface (a popover) is the ground in light mode, a little
+ * lighter than it in dark mode.
+ */
+:root {
+  --ground-contrast: #fff;
+  --ink-contrast: #000;
+  --ground-soft: #fbfaf7;
+  --ink-soft: #262626;
+  --ground: var(--ground-contrast);
+  --ink: var(--ink-contrast);
+  --surface: var(--ground);
+}
+
+.dark {
+  --ground-contrast: #000;
+  --ink-contrast: #fff;
+  --ground-soft: #1a1a1a;
+  --ink-soft: #d6d6d6;
+  --surface: color-mix(in srgb, var(--ink) 10%, var(--ground));
+}
+
+:root[data-reading-background='soft'] {
+  --ground: var(--ground-soft);
+  --ink: var(--ink-soft);
+}
+
+/*
+ * Weights: every weight of the site is its usual value moved by one shift,
+ * so the whole hierarchy moves together and the distance between the text
+ * and its bold stays the same. The shift is the sum of the theme's and the
+ * reader's (`data-reading-weight`). Light text on a dark ground looks
+ * heavier than it is: in dark mode the theme draws everything a little
+ * thinner. A face clamps a weight it does not have to its nearest one.
+ */
+:root {
+  --weight-theme: 0;
+  --weight-reading: 0;
+  /* The reader's steps, also drawn by the menu's samples */
+  --weight-step-light: -100;
+  --weight-step-heavy: 150;
+  --weight-shift: calc(var(--weight-theme) + var(--weight-reading));
+  --weight-extralight: calc(200 + var(--weight-shift));
+  --weight-light: calc(300 + var(--weight-shift));
+  --weight-normal: calc(400 + var(--weight-shift));
+  --weight-medium: calc(500 + var(--weight-shift));
+  --weight-semibold: calc(600 + var(--weight-shift));
+  --weight-bold: calc(700 + var(--weight-shift));
+}
+
+/* On <html>, like `:root`: the weights above are computed with it */
+.dark {
+  --weight-theme: -25;
+}
+
+:root[data-reading-weight='light'] {
+  --weight-reading: var(--weight-step-light);
+}
+
+:root[data-reading-weight='heavy'] {
+  --weight-reading: var(--weight-step-heavy);
+}
+
+/*
+ * The reader's settings (`lib/reading.ts`, set on <html>).
+ *
+ * The size scales the column and every size of the scale but the name's;
+ * the header keeps its own. The typeface is the one of a post's text only:
+ * the header aligns on Fustat's capitals, and the headings keep theirs.
+ * Each face has its scale, which gives it Fustat's x-height: Source Serif 4's
+ * is 0.452 em, Atkinson Hyperlegible Next's 0.496.
+ */
+:root {
+  --type-serif:
+    'Source Serif 4 Variable', 'Source Serif 4 Fallback', Georgia, serif;
+  --type-hyperlegible:
+    'Atkinson Hyperlegible Next Variable',
+    'Atkinson Hyperlegible Next Fallback', system-ui, sans-serif;
+  --reading-scale: 1;
+  --type-reading: var(--type-text);
+  --type-reading-scale: 1;
+}
+
+:root[data-reading-size='small'] {
+  --reading-scale: 0.9;
+}
+
+:root[data-reading-size='large'] {
+  --reading-scale: 1.15;
+}
+
+:root[data-reading-font='serif'] {
+  --type-reading: var(--type-serif);
+  --type-reading-scale: 1.106;
+}
+
+:root[data-reading-font='hyperlegible'] {
+  --type-reading: var(--type-hyperlegible);
+  --type-reading-scale: 1.008;
 }
 
 /*
@@ -88,12 +204,31 @@
   line-gap-override: 0%;
 }
 
+/* The reading faces, measured the same way */
+@font-face {
+  font-family: 'Source Serif 4 Fallback';
+  src: local('Arial');
+  size-adjust: 90.71%;
+  ascent-override: 114.22%;
+  descent-override: 36.93%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next Fallback';
+  src: local('Arial');
+  size-adjust: 98.6%;
+  ascent-override: 99.8%;
+  descent-override: 32.05%;
+  line-gap-override: 0%;
+}
+
 .site-name {
   /* Pulls the name back by its first letter's side bearing, onto the column */
   margin-left: -0.096em;
   font-family: var(--type-heading);
   font-size: var(--size-name);
-  font-weight: 200;
+  font-weight: var(--weight-extralight);
   line-height: 1;
 }
 
@@ -114,7 +249,7 @@
 .post-entry-title {
   font-family: var(--type-heading);
   font-size: var(--size-heading-text);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   line-height: 1.35;
 }
 
@@ -167,7 +302,8 @@
   --tw-prose-quote-borders: var(--rule);
   --tw-prose-th-borders: var(--rule);
   --tw-prose-td-borders: var(--rule);
-  font-size: var(--size-text);
+  font-family: var(--type-reading);
+  font-size: calc(var(--size-text) * var(--type-reading-scale));
   line-height: 1.65;
 }
 
@@ -177,24 +313,26 @@
 
 .prose h1 {
   font-size: var(--size-title);
-  font-weight: 300;
+  font-weight: var(--weight-light);
   line-height: 1.15;
 }
 
 .prose h2 {
   font-size: var(--size-heading);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   line-height: 1.3;
 }
 
 .prose h3 {
   font-size: var(--size-heading-text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
+.prose h4,
+.prose dt,
 .prose strong,
 .prose thead th {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .prose a {
@@ -203,8 +341,9 @@
 
 .prose code {
   font-family: var(--type-mono);
-  font-size: 0.9em;
-  font-weight: 400;
+  /* The code keeps its size whatever the text's face */
+  font-size: calc(0.9em / var(--type-reading-scale));
+  font-weight: var(--weight-normal);
 }
 
 .prose code::before,
@@ -296,13 +435,159 @@
   margin-left: calc(var(--nav-icon) / -2);
 }
 
-/* Popover dark mode support */
+/* The reading settings' menu, under its button in the header: the
+   typefaces and the backgrounds each across the menu, the size and the
+   weight side by side between them */
+.reading-settings:popover-open {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.75rem 1.5rem;
+}
+
+/* A row across the menu, its choices sharing the width */
+.reading-settings
+  fieldset:has([data-reading-font-sample], [data-reading-background-sample]) {
+  grid-column: 1 / -1;
+}
+
+.reading-settings
+  :is([data-reading-font-sample], [data-reading-background-sample]) {
+  flex: 1 1 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.reading-settings {
+  position: absolute;
+  inset: auto;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.25);
+  font-family: var(--type-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.reading-settings legend {
+  margin-bottom: 0.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.reading-settings fieldset {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.reading-settings label {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.reading-settings label:hover {
+  color: #dc2626;
+}
+
+.reading-settings label:has(:checked) {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.reading-settings label:has(:focus-visible) {
+  outline: 2px solid #dc2626;
+  outline-offset: 1px;
+}
+
+/* The radios are the labels: each shows its choice */
+.reading-settings input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reading-settings [data-reading-font-sample='sans'] {
+  font-family: var(--type-text);
+}
+
+.reading-settings [data-reading-font-sample='serif'] {
+  font-family: var(--type-serif);
+}
+
+.reading-settings [data-reading-font-sample='hyperlegible'] {
+  font-family: var(--type-hyperlegible);
+}
+
+/* The size and weight samples show the direction of a step, drawn further
+   than the step goes (a weight sample twice as far), so that the
+   difference reads at a glance */
+/* Whatever its letter, every size and weight button is the same square */
+.reading-settings
+  :is([data-reading-size-sample], [data-reading-weight-sample]) {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.reading-settings
+  fieldset:has([data-reading-size-sample], [data-reading-weight-sample]) {
+  align-items: center;
+}
+
+.reading-settings [data-reading-size-sample='small'] {
+  font-size: 0.75rem;
+}
+
+.reading-settings [data-reading-size-sample='large'] {
+  font-size: 1.5rem;
+}
+
+.reading-settings [data-reading-weight-sample] {
+  --sample-step: 0;
+  font-size: 1.125rem;
+  font-weight: calc(400 + var(--weight-theme) + 2 * var(--sample-step));
+}
+
+.reading-settings [data-reading-weight-sample='light'] {
+  --sample-step: var(--weight-step-light);
+}
+
+.reading-settings [data-reading-weight-sample='heavy'] {
+  --sample-step: var(--weight-step-heavy);
+}
+
+/* Each background is shown in its own colours, in the current theme */
+.reading-settings [data-reading-background-sample] {
+  border: 1px solid var(--rule);
+}
+
+.reading-settings [data-reading-background-sample='contrast'] {
+  background: var(--ground-contrast);
+  color: var(--ink-contrast);
+}
+
+.reading-settings [data-reading-background-sample='soft'] {
+  background: var(--ground-soft);
+  color: var(--ink-soft);
+}
+
+.reading-settings [data-reading-background-sample]:has(:checked) {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
 [popover] {
-  @apply dark:bg-slate-800 dark:text-white;
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .freshBlog-authors [popover] h3 {
-  @apply text-black dark:text-white;
+  color: var(--ink);
 }
 
 /* Prose link styling */
@@ -417,7 +702,7 @@ a:hover {
 }
 
 .freshBlog-dialogMessages dt {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .freshBlog-dialogMessages .freshBlog-dialogMessages-errors {
@@ -425,7 +710,7 @@ a:hover {
 }
 
 .freshBlog-dialogMessages button {
-  font-weight: bold;
+  font-weight: var(--weight-bold);
   float: right;
   color: black;
 }
@@ -469,7 +754,7 @@ a:hover {
 .freshBlog-post-subtitle {
   margin: 0.5rem 0;
   color: var(--muted);
-  font-size: var(--size-text);
+  font-size: calc(var(--size-text) * var(--type-reading-scale));
   line-height: 1.5;
 }
 
@@ -545,7 +830,7 @@ a:hover {
 }
 
 .freshBlog-post-content .admonition-title {
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   display: flex;
   min-width: 0;
   font-size: 1.125rem;
@@ -614,7 +899,7 @@ a:hover {
 }
 
 .freshBlog-authors article address a:hover {
-  color: black;
+  color: var(--ink);
 }
 
 .freshBlog-authors article dl {
