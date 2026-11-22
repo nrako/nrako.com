@@ -13,8 +13,8 @@ const { authors, affiliations, showLinks = false } = Astro.props
 
 {
   authors && authors.length > 0 && (
-    <section class="freshBlog-authors" aria-labelledby="freshBlog-authors">
-      <h2 id="freshBlog-authors">Authors</h2>
+    <section class="post-authors" aria-labelledby="post-authors">
+      <h2 id="post-authors">Authors</h2>
       {authors.map((a) => (
         <Author
           client:load

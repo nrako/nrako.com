@@ -63,13 +63,13 @@ if (displayMessages) {
   {displayMessages && <DialogMessages messages={post.messages} />}
 
   <article
-    class="freshBlog-post prose mx-auto max-w-(--column)"
+    class="post prose mx-auto max-w-(--column)"
   >
     <PostHeader post={post}>
       <dialog
         role="alertdialog"
         open
-        class="freshBlog-dialogMessages not-prose"
+        class="post-messages not-prose"
       >
         You are looking at version{' '}
         <a
@@ -81,9 +81,7 @@ if (displayMessages) {
       </dialog>
     </PostHeader>
     <div
-      class="freshBlog-post-content"
-      data-light-theme="light"
-      data-dark-theme="dark"
+      class="post-content"
       set:html={post.content}
     />
   </article>

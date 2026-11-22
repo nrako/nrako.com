@@ -372,6 +372,30 @@
   font-size: var(--size-meta);
 }
 
+.site-footer-feeds {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.site-footer-feeds svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.site-footer-feeds ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.site-footer-feeds ul li:not(:last-child)::after {
+  content: '|';
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
 /*
  * The header sits in that column, and what it draws sits between two lines:
  * the baseline of its text links and the top of their capitals. Every icon
@@ -586,10 +610,6 @@
   color: var(--ink);
 }
 
-.freshBlog-authors [popover] h3 {
-  color: var(--ink);
-}
-
 /* Prose link styling */
 .prose :where(a):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   @apply underline-offset-2;
@@ -681,84 +701,28 @@ a:hover {
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
-.freshBlog-post-content {
-  margin-bottom: 4rem;
-}
+/* A post */
 
-.freshBlog-post-content .footnotes {
-  margin-top: 6rem;
-}
-
-.freshBlog-dialogMessages {
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #fef2f2;
-  padding: 1rem;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-top: 1rem;
-  color: rgb(162, 94, 10);
-}
-
-.freshBlog-dialogMessages dt {
-  font-weight: var(--weight-semibold);
-}
-
-.freshBlog-dialogMessages .freshBlog-dialogMessages-errors {
-  color: red;
-}
-
-.freshBlog-dialogMessages button {
-  font-weight: var(--weight-bold);
-  float: right;
-  color: black;
-}
-
-.freshBlog-footer {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.freshBlog-footer svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.freshBlog-footer ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-}
-
-.freshBlog-footer ul li:not(:last-child)::after {
-  content: '|';
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
-.freshBlog-post {
+.post {
   margin-bottom: 8rem;
 }
 
-.freshBlog-post header {
+.post header {
   margin-bottom: 2rem;
 }
 
-.freshBlog-post header h1 {
+.post header h1 {
   margin: 0;
 }
 
-.freshBlog-post-subtitle {
+.post-subtitle {
   margin: 0.5rem 0;
   color: var(--muted);
   font-size: calc(var(--size-text) * var(--type-reading-scale));
   line-height: 1.5;
 }
 
-.freshBlog-post header .freshBlog-post-meta {
+.post header .post-meta {
   color: var(--muted);
   font-size: var(--size-meta);
   margin-top: 0.5rem;
@@ -766,35 +730,43 @@ a:hover {
   gap: 2rem;
 }
 
+.post-content {
+  margin-bottom: 4rem;
+}
+
+.post-content .footnotes {
+  margin-top: 6rem;
+}
+
 /* Footnotes */
-.freshBlog-post-content .footnotes #footnote-label {
+.post-content .footnotes #footnote-label {
   font-size: 1em;
   margin-bottom: 0.5em;
 }
 
-.freshBlog-post-content .footnotes .data-footnote-backref {
+.post-content .footnotes .data-footnote-backref {
   font-family: monospace;
 }
 
-.freshBlog-post-content .footnotes ol :target {
+.post-content .footnotes ol :target {
   animation: flash 0.8s ease-in 2;
 }
 
-.freshBlog-post-content .footnotes li,
-.freshBlog-post-content .footnotes p {
+.post-content .footnotes li,
+.post-content .footnotes p {
   margin: 0;
   font-size: 0.9em;
 }
 
 /* Anchor links */
-.freshBlog-post-content .anchorsign {
+.post-content .anchorsign {
   color: gray;
   position: relative;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
-.freshBlog-post-content .anchorsign::before {
+.post-content .anchorsign::before {
   content: '#';
   position: absolute;
   left: -1.1rem;
@@ -806,13 +778,13 @@ a:hover {
   line-height: 1rem;
 }
 
-.freshBlog-post-content :is(h1, h2, h3, h4, h5, h6):hover .anchorsign {
+.post-content :is(h1, h2, h3, h4, h5, h6):hover .anchorsign {
   opacity: 1;
   color: inherit;
 }
 
 /* Admonitions/Callouts */
-.freshBlog-post-content .admonition {
+.post-content .admonition {
   width: 100%;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
@@ -824,12 +796,12 @@ a:hover {
   border-color: #3b82f6;
 }
 
-.freshBlog-post-content .admonition p {
+.post-content .admonition p {
   padding: 0.25rem;
   margin: 0;
 }
 
-.freshBlog-post-content .admonition-title {
+.post-content .admonition-title {
   font-weight: var(--weight-medium);
   display: flex;
   min-width: 0;
@@ -839,91 +811,12 @@ a:hover {
 }
 
 /* Image alignment */
-.freshBlog-post-content .align-center {
+.post-content .align-center {
   margin: 0 auto;
 }
 
-.freshBlog-post-content .align-right {
+.post-content .align-right {
   margin: 0 0 0 auto;
-}
-
-/* Authors */
-.freshBlog-authors {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-right: 1rem;
-}
-
-.freshBlog-authors svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.freshBlog-authors h2 {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.freshBlog-authors article {
-  position: relative;
-  display: inline-flex;
-  gap: 0.25rem;
-}
-
-.freshBlog-authors article h3,
-.freshBlog-authors article button {
-  font-size: 1.125rem;
-  margin: 0;
-  background: none !important;
-  border: none;
-  padding: 0 !important;
-  color: #6b7280;
-}
-
-.freshBlog-authors article address {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.freshBlog-authors article address a {
-  color: #6b7280;
-}
-
-.freshBlog-authors article address a:hover {
-  color: var(--ink);
-}
-
-.freshBlog-authors article dl {
-  margin: 0;
-}
-
-.freshBlog-authors article dl dt {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.freshBlog-authors article dl dd {
-  margin: 0;
-  padding: 0;
-}
-
-@media (min-width: 640px) {
-  .freshBlog-authors article dl div {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
 }
 
 @keyframes flash {
@@ -935,4 +828,115 @@ a:hover {
   75% {
     background-color: yellow;
   }
+}
+
+/* Authors */
+.post-authors {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-right: 1rem;
+}
+
+.post-authors svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.post-authors h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.post-authors article {
+  position: relative;
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.post-authors article h3,
+.post-authors article button {
+  font-size: 1.125rem;
+  margin: 0;
+  background: none !important;
+  border: none;
+  padding: 0 !important;
+  color: #6b7280;
+}
+
+.post-authors article address {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.post-authors article address a {
+  color: #6b7280;
+}
+
+.post-authors article address a:hover {
+  color: var(--ink);
+}
+
+.post-authors article dl {
+  margin: 0;
+}
+
+.post-authors article dl dt {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.post-authors article dl dd {
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .post-authors article dl div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.post-authors [popover] h3 {
+  color: var(--ink);
+}
+
+/* Parse errors and warnings, shown on a post in dev */
+
+.post-messages {
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fef2f2;
+  padding: 1rem;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin-top: 1rem;
+  color: rgb(162, 94, 10);
+}
+
+.post-messages dt {
+  font-weight: var(--weight-semibold);
+}
+
+.post-messages .post-messages-errors {
+  color: red;
+}
+
+.post-messages button {
+  font-weight: var(--weight-bold);
+  float: right;
+  color: black;
 }

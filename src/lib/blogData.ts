@@ -11,79 +11,37 @@ import process from 'node:process'
 // 200 word-per-minute is on the lower range of the average reading speed 200-300 wpm
 const WPM = 200
 
-export interface InternalOptions {
-  /**
-   * Title of the blog
-   * @default { 'Blog' }
-   */
+export interface BlogOptions {
   title: string
-  /**
-   * Description of the blog content, this is used in the syndicate feeds
-   * @default { 'This is a Fresh Blog' }
-   */
+  /** Description of the posts, used in the feeds */
   description: string
-  /**
-   * Language code BCP 47, currently used to format date and time format
-   * @default { 'en' }
-   */
+  /** BCP 47 language code, used to format dates and times */
   language: string
   /**
-   * Path to folder containing the markdown (*.md) files. The `POSTS_DIR`
-   * environment variable overrides it, which the e2e tests use to build the
-   * site from fixture posts.
-   * @default { './posts' }
+   * Directory of the markdown (*.md) posts. The `POSTS_DIR` environment
+   * variable overrides it, which the e2e tests use to build the site from
+   * fixture posts.
    */
   contentDir: string
-  /**
-   * Path of the favicon, this is used in the feeds
-   * @default { '/favicon.ico' }
-   */
+  /** Path of the favicon, used in the feeds */
   favicon: string
-  /**
-   * Copyright text, `{{year}}` and `{{url}}` can be used for automatic replacement
-   * @default { 'Copryright {{year}} {{url}}' }
-   */
   copyright: string
-  /**
-   * A string used in RSS 2.0 feed to indicate the program used to generate the channel.
-   * @default { 'Feed (https://github.com/jpmonette/feed) for Deno' }
-   */
+  /** Program named in the RSS 2.0 feed's `generator` */
   generator: string
-  /**
-   * Configuration passed to the code highlighter Shiki where `light` and `dark`
-   * themes can be set. See https://shiki.style/themes for supported themes.
-   * @default { { themes: { light: 'material-theme-lighter', dark: 'material-theme-darker' } } }
-   */
+  /** Shiki themes, see https://shiki.style/themes */
   highlighter: {
     themes: {
       light: string
       dark: string
     }
   }
-  /**
-   * Name of the CSS file which will be exported by the plugin for the blog
-   * @default { 'freshblog.css' }
-   */
-  cssFilename: string
-  /** Determine the author(s) to display for all posts when the `authors` entry
-   * is not defined in frontmatter. Useful for personal blog when the author is
-   * often the same and rarely need to be overridden.
-   * @default { undefined }
-   */
+  /** Authors of every post whose frontmatter names none */
   defaultAuthors?: PageFrontmatter['authors']
-  /** Determines when to show authors
-   * ```
-   * 'always' - always show authors in both the listing of blog posts and in the post
-   * 'only_in_posts' - only show authors in the post
-   * 'never' - never show authors
-   * ```
-   *  @default 'only_in_posts'
+  /**
+   * Where authors are shown: `always` (listings and posts), `only_in_posts`
+   * or `never`
    */
   showAuthors: 'always' | 'only_in_posts' | 'never'
-
-  /**
-   * Configure versioning
-   */
   versioning:
     | {
         provider: 'github'
@@ -105,7 +63,7 @@ export interface Post {
   versions?: CommitInfo[]
 }
 
-export const defaultOptions: InternalOptions = {
+export const defaultOptions: BlogOptions = {
   title: "Nicholas's Posts",
   description: 'All my posts as seen on nrako.com',
   language: 'en',
@@ -119,7 +77,6 @@ export const defaultOptions: InternalOptions = {
       dark: 'material-theme-darker',
     },
   },
-  cssFilename: 'freshblog.css',
   showAuthors: 'only_in_posts',
   versioning: {
     provider: 'github',
@@ -134,7 +91,7 @@ export const defaultOptions: InternalOptions = {
  * (build and dev), never in workerd.
  */
 export async function getPosts(
-  options: InternalOptions = defaultOptions,
+  options: BlogOptions = defaultOptions,
 ): Promise<Post[]> {
   // Git does not track empty directories: with nothing published, the
   // content directory does not exist in a fresh clone.
@@ -165,7 +122,7 @@ export async function getPosts(
  */
 export async function getPost(
   slug: string,
-  options: InternalOptions = defaultOptions,
+  options: BlogOptions = defaultOptions,
 ): Promise<Post | null> {
   const filePath = join(options.contentDir, `${slug}.md`)
   if (!existsSync(filePath)) return null

@@ -11,9 +11,9 @@ const hasMessages = messages.errors?.length || messages.warnings?.length
 
 {
   hasMessages && (
-    <dialog role="alertdialog" open class="freshBlog-dialogMessages">
+    <dialog role="alertdialog" open class="post-messages">
       {messages.errors && (
-        <dl class="freshBlog-dialogMessages-errors">
+        <dl class="post-messages-errors">
           {messages.errors.map((error) => (
             <>
               <dt>{error.property}</dt>

@@ -22,7 +22,7 @@ function againstColumn(page: Page) {
       lastIconFromRightEdge:
         Math.max(...icons.map((icon) => icon.right)) - column.right,
       iconMiddles: icons.map((icon) => (icon.top + icon.bottom) / 2),
-      footerFromLeftEdge: box('footer .freshBlog-footer').left - column.left,
+      footerFromLeftEdge: box('footer .site-footer-feeds').left - column.left,
       footerFromRightEdge: box('footer > div > a').right - column.right,
     }
   })

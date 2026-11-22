@@ -27,13 +27,10 @@ import rehypeExternalLinks from 'rehype-external-links'
 import rehypeKatex from 'rehype-katex'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import { h } from 'hastscript'
-import { defaultOptions, type InternalOptions } from './blogData.ts'
+import { defaultOptions, type BlogOptions } from './blogData.ts'
 import { validatePageFrontmatter } from 'myst-frontmatter'
 
-export type ParseOptions = Pick<
-  InternalOptions,
-  'highlighter' | 'defaultAuthors'
->
+export type ParseOptions = Pick<BlogOptions, 'highlighter' | 'defaultAuthors'>
 
 interface Message {
   property: string

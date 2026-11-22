@@ -1,4 +1,4 @@
-import type { InternalOptions, Post } from './blogData.ts'
+import type { BlogOptions, Post } from './blogData.ts'
 import { calculateReadingTime } from './blogData.ts'
 import processor from './processor.ts'
 import process from 'node:process'
@@ -22,7 +22,7 @@ function getGitHubToken(): string | undefined {
  */
 export async function getCommitHistory(
   slug: string,
-  options: InternalOptions,
+  options: BlogOptions,
 ): Promise<CommitInfo[]> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 
@@ -80,7 +80,7 @@ export async function getCommitHistory(
 export async function getPostContentAtVersion(
   slug: string,
   sha: string,
-  options: InternalOptions,
+  options: BlogOptions,
 ): Promise<string | null> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 
@@ -135,7 +135,7 @@ export async function isDraftVersion(
   slug: string,
   currentContent: string,
   latestCommit: CommitInfo,
-  options: InternalOptions,
+  options: BlogOptions,
 ): Promise<boolean> {
   const latestContent = await getPostContentAtVersion(
     slug,
@@ -156,7 +156,7 @@ export async function isDraftVersion(
 export async function getPostAtVersion(
   slug: string,
   sha: string,
-  options: InternalOptions,
+  options: BlogOptions,
 ): Promise<Post | null> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 

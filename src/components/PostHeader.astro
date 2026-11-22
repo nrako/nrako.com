@@ -16,12 +16,8 @@ const { frontmatter } = post
 
 <header>
   <h1>{frontmatter.title}</h1>
-  {
-    frontmatter.subtitle && (
-      <p class="freshBlog-post-subtitle">{frontmatter.subtitle}</p>
-    )
-  }
-  <div class="freshBlog-post-meta" aria-label="Post Metadata">
+  {frontmatter.subtitle && <p class="post-subtitle">{frontmatter.subtitle}</p>}
+  <div class="post-meta" aria-label="Post Metadata">
     {
       options.showAuthors !== 'never' && frontmatter.authors && (
         <Authors

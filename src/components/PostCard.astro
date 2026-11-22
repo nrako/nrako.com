@@ -13,7 +13,7 @@ interface Props {
 const { url, frontmatter, language = 'en', showAuthors = false } = Astro.props
 ---
 
-<a class="freshBlog-postCard post-entry" href={url}>
+<a class="post-entry" href={url}>
   <article>
     <header class="post-entry-head">
       <h2 class="post-entry-title">{frontmatter.title}</h2>

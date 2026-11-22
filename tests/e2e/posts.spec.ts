@@ -39,7 +39,7 @@ test.describe('Posts listing', () => {
   test('post cards are links to individual posts', async ({ page }) => {
     await skipWithoutPosts(page)
 
-    const firstPostLink = page.locator('.freshBlog-postCard').first()
+    const firstPostLink = page.locator('.post-entry').first()
 
     await expect(firstPostLink).toHaveAttribute('href', /^\/posts\//)
   })
@@ -72,7 +72,7 @@ test.describe('Individual post', () => {
     await expect(mainContent.getByRole('heading').first()).toBeVisible()
 
     // Post should have article content
-    await expect(page.locator('.freshBlog-post-content')).toBeVisible()
+    await expect(page.locator('.post-content')).toBeVisible()
   })
 
   test('displays post metadata', async ({ page }) => {
@@ -90,7 +90,7 @@ test.describe('Post versions', () => {
     await skipWithoutPosts(page)
 
     await page.getByRole('article').first().click()
-    await expect(page.locator('.freshBlog-post-content')).toBeVisible()
+    await expect(page.locator('.post-content')).toBeVisible()
 
     // Version history comes from the GitHub API and needs GITHUB_TOKEN.
     const versionLinks = page.locator('#versions-popover a')
@@ -111,7 +111,7 @@ test.describe('Post versions', () => {
     await page.goto(oldestHref!)
 
     await expect(page.getByText('You are looking at version')).toBeVisible()
-    await expect(page.locator('.freshBlog-post-content')).toBeVisible()
+    await expect(page.locator('.post-content')).toBeVisible()
   })
 })
 
