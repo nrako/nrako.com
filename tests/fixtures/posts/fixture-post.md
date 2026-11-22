@@ -28,7 +28,8 @@ not hold, as @missing2021, stays in the text.
 
 ## Some keys
 
-A post names a key to press, as {kbd}`Ctrl`, and sets a <mark>highlight</mark>.
+A post names a key to press, as {kbd}`Ctrl`, sets a <mark>highlight</mark> and
+spells out an abbreviation, as {abbr}`MyST (Markedly Structured Text)`.
 
 ## Some code
 

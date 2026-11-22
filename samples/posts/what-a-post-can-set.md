@@ -95,7 +95,9 @@ above a heading, as `(labels)=` above this one, gives it a name that survives
 a change of title: [this section](#labels).
 
 A link without a text takes the name of what it points to: [](#labels) for a
-section, [](#fig-pipeline) for a figure.
+section, [](#fig-pipeline) for a figure. A link that stays on the page, as
+these and the citations do, is underlined with dots; one that leaves it, with
+a line.
 
 Figures, tables, equations and captioned code are numbered, and a reference to
 their label takes the number: {numref}`fig-pipeline`, {numref}`tbl-syntax`,

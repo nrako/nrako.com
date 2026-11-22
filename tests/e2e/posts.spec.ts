@@ -146,6 +146,20 @@ test.describe('Citations', () => {
     await expect(page.locator('#cite-fixture2020')).toBeInViewport()
   })
 
+  test('a citation is underlined with dots, a link that leaves the page with a line', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post')
+
+    await expect(page.getByRole('link', { name: 'Fixture (2020)' })).toHaveCSS(
+      'text-decoration-style',
+      'dotted',
+    )
+    await expect(
+      page.getByRole('link', { name: 'https://example.com/an-article' }),
+    ).toHaveCSS('text-decoration-style', 'solid')
+  })
+
   test('a key the bibliography does not hold stays in the text', async ({
     page,
   }) => {
@@ -195,6 +209,22 @@ test.describe('Markup', () => {
       )
     })
   }
+})
+
+test.describe('Abbreviations', () => {
+  test('an abbreviation is not underlined as a link is', async ({ page }) => {
+    skipWithoutFixturePosts()
+    await page.goto('/posts/fixture-post')
+
+    const abbreviation = page.locator('.post-content abbr')
+
+    await expect(abbreviation).toHaveAttribute(
+      'title',
+      'Markedly Structured Text',
+    )
+    await expect(abbreviation).toHaveCSS('text-decoration-line', 'none')
+    await expect(abbreviation).toHaveCSS('cursor', 'help')
+  })
 })
 
 test.describe('Not found', () => {

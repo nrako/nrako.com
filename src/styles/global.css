@@ -639,9 +639,28 @@
   text-decoration-color: var(--muted);
 }
 
+/*
+ * A link that stays on the page (a citation, a reference to a figure or a
+ * section, a note) is underlined with dots; one that leaves it, with a line.
+ */
+.prose a[href^='#'] {
+  text-decoration-style: dotted;
+  text-decoration-color: currentColor;
+}
+
 .prose a:hover,
 a:hover {
   text-decoration-color: var(--accent);
+}
+
+/*
+ * An abbreviation spells itself out under the pointer. It is not a link, so
+ * it loses the dotted underline browsers give it, which a link that stays on
+ * the page has.
+ */
+.prose abbr[title] {
+  text-decoration: none;
+  cursor: help;
 }
 
 /*
