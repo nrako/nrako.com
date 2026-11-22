@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 150" role="img" aria-label="A post goes from Markdown to a tree, then to HTML">
+  <!-- Drawn in a mid grey and the accent so that it reads on a light and on a dark ground -->
+  <g fill="none" stroke="#888" stroke-width="2">
+    <rect x="11" y="31" width="158" height="88" rx="8"/>
+    <rect x="241" y="31" width="158" height="88" rx="8"/>
+    <rect x="471" y="31" width="158" height="88" rx="8"/>
+  </g>
+  <g fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M183 75h44m-10-9 10 9-10 9"/>
+    <path d="M413 75h44m-10-9 10 9-10 9"/>
+  </g>
+  <g fill="#888" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" text-anchor="middle">
+    <text x="90" y="70">post.md</text>
+    <text x="320" y="70">tree</text>
+    <text x="550" y="70">page.html</text>
+  </g>
+  <g fill="#888" font-family="system-ui, -apple-system, sans-serif" font-size="13" text-anchor="middle">
+    <text x="90" y="94">what is typed</text>
+    <text x="320" y="94">what it means</text>
+    <text x="550" y="94">what is read</text>
+  </g>
+</svg>
