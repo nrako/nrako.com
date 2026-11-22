@@ -18,13 +18,9 @@
 
 @layer base {
   body {
-    @apply bg-white text-black;
+    background: var(--ground);
+    color: var(--ink);
     font-weight: var(--weight-normal);
-  }
-
-  .dark body,
-  body:is(.dark *) {
-    @apply bg-black text-white;
   }
 }
 
@@ -76,6 +72,38 @@
 
 .dark {
   --muted: #9ca3af;
+}
+
+/*
+ * Colours: the page is ink on a ground. The reader's background
+ * (`data-reading-background`) picks full contrast or a softer pair: an
+ * off-white with a hint of paper in light mode, a dark grey in dark mode.
+ * No more tint than that: the warmth of a screen is the screen's setting.
+ * Each pair keeps at least 7:1. What is drawn in `currentColor` follows the
+ * ink. A raised surface (a popover) is the ground in light mode, a little
+ * lighter than it in dark mode.
+ */
+:root {
+  --ground-contrast: #fff;
+  --ink-contrast: #000;
+  --ground-soft: #fbfaf7;
+  --ink-soft: #262626;
+  --ground: var(--ground-contrast);
+  --ink: var(--ink-contrast);
+  --surface: var(--ground);
+}
+
+.dark {
+  --ground-contrast: #000;
+  --ink-contrast: #fff;
+  --ground-soft: #1a1a1a;
+  --ink-soft: #d6d6d6;
+  --surface: color-mix(in srgb, var(--ink) 10%, var(--ground));
+}
+
+:root[data-reading-background='soft'] {
+  --ground: var(--ground-soft);
+  --ink: var(--ink-soft);
 }
 
 /*
@@ -506,13 +534,33 @@
   --sample-step: var(--weight-step-heavy);
 }
 
-/* Popover dark mode support */
+/* Each background is shown in its own colours, in the current theme */
+.reading-settings [data-reading-background-sample] {
+  border: 1px solid var(--rule);
+}
+
+.reading-settings [data-reading-background-sample='contrast'] {
+  background: var(--ground-contrast);
+  color: var(--ink-contrast);
+}
+
+.reading-settings [data-reading-background-sample='soft'] {
+  background: var(--ground-soft);
+  color: var(--ink-soft);
+}
+
+.reading-settings [data-reading-background-sample]:has(:checked) {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
 [popover] {
-  @apply dark:bg-slate-800 dark:text-white;
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .freshBlog-authors [popover] h3 {
-  @apply text-black dark:text-white;
+  color: var(--ink);
 }
 
 /* Prose link styling */
@@ -824,7 +872,7 @@ a:hover {
 }
 
 .freshBlog-authors article address a:hover {
-  color: black;
+  color: var(--ink);
 }
 
 .freshBlog-authors article dl {

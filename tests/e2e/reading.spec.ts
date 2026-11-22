@@ -153,6 +153,42 @@ test.describe('Reading settings', () => {
     expect(await weights()).toEqual({ text: 275, title: 175 })
   })
 
+  test('the soft background softens the ground and the ink in both themes', async ({
+    page,
+  }) => {
+    const colours = () =>
+      page.evaluate(() => {
+        const style = getComputedStyle(document.body)
+        return { ground: style.backgroundColor, ink: style.color }
+      })
+
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto(PROSE_PAGE)
+    expect(await colours()).toEqual({
+      ground: 'rgb(255, 255, 255)',
+      ink: 'rgb(0, 0, 0)',
+    })
+
+    const menu = await openMenu(page)
+    await choose(menu, 'Soft')
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-reading-background',
+      'soft',
+    )
+    expect(await colours()).toEqual({
+      ground: 'rgb(251, 250, 247)',
+      ink: 'rgb(38, 38, 38)',
+    })
+
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto(PROSE_PAGE)
+    await expect(page.locator('html')).toHaveClass(/dark/)
+    expect(await colours()).toEqual({
+      ground: 'rgb(26, 26, 26)',
+      ink: 'rgb(214, 214, 214)',
+    })
+  })
+
   test('an unknown stored value is ignored', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('reading-font', 'comic')

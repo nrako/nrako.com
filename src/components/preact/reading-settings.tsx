@@ -4,6 +4,7 @@ import {
   applyReadingSetting,
   readReadingSetting,
   readingSettings,
+  type ReadingBackground,
   type ReadingFont,
   type ReadingSetting,
   type ReadingSize,
@@ -17,7 +18,8 @@ interface Choice<Value> {
   label: string
 }
 
-// A typeface shows its name; a size or a weight shows an "A" drawn with it
+// A typeface or a background shows its name drawn with it; a size or a
+// weight shows an "A" drawn with it
 const groups = [
   {
     setting: 'font',
@@ -49,6 +51,15 @@ const groups = [
       { value: 'heavy', label: 'Heavier' },
     ] satisfies Choice<ReadingWeight>[],
   },
+  {
+    setting: 'background',
+    legend: 'Background',
+    sample: 'label',
+    choices: [
+      { value: 'contrast', label: 'Contrast' },
+      { value: 'soft', label: 'Soft' },
+    ] satisfies Choice<ReadingBackground>[],
+  },
 ] as const satisfies {
   setting: ReadingSetting
   legend: string
@@ -77,6 +88,7 @@ export default function ReadingSettings() {
       font: readReadingSetting('font'),
       size: readReadingSetting('size'),
       weight: readReadingSetting('weight'),
+      background: readReadingSetting('background'),
     })
     setReady(true)
   }, [])
@@ -119,7 +131,7 @@ export default function ReadingSettings() {
         aria-label="Reading settings"
         title={
           ready
-            ? 'Typeface, size and weight of the text'
+            ? 'Typeface, size, weight and background of the text'
             : 'Not available when JavaScript is disabled'
         }
         class="[&:not(:disabled):hover]:text-red-600 disabled:text-gray-500 cursor-pointer disabled:cursor-default"

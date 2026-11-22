@@ -1,6 +1,7 @@
-// The reader's settings for the text: its typeface, its size and its
-// weight. Each is an attribute on <html> (`data-reading-font`,
-// `data-reading-size`, `data-reading-weight`), absent for the default, and
+// The reader's settings for the text: its typeface, its size, its weight
+// and its background. Each is an attribute on <html> (`data-reading-font`,
+// `data-reading-size`, `data-reading-weight`, `data-reading-background`),
+// absent for the default, and
 // is kept in localStorage under the same name. `Layout.astro` sets them
 // before the page is drawn; `global.css` draws them.
 
@@ -23,12 +24,20 @@ export const readingSettings = {
     values: ['light', 'regular', 'heavy'],
     default: 'regular',
   },
+  background: {
+    attribute: 'data-reading-background',
+    storageKey: 'reading-background',
+    values: ['contrast', 'soft'],
+    default: 'contrast',
+  },
 } as const
 
 export type ReadingSetting = keyof typeof readingSettings
 export type ReadingFont = (typeof readingSettings.font.values)[number]
 export type ReadingSize = (typeof readingSettings.size.values)[number]
 export type ReadingWeight = (typeof readingSettings.weight.values)[number]
+export type ReadingBackground =
+  (typeof readingSettings.background.values)[number]
 
 export function readReadingSetting(setting: ReadingSetting): string {
   const { attribute, default: fallback } = readingSettings[setting]
