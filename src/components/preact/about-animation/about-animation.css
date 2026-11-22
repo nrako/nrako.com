@@ -614,11 +614,13 @@
     cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-.aa-canvas[data-dave='draw'] .aa-underline {
+.aa-canvas[data-dave='draw'] .aa-underline,
+.aa-canvas[data-dave='away'] .aa-underline {
   opacity: 1;
 }
 
-.aa-canvas[data-dave='draw'] .aa-underline path {
+.aa-canvas[data-dave='draw'] .aa-underline path,
+.aa-canvas[data-dave='away'] .aa-underline path {
   stroke-dashoffset: 0;
 }
 
@@ -756,8 +758,19 @@
     cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-.aa-canvas[data-dave='draw'] .aa-dave .aa-pen {
+.aa-canvas[data-dave='draw'] .aa-dave .aa-pen,
+.aa-canvas[data-dave='away'] .aa-dave .aa-pen {
   offset-distance: 100%;
+}
+
+/*
+ * Aside, to the lower right of the title. The pen stays at the end of its
+ * path, 148px across and 31px down from where the path starts: the cursor
+ * moves by what separates that point from the place it goes to.
+ */
+.aa-canvas[data-dave='away'] .aa-dave {
+  opacity: 1;
+  translate: 96px 29px;
 }
 
 /* Same duration and easing as the view it drags: they move as one */
