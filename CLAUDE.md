@@ -76,6 +76,7 @@ pnpm run deploy               # Build + wrangler deploy
 - `blogData.ts` — Post loading, reading time
 - `processor.ts` — MyST markdown processing with Shiki syntax highlighting
 - `citations.ts` — Citations of a post's BibTeX bibliography and its list of references
+- `crossReferences.ts` — What MyST's resolved references still need from the HTML renderer
 - `githubVersioning.ts` — Post version history and old versions from the GitHub API
 - `bluesky.ts` — Bluesky API integration
 
@@ -113,6 +114,7 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Citations: a post lists BibTeX files under `bibliography` in its frontmatter, as paths from the posts directory, and cites their works by key: `@key`, `[@key, p. 3; @other]`, `[-@key]` or the `{cite}` roles (`citations.ts`). Each citation links to its entry in the "References" section, which lists the cited works in the APA style, sorted by name, after the footnotes; a `{bibliography}` directive places the list elsewhere. `citation-js-utils`, from the MyST project, parses and formats.
 - An @ only cites in a post that lists a bibliography; elsewhere it is text, which costs the post a second parse (`processor.ts`). A key the bibliography does not hold stays in the text as `@key` with a warning, shown in dev like the frontmatter's. A bibliography that is missing, outside the posts directory or not BibTeX fails the build.
 - An older version of a post reads its bibliography from GitHub at the same commit. A commit that only changes the `.bib` file adds no version to the post.
+- References between the parts of a post are resolved by MyST's own transforms (`enumerateTargetsPlugin` and `resolveReferencesPlugin`, in `processor.ts`): they number the figures, tables, equations and labelled code, and name a reference that has no text. The renderer of `myst-to-html` is run without the transforms `mystToHtml` puts before it, which would number, title and resolve everything a second time. `crossReferences.ts` finishes what that renderer leaves out: the `id` of a labelled block or equation, the number before a caption, and a text for an empty link or for a reference whose target does not exist. What MyST reports on the way, such as that missing target, joins the post's messages, shown in dev.
 - Code is highlighted with `github-light-high-contrast` / `github-dark-high-contrast` (`blogData.ts`): every token reaches 7:1 on the code block in both themes and both reading backgrounds, the light comments through a `colorReplacements` entry. The block's background is tinted from `--ink` and `--ground` (`global.css`), not the theme's. Measure the tokens again when changing either.
 - Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects; the JavaScript engine keeps the pipeline usable from an on-demand route.
 - Feed `Content-Type` headers live in `public/_headers`: the feeds are prerendered to extensionless files, so the type set in `src/pages/feed/[type].ts` only applies in dev. Keep both in sync.

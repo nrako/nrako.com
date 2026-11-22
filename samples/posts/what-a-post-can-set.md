@@ -94,10 +94,18 @@ text, so a link can lead to [the section on notes](#notes). A label written
 above a heading, as `(labels)=` above this one, gives it a name that survives
 a change of title: [this section](#labels).
 
-Figures, tables and equations are numbered, and a reference to their label
-takes the number: {numref}`fig-pipeline`, {numref}`tbl-syntax` and
-equation {eq}`eq-pythagoras` are all further down. The text of such a
-reference can be chosen, as in {numref}`Fig. %s <fig-pipeline>`.
+A link without a text takes the name of what it points to: [](#labels) for a
+section, [](#fig-pipeline) for a figure.
+
+Figures, tables, equations and captioned code are numbered, and a reference to
+their label takes the number: {numref}`fig-pipeline`, {numref}`tbl-syntax`,
+{numref}`code-greet` and equation {eq}`eq-pythagoras` are all further down.
+The text of such a reference can be chosen, as in
+{numref}`Fig. %s <fig-pipeline>`.
+
+(a-labelled-paragraph)=
+A label can also name a paragraph, a list, a quotation or a callout. This
+paragraph has one, and [a link to it](#a-labelled-paragraph) lands here.
 
 ## Figures
 
@@ -191,10 +199,23 @@ The details are not the details. They make the design.
 
 ## Callouts
 
-A callout sets a block apart, under a title of its own:
+A callout sets a block apart. Each kind has its title, as `{note}`, `{tip}`,
+`{important}`, `{warning}` or `{seealso}`:
+
+:::{note}
+The body of a callout is ordinary markup: a list, a link, `some code`.
+:::
+
+A kind takes another title when it is given one:
+
+:::{warning} Mind the order
+A label goes above what it names, not below.
+:::
+
+And `{admonition}` has no kind, only the title it is given:
 
 :::{admonition} A callout with its own title
-Its body is ordinary markup: a list, a link, `some code`.
+It is the plainest of them.
 :::
 
 ## Math
@@ -221,9 +242,10 @@ int main(void)
 }
 ```
 
-The `{code}` directive adds a caption:
+The `{code}` directive adds a caption, and a number once it has a label:
 
 ```{code} ts
+:label: code-greet
 :caption: A function with a caption
 
 export function greet(name: string): string {
@@ -260,13 +282,10 @@ source below this paragraph, and it does not show.
 MyST defines more than this site renders. Until these work, a post should not
 use them:
 
-- the built-in callouts (`{note}`, `{tip}`, `{warning}` and the others), which
-  show their title twice;
 - `{dropdown}`, `{tab-set}`, `{glossary}` with `{term}`, `{include}`,
   `{literalinclude}`, `{iframe}` and `{mermaid}`;
 - the `{underline}`, `{smallcaps}`, `{span}` and `{index}` roles;
-- a reference without a text of its own, as an empty link to a label or to a
-  DOI;
-- a label on a paragraph, and `{numref}` to a block of code;
+- the number of an equation beside it, and the number of a figure or a table
+  that has no label: both are counted, neither is shown;
 - `:linenos:`, `:emphasize-lines:` and `:filename:` on a block of code;
 - a citation followed at once by a note, which takes the note for its page.

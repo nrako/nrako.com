@@ -72,16 +72,26 @@ const pieces: Record<string, RegExp> = {
   'the references': /<section class="references"><h2 id="references">/,
   'a link to a heading': /<a href="#notes">the section on notes<\/a>/,
   'a labelled heading': /<h2 id="labels">/,
-  'a numbered reference to a figure': /<a href="#fig-pipeline">Figure 1<\/a>/,
-  'a numbered reference to a table': /<a href="#tbl-syntax">Table 1<\/a>/,
+  'a numbered reference to a figure':
+    /<a href="#fig-pipeline">Figure\u00a01<\/a>/,
+  'a numbered reference to a table': /<a href="#tbl-syntax">Table\u00a01<\/a>/,
   'a numbered reference to an equation': /<a href="#eq-pythagoras">\(1\)<\/a>/,
+  'a numbered reference to code': /<a href="#code-greet">Program\u00a01<\/a>/,
   'a numbered reference with its own text':
     /<a href="#fig-pipeline">Fig\. 1<\/a>/,
+  'a reference without a text to a section':
+    /<a href="#labels">References between parts<\/a> for a/,
+  'a reference without a text to a figure':
+    /<a href="#fig-pipeline">Figure\u00a01<\/a> for a figure/,
+  'a labelled paragraph':
+    /<p id="a-labelled-paragraph">[\s\S]*<a href="#a-labelled-paragraph">a link to it<\/a>/,
+  'a labelled equation':
+    /<div id="eq-pythagoras" class="equation"><span class="katex-display">/,
   'a figure with a caption':
-    /<figure id="fig-pipeline" class="numbered"><img src="\/samples\/from-source-to-page\.svg"[^>]*class="align-center" width="90%"><figcaption><p><span class="caption-number">Figure 1: <\/span>A figure/,
+    /<figure id="fig-pipeline" class="numbered"><img src="\/samples\/from-source-to-page\.svg"[^>]*class="align-center" width="90%"><figcaption><p><span class="caption-number">Figure\u00a01: <\/span>A figure/,
   'a pipe table': /<td><code>\*text\*<\/code><\/td>\s*<td><em>text<\/em><\/td>/,
   'a table with a caption':
-    /<figure id="tbl-syntax" class="numbered"><figcaption><p><span class="caption-number">Table 1: <\/span>What each/,
+    /<figure id="tbl-syntax" class="numbered"><figcaption><p><span class="caption-number">Table\u00a01: <\/span>What each/,
   'a table written as a list':
     /<figcaption><p>A table written as a list<\/p><\/figcaption><table>/,
   'a nested list': /<ol>\s*<li>\s*<p>A numbered item<\/p>\s*<ul>/,
@@ -90,14 +100,18 @@ const pieces: Record<string, RegExp> = {
   'an attributed quotation':
     /<\/blockquote><figcaption><p>Harold Abelson and Gerald Jay Sussman<\/p>/,
   'an epigraph': /<figure class="numbered epigraph"><blockquote>/,
-  'a callout with its title, once':
-    /<aside class="admonition"><p class="admonition-title">A callout with its own title<\/p><p>Its body/,
+  "a callout with its kind's title, once":
+    /<aside class="admonition note"><p class="admonition-title">Note<\/p><p>The body/,
+  'a callout of a kind with another title':
+    /<aside class="admonition warning"><p class="admonition-title">Mind the order<\/p><p>A label/,
+  'a callout without a kind':
+    /<aside class="admonition"><p class="admonition-title">A callout with its own title<\/p><p>It is/,
   'inline math': /<span class="katex">/,
   'a block of math': /<span class="katex-display">/,
   'highlighted code':
     /<pre class="shiki [^"]*" [^>]*><code><span class="line">/,
   'code with a caption':
-    /<\/pre><figcaption><p>A function with a caption<\/p><\/figcaption>/,
+    /<\/pre><figcaption><p><span class="caption-number">Program\u00a01: <\/span>A function with a caption<\/p><\/figcaption>/,
   'removed and added lines':
     /<span class="line diff remove">[\s\S]*<span class="line diff add">/,
   'a block of HTML with Markdown inside':

@@ -14,7 +14,7 @@ test('the number of a figure is set apart from its caption', async () => {
 
   assert.ok(
     html.includes(
-      '<figcaption><p><span class="caption-number">Figure 1: </span>A caption.</p></figcaption>',
+      '<figcaption><p><span class="caption-number">Figure\u00a01: </span>A caption.</p></figcaption>',
     ),
   )
 })
@@ -26,6 +26,8 @@ test('the number of a table is set apart from its caption', async () => {
   )
 
   assert.ok(
-    html.includes('<span class="caption-number">Table 1: </span>A caption'),
+    html.includes(
+      '<span class="caption-number">Table\u00a01: </span>A caption',
+    ),
   )
 })

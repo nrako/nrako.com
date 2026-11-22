@@ -4,16 +4,19 @@ import { mystParse } from 'myst-parser'
 import {
   basicTransformationsPlugin,
   DOITransformer,
+  enumerateTargetsPlugin,
   getFrontmatter,
   GithubTransformer,
   inlineMathSimplificationPlugin,
   linksPlugin,
+  ReferenceState,
+  resolveReferencesPlugin,
   RRIDTransformer,
   WikiTransformer,
 } from 'myst-transforms'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
-import { mystToHtml } from 'myst-to-html'
+import { formatHtml, mystToHast } from 'myst-to-html'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import {
   bundledLanguages,
@@ -35,6 +38,11 @@ import {
   rehypeReferences,
   type LoadFile,
 } from './citations.ts'
+import {
+  captionNumber,
+  crossReferencesTransform,
+  reportMessages,
+} from './crossReferences.ts'
 
 export type ParseOptions = Pick<
   BlogOptions,
@@ -80,20 +88,6 @@ function getHighlighter(
     highlighters.set(key, highlighter)
   }
   return highlighter
-}
-
-/**
- * Rehype plugin: sets the number of a figure or a table apart from its
- * caption. The renderer runs the two together ("Figure 1A caption"); the
- * colon is added to the markup, not in CSS, so that a feed reader has it too.
- */
-function rehypeCaptionNumbers() {
-  return (tree: any) => {
-    visit(tree, 'element', (node: any) => {
-      if (!node.properties?.className?.includes('caption-number')) return
-      node.children.push({ type: 'text', value: ': ' })
-    })
-  }
 }
 
 /**
@@ -148,23 +142,32 @@ async function parse(text: string, options: ParseOptions) {
   // For the mdast that we show, duplicate, strip positions and dump to yaml
   // Also run some of the transforms, like the links
   const mdastPre = JSON.parse(JSON.stringify(mdast))
+  const file = new VFile()
+  const state = new ReferenceState('', { frontmatter, vfile: file as any })
   ;(unified() as any)
     .use(basicTransformationsPlugin, {})
     .use(inlineMathSimplificationPlugin)
+    .use(enumerateTargetsPlugin, { state })
     .use(linksPlugin, { transformers: linkTransforms })
-    .runSync(mdastPre)
+    .use(resolveReferencesPlugin, { state })
+    .runSync(mdastPre, file)
+
+  reportMessages(file, messages)
+  crossReferencesTransform(mdastPre)
 
   const references = citationsTransform(mdastPre, citationRenderers, messages)
 
   visit(mdastPre, (n) => delete (n as { position?: unknown }).position)
-  const htmlString = mystToHtml(mdastPre, {
-    hast: {
-      allowDangerousHtml: true,
-    },
-    stringifyHtml: {
-      allowDangerousHtml: true,
-    },
-  })
+  // The renderer of `mystToHtml`, without the transforms it runs first: they
+  // number, title and resolve a second time what MyST's own have just done
+  // above, which showed the title of a callout twice.
+  const toHtml = (unified() as any)
+    .use(mystToHast, { allowDangerousHtml: true, handlers: { captionNumber } })
+    .use(formatHtml)
+    .use(rehypeStringify, { allowDangerousHtml: true })
+  const htmlString = (
+    toHtml.stringify(toHtml.runSync(mdastPre)) as string
+  ).trim()
 
   const highlighter = await getHighlighter(options.highlighter.themes)
 
@@ -174,7 +177,6 @@ async function parse(text: string, options: ParseOptions) {
       ...options.highlighter,
       transformers: [transformerNotationDiff()],
     })
-    .use(rehypeCaptionNumbers)
     .use(rehypeReferences, references)
     .use(rehypeExternalLinks, { rel: ['noopener'] })
     .use(rehypeKatex)
