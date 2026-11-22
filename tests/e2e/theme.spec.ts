@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { skipWithoutFixturePosts } from './fixtures'
 
 test.describe('Theme toggle', () => {
   test('theme toggle button is visible', async ({ page }) => {
@@ -73,5 +74,26 @@ test.describe('Theme toggle', () => {
 
     // Without user interaction, should follow system preference (no dark class)
     await expect(page.locator('html')).not.toHaveClass(/dark/)
+  })
+
+  test('code follows the chosen theme, not the system', async ({ page }) => {
+    skipWithoutFixturePosts()
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/posts/fixture-post', { waitUntil: 'networkidle' })
+    const code = page.locator('pre.shiki')
+    const background = () =>
+      code.evaluate((pre) => getComputedStyle(pre).backgroundColor)
+    const darkBackground = await background()
+
+    const toggleButton = page.getByRole('button', { name: 'Toggle Theme' })
+    await expect(toggleButton).toBeEnabled({ timeout: 15000 })
+    await toggleButton.click()
+    await expect(page.locator('html')).toHaveClass(/light/)
+
+    expect(await background()).not.toBe(darkBackground)
+    await expect(code).toHaveCSS(
+      'background-color',
+      await code.evaluate((pre) => pre.style.backgroundColor),
+    )
   })
 })
