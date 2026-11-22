@@ -17,6 +17,15 @@ importers:
       '@atproto/api':
         specifier: ^0.13.19
         version: 0.13.35
+      '@fontsource-variable/fustat':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/source-code-pro':
+        specifier: ^5.3.1
+        version: 5.3.1
+      '@fontsource-variable/source-sans-3':
+        specifier: ^5.3.1
+        version: 5.3.1
       '@fontsource/caveat-brush':
         specifier: ^5.3.0
         version: 5.3.0
@@ -35,6 +44,9 @@ importers:
       hastscript:
         specifier: ^9.0.1
         version: 9.0.3
+      katex:
+        specifier: ^0.16.47
+        version: 0.16.47
       linkedom:
         specifier: ^0.18.12
         version: 0.18.15
@@ -765,6 +777,15 @@ packages:
   '@eslint/plugin-kit@0.7.3':
     resolution: {integrity: sha512-IkO+/KEUvwbVpiURZg+P7zF74z5Jxe0UgJxVni+RtoHQ6IZieXaO02kmadomap/q+l6bc/jdPGGqTjhuZnuz1Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@fontsource-variable/fustat@5.3.0':
+    resolution: {integrity: sha512-5KsDRCq4yI6Fc4MJ4d7PBw3fgK0MUsSlh6akKZALQY7tVZ4KwB5SWJeHP/QZjGRzDPZUqy/MAi16Evj5c0rlcA==}
+
+  '@fontsource-variable/source-code-pro@5.3.1':
+    resolution: {integrity: sha512-N0nZDizh8CQ19+AHHA8Ssb1i/aQf4N2lpRl3qZVH4/9f1yNgWzTkBFpc26v+QQr2hm4By4aiv597BCoEg2SDQg==}
+
+  '@fontsource-variable/source-sans-3@5.3.1':
+    resolution: {integrity: sha512-u0p5Z/PM2e1uxYOMiodLM6NVzxHwULcB6Oi7QSr2WU/sdoLBFP/BeOZ3YYHeJ6rHsjPZA1nZweZVaV7sf2MAyQ==}
 
   '@fontsource/caveat-brush@5.3.0':
     resolution: {integrity: sha512-BHSP/9EKNUtnSj7h4TXuYKOrQWgnkCGm7QMHYiie0xSxtlWKbND6wLkhAgwUtUpbz5k8XL8CWPRrL6tDV+JC8w==}
@@ -4148,6 +4169,12 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       levn: 0.4.1
+
+  '@fontsource-variable/fustat@5.3.0': {}
+
+  '@fontsource-variable/source-code-pro@5.3.1': {}
+
+  '@fontsource-variable/source-sans-3@5.3.1': {}
 
   '@fontsource/caveat-brush@5.3.0': {}
 

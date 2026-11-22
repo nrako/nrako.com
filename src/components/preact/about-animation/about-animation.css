@@ -59,7 +59,7 @@
 
 .aa-sentence {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--size-text);
   color: var(--aa-dim);
 }
 

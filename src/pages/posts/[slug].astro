@@ -1,4 +1,5 @@
 ---
+import katexStyles from 'katex/dist/katex.min.css?url'
 import Layout from '@/layouts/Layout.astro'
 import DialogMessages from '@/components/DialogMessages.astro'
 import PostHeader from '@/components/PostHeader.astro'
@@ -29,18 +30,17 @@ if (displayMessages) {
 ---
 
 <Layout title={`${post.frontmatter.title} - ${options.title}`}>
-  <Fragment slot="head">
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
-    />
-  </Fragment>
+  {
+    /* Served from the site, and only to a post that has math to set */
+    post.content.includes('class="katex') && (
+      <link rel="stylesheet" href={katexStyles} slot="head" />
+    )
+  }
 
   {displayMessages && <DialogMessages messages={post.messages} />}
 
   <article
-    class="freshBlog-post prose prose-md md:prose-lg mx-auto max-w-(--column) dark:prose-invert"
+    class="freshBlog-post prose mx-auto max-w-(--column)"
   >
     <PostHeader post={post} />
     <div

@@ -2,10 +2,8 @@
 @plugin '@tailwindcss/typography';
 
 @theme inline {
-  /* Font Families */
-  --font-family-sans: Helvetica, Arial, system-ui, sans-serif;
-  --font-family-mono:
-    'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --font-sans: var(--type-text);
+  --font-mono: var(--type-mono);
 }
 
 /* Dark mode with class-based toggle support */
@@ -31,15 +29,217 @@
 }
 
 /*
+ * Typography: Fustat for the text, Source Sans 3 for the headings and the
+ * name, Source Code Pro for code, on one scale of sizes for every page.
+ *
+ * Each face is drawn at its own proportions: Fustat's x-height is 0.5 em,
+ * Source Sans 3's 0.486. A scale per face gives both the same x-height,
+ * 9.1 px in a post's text.
+ */
+:root {
+  --type-text: 'Fustat Variable', 'Fustat Fallback', system-ui, sans-serif;
+  --type-heading:
+    'Source Sans 3 Variable', 'Source Sans 3 Fallback', system-ui, sans-serif;
+  --type-mono: 'Source Code Pro Variable', ui-monospace, monospace;
+  --type-scale: 1.014;
+  --type-heading-scale: 1.045;
+  /* The text face's capital height, in em: the header aligns its icons on it */
+  --type-cap: 0.7;
+
+  --size-meta: calc(0.875rem * var(--type-scale));
+  --size-ui: calc(1rem * var(--type-scale));
+  --size-text: calc(1.125rem * var(--type-scale));
+  --size-heading-text: calc(1.125rem * var(--type-heading-scale));
+  --size-heading: calc(1.5rem * var(--type-heading-scale));
+  --size-title: calc(2.25rem * var(--type-heading-scale));
+  --size-name: calc(clamp(3.75rem, 17vw, 5.5rem) * var(--type-heading-scale));
+
+  --muted: #6b7280;
+  --rule: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.dark {
+  --muted: #9ca3af;
+}
+
+/*
+ * Arial drawn at each web font's width and line metrics, shown until the
+ * font arrives, so that the text does not reflow when it does. Measured
+ * against a paragraph of text; Arial has no light weights, so the
+ * headings' fallback is heavier than they are.
+ */
+@font-face {
+  font-family: 'Fustat Fallback';
+  src: local('Arial');
+  size-adjust: 99.27%;
+  ascent-override: 100.73%;
+  descent-override: 42.31%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Source Sans 3 Fallback';
+  src: local('Arial');
+  size-adjust: 92.45%;
+  ascent-override: 110.76%;
+  descent-override: 43.27%;
+  line-gap-override: 0%;
+}
+
+.site-name {
+  /* Pulls the name back by its first letter's side bearing, onto the column */
+  margin-left: -0.096em;
+  font-family: var(--type-heading);
+  font-size: var(--size-name);
+  font-weight: 200;
+  line-height: 1;
+}
+
+/* A post in a listing: its title and date on one line, its description under */
+.post-entry {
+  display: block;
+  padding-block: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.post-entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: 1.5rem;
+}
+
+.post-entry-title {
+  font-family: var(--type-heading);
+  font-size: var(--size-heading-text);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.post-entry:hover .post-entry-title {
+  color: #dc2626;
+}
+
+/* A long title wraps beside its date; the date stays whole on the first line */
+.post-entry time {
+  flex: none;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+.post-entry-description {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: var(--size-ui);
+  line-height: 1.5;
+}
+
+/* On a phone the date goes under the title, not beside it */
+@media (max-width: 39.99rem) {
+  .post-entry-head {
+    display: block;
+  }
+
+  .post-entry time {
+    display: block;
+    margin: 0.125rem 0 0;
+  }
+}
+
+/*
+ * Prose pages: the text and its headings on the site's sizes, in the page's
+ * own colour, in place of the typography plugin's greys and weights.
+ */
+.prose {
+  --tw-prose-body: currentColor;
+  --tw-prose-headings: currentColor;
+  --tw-prose-bold: currentColor;
+  --tw-prose-links: currentColor;
+  --tw-prose-code: currentColor;
+  --tw-prose-quotes: currentColor;
+  --tw-prose-counters: var(--muted);
+  --tw-prose-bullets: var(--muted);
+  --tw-prose-captions: var(--muted);
+  --tw-prose-hr: var(--rule);
+  --tw-prose-quote-borders: var(--rule);
+  --tw-prose-th-borders: var(--rule);
+  --tw-prose-td-borders: var(--rule);
+  font-size: var(--size-text);
+  line-height: 1.65;
+}
+
+.prose :is(h1, h2, h3, h4) {
+  font-family: var(--type-heading);
+}
+
+.prose h1 {
+  font-size: var(--size-title);
+  font-weight: 300;
+  line-height: 1.15;
+}
+
+.prose h2 {
+  font-size: var(--size-heading);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.prose h3 {
+  font-size: var(--size-heading-text);
+  font-weight: 600;
+}
+
+.prose strong,
+.prose thead th {
+  font-weight: 600;
+}
+
+.prose a {
+  font-weight: inherit;
+}
+
+.prose code {
+  font-family: var(--type-mono);
+  font-size: 0.9em;
+  font-weight: 400;
+}
+
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+.prose :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border-radius: 0.25em;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.prose blockquote {
+  font-style: normal;
+  font-weight: inherit;
+}
+
+.prose blockquote p::before,
+.prose blockquote p::after {
+  content: none;
+}
+
+.site-footer {
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+/*
  * The header sits in that column, and what it draws sits between two lines:
  * the baseline of its text links and the top of their capitals. Every icon
  * is as tall as a capital and centred between the two.
  */
 .site-header {
-  /* The size of the text links, and the height of their capitals: 0.716 em
-     in Helvetica and in Arial */
-  --nav-size: 1.4375rem;
-  --nav-cap: calc(var(--nav-size) * 0.716);
+  /* The size of the text links, and the height of their capitals */
+  --nav-size: calc(1.4375rem * var(--type-scale));
+  --nav-cap: calc(var(--nav-size) * var(--type-cap));
   /* The home plate's height in capitals: at 1, it is as tall as a capital,
      its tip on the baseline; at 2, its shoulders would be on the baseline
      and its tip under it */
@@ -53,7 +253,7 @@
 
 @media (min-width: 40rem) {
   .site-header {
-    --nav-size: 1.725rem;
+    --nav-size: calc(1.725rem * var(--type-scale));
   }
 }
 
@@ -194,17 +394,6 @@ a:hover {
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
-/* Blog styling */
-.fresh-blog h1 {
-  font-size: 3rem;
-  font-weight: bold;
-}
-
-.fresh-blog h2 {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
 .freshBlog-post-content {
   margin-bottom: 4rem;
 }
@@ -243,8 +432,6 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
-  opacity: 0.7;
 }
 
 .freshBlog-footer svg {
@@ -279,13 +466,14 @@ a:hover {
 
 .freshBlog-post-subtitle {
   margin: 0.5rem 0;
-  color: #6b7280;
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+  color: var(--muted);
+  font-size: var(--size-text);
+  line-height: 1.5;
 }
 
 .freshBlog-post header .freshBlog-post-meta {
-  color: #6b7280;
+  color: var(--muted);
+  font-size: var(--size-meta);
   margin-top: 0.5rem;
   display: flex;
   gap: 2rem;
@@ -372,21 +560,6 @@ a:hover {
   margin: 0 0 0 auto;
 }
 
-/* Post card */
-.freshBlog-postCard {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
-
-.freshBlog-postCard header {
-  margin-bottom: 0.5rem;
-}
-
-.freshBlog-postCard header h2 {
-  margin-bottom: 0rem;
-}
-
 /* Authors */
 .freshBlog-authors {
   display: inline-flex;
@@ -440,23 +613,6 @@ a:hover {
 
 .freshBlog-authors article address a:hover {
   color: black;
-}
-
-.freshBlog-post header [anchor] {
-  position: absolute;
-  top: calc(anchor(bottom) + 0.5rem);
-  left: calc(anchor(left) - 1rem);
-  filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04))
-    drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
-  font-size: 0.875rem;
-  padding: 1rem;
-  border-radius: 6px;
-  margin: 0;
-  overflow: visible;
-}
-
-.freshBlog-authors article [anchor] h3 {
-  margin-bottom: 0.5rem;
 }
 
 .freshBlog-authors article dl {
