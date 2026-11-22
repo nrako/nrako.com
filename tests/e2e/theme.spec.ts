@@ -46,6 +46,27 @@ test.describe('Theme toggle', () => {
     await expect(page.locator('html')).toHaveClass(/dark/)
   })
 
+  test('dark mode draws every weight thinner by the same shift', async ({
+    page,
+  }) => {
+    const weights = () =>
+      page.evaluate(() => {
+        const weight = (selector: string) =>
+          Number(getComputedStyle(document.querySelector(selector)!).fontWeight)
+        return { text: weight('.prose p'), title: weight('.prose h1') }
+      })
+
+    // The not-found page: a prose page that exists whatever is published
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto('/this-page-does-not-exist')
+    expect(await weights()).toEqual({ text: 400, title: 300 })
+
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/this-page-does-not-exist')
+    await expect(page.locator('html')).toHaveClass(/dark/)
+    expect(await weights()).toEqual({ text: 375, title: 275 })
+  })
+
   test('respects system light mode preference by default', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')

@@ -4,6 +4,13 @@
 @theme inline {
   --font-sans: var(--type-text);
   --font-mono: var(--type-mono);
+  /* Tailwind's weights are the site's (`--weight-*`) */
+  --font-weight-extralight: var(--weight-extralight);
+  --font-weight-light: var(--weight-light);
+  --font-weight-normal: var(--weight-normal);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
 }
 
 /* Dark mode with class-based toggle support */
@@ -12,6 +19,7 @@
 @layer base {
   body {
     @apply bg-white text-black;
+    font-weight: var(--weight-normal);
   }
 
   .dark body,
@@ -68,6 +76,28 @@
 
 .dark {
   --muted: #9ca3af;
+}
+
+/*
+ * Weights: every weight of the site is its usual value moved by one shift,
+ * so the whole hierarchy moves together and the distance between the text
+ * and its bold stays the same. Light text on a dark ground looks heavier
+ * than it is: in dark mode the shift draws everything a little thinner.
+ * A face clamps a weight it does not have to its nearest one.
+ */
+:root {
+  --weight-shift: 0;
+  --weight-extralight: calc(200 + var(--weight-shift));
+  --weight-light: calc(300 + var(--weight-shift));
+  --weight-normal: calc(400 + var(--weight-shift));
+  --weight-medium: calc(500 + var(--weight-shift));
+  --weight-semibold: calc(600 + var(--weight-shift));
+  --weight-bold: calc(700 + var(--weight-shift));
+}
+
+/* On <html>, like `:root`: the weights above are computed with it */
+.dark {
+  --weight-shift: -25;
 }
 
 /*
@@ -156,7 +186,7 @@
   margin-left: -0.096em;
   font-family: var(--type-heading);
   font-size: var(--size-name);
-  font-weight: 200;
+  font-weight: var(--weight-extralight);
   line-height: 1;
 }
 
@@ -177,7 +207,7 @@
 .post-entry-title {
   font-family: var(--type-heading);
   font-size: var(--size-heading-text);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   line-height: 1.35;
 }
 
@@ -241,24 +271,26 @@
 
 .prose h1 {
   font-size: var(--size-title);
-  font-weight: 300;
+  font-weight: var(--weight-light);
   line-height: 1.15;
 }
 
 .prose h2 {
   font-size: var(--size-heading);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   line-height: 1.3;
 }
 
 .prose h3 {
   font-size: var(--size-heading-text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
+.prose h4,
+.prose dt,
 .prose strong,
 .prose thead th {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .prose a {
@@ -269,7 +301,7 @@
   font-family: var(--type-mono);
   /* The code keeps its size whatever the text's face */
   font-size: calc(0.9em / var(--type-reading-scale));
-  font-weight: 400;
+  font-weight: var(--weight-normal);
 }
 
 .prose code::before,
@@ -558,7 +590,7 @@ a:hover {
 }
 
 .freshBlog-dialogMessages dt {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .freshBlog-dialogMessages .freshBlog-dialogMessages-errors {
@@ -566,7 +598,7 @@ a:hover {
 }
 
 .freshBlog-dialogMessages button {
-  font-weight: bold;
+  font-weight: var(--weight-bold);
   float: right;
   color: black;
 }
@@ -686,7 +718,7 @@ a:hover {
 }
 
 .freshBlog-post-content .admonition-title {
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   display: flex;
   min-width: 0;
   font-size: 1.125rem;
