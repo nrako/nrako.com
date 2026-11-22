@@ -23,9 +23,7 @@
 
   /* Colour fringes while a word is noise */
   .about-suffix[data-glitch] {
-    text-shadow:
-      0.05em 0 #0ff,
-      -0.05em 0 #f0f;
+    text-shadow: var(--noise-fringe);
   }
 
   .about-dots {
@@ -67,15 +65,14 @@
 </style>
 
 <script>
+  import { noise, NOISE_FRAME } from '@/lib/noise'
+
   const WORDS = ['Me', 'Myself', 'I']
-  const NOISE = '░▒▓█▚▞<>/#_'
-  /** Milliseconds per frame of noise, frames per morph, and rest on a word */
-  const FRAME = 45
+  /** Frames of noise per morph, and milliseconds of rest on a word */
   const FRAMES = 7
   const HOLD = 900
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-  const noise = () => NOISE[Math.floor(Math.random() * NOISE.length)]
 
   for (const link of document.querySelectorAll<HTMLElement>('.about-link')) {
     const suffix = link.querySelector<HTMLElement>('.about-suffix')
@@ -113,7 +110,7 @@
         }
         suffix.textContent = text
         suffix.dataset.glitch = ''
-        timer = window.setTimeout(step, FRAME)
+        timer = window.setTimeout(step, NOISE_FRAME)
       }
       step()
     }

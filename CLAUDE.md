@@ -65,7 +65,7 @@ pnpm run deploy               # Build + wrangler deploy
 **Preact Islands** (`src/components/preact/`, mounted with `client:load`):
 
 - `theme-toggle.tsx`
-- `about-animation/` — the introduction on the homepage. It shows one sentence and plays the animated sequence only when a link to `#about` is followed on the homepage, or when the homepage is reached with that anchor, which is what the "About" link does from other pages. `script.ts` is the sequence of scenes and its timing, `views.tsx` renders a scene, `about-animation.css` holds the transitions. `?speed=2` plays it twice as fast and `?from=<chapter>` starts it at a chapter (`CHAPTERS` in `script.ts`), both for tuning
+- `about-animation/` — the introduction on the homepage. It shows one sentence and plays the animated sequence only when a link to `#about` is followed on the homepage, or when the homepage is reached with that anchor, which is what the "About" link does from other pages. Before the first scene, the sentence leaves as noise while the room for the stage opens (`playOpening`); with reduced motion, or when the sequence is asked for again while it plays, the stage comes at once. The noise is `src/lib/noise.ts`, shared with the header's "About" link. `script.ts` is the sequence of scenes and its timing, `views.tsx` renders a scene, `about-animation.css` holds the transitions. `?speed=2` plays it twice as fast and `?from=<chapter>` starts it at a chapter (`CHAPTERS` in `script.ts`), both for tuning
 - `author.tsx` — a post's author from its frontmatter, with a popover of their details
 - Bluesky: `bluesky-interactions.tsx`, `bsky-author.tsx`, `reply.tsx`, `avatar.tsx`, `post-embed.tsx`, `reaction-bar.tsx`, `reaction-count.tsx`
 

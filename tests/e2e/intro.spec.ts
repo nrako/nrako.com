@@ -38,6 +38,87 @@ test.describe('Introduction', () => {
     await expect(page.getByText(sentence)).toBeVisible()
   })
 
+  test('the sentence leaves as noise while the room for the stage opens', async ({
+    page,
+  }) => {
+    // Slowed down: the opening lasts about half a second at its own pace
+    await page.goto('/?speed=0.25')
+    await page.waitForLoadState('networkidle')
+
+    // The height at every frame until the stage comes, then with the stage
+    const heights = page.evaluate(
+      () =>
+        new Promise<{ opening: number[]; playing: number }>((resolve) => {
+          const intro = document.querySelector('.about-animation')!
+          const opening: number[] = []
+          const frame = () => {
+            const { height } = intro.getBoundingClientRect()
+            if (intro.getAttribute('data-phase') === 'playing') {
+              resolve({ opening, playing: height })
+              return
+            }
+            opening.push(height)
+            requestAnimationFrame(frame)
+          }
+          frame()
+        }),
+    )
+
+    await aboutMe(page).click()
+
+    await expect(intro(page)).toHaveAttribute('data-phase', 'opening')
+    const noise = intro(page).locator('.aa-noise')
+    await expect(noise).toHaveText(/[░▒▓█▚▞<>/#_]/)
+    await expect(noise).toHaveAttribute('aria-hidden', 'true')
+    // In the red the link takes under the mouse, which is still on it
+    const ink = await page.evaluate(() => getComputedStyle(document.body).color)
+    const red = await aboutMe(page).evaluate(
+      (link) => getComputedStyle(link).color,
+    )
+    expect(red).not.toBe(ink)
+    await expect(noise).toHaveCSS('color', red)
+    // Screen readers still have the sentence, and the stage is not there yet
+    await expect(intro(page).locator('.aa-sentence')).toHaveText(sentence)
+    await expect(intro(page).locator('.aa-stage')).toHaveCount(0)
+
+    const { opening, playing } = await heights
+    // It grows frame after frame, and has all its height when the stage comes
+    expect(new Set(opening.map(Math.round)).size).toBeGreaterThan(5)
+    for (const [index, height] of opening.entries()) {
+      expect(height).toBeGreaterThanOrEqual((opening[index - 1] ?? 0) - 0.5)
+    }
+    expect(Math.abs(playing - opening[opening.length - 1])).toBeLessThan(1)
+    await expect(noise).toHaveCount(0)
+  })
+
+  test('asked for again while it plays, it starts over without the noise', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    const buffer = intro(page).locator('.aa-buffer')
+    await aboutMe(page).click()
+    await expect(buffer).toContainText('I was a Web')
+
+    // Every phase it goes through from here on
+    await page.evaluate(() => {
+      const intro = document.querySelector('.about-animation')!
+      const phases: (string | null)[] = []
+      ;(window as any).phases = phases
+      new MutationObserver(() => {
+        phases.push(intro.getAttribute('data-phase'))
+      }).observe(intro, { attributes: true, attributeFilter: ['data-phase'] })
+    })
+
+    await aboutMe(page).click()
+
+    // The text is typed again from its first letter
+    await expect(buffer).not.toContainText('Web')
+    await expect(buffer).toContainText('I was a Web')
+    expect(await page.evaluate(() => (window as any).phases)).toEqual([])
+  })
+
   test('the link reads "About" and adds its words under the mouse', async ({
     page,
   }) => {
@@ -246,6 +327,32 @@ test.describe('Introduction', () => {
       await aboutMe(page).click()
 
       await expect(intro(page)).toHaveAttribute('data-phase', 'playing')
+    })
+
+    test('goes to the stage without the noise', async ({ page }) => {
+      await page.goto('/')
+      await page.waitForLoadState('networkidle')
+
+      // Every phase it goes through until the stage is there
+      const phases = page.evaluate(
+        () =>
+          new Promise<(string | null)[]>((resolve) => {
+            const intro = document.querySelector('.about-animation')!
+            const seen: (string | null)[] = []
+            new MutationObserver(() => {
+              const phase = intro.getAttribute('data-phase')
+              seen.push(phase)
+              if (phase === 'playing') resolve(seen)
+            }).observe(intro, {
+              attributes: true,
+              attributeFilter: ['data-phase'],
+            })
+          }),
+      )
+
+      await aboutMe(page).click()
+
+      expect(await phases).toEqual(['playing'])
     })
   })
 })

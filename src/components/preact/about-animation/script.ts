@@ -4,6 +4,8 @@
  * in `views.tsx` render a scene; nothing here touches the DOM.
  */
 
+import { noise, NOISE_FRAME } from '@/lib/noise'
+
 /** How a run of text is drawn. */
 export type Tone =
   /** Vim visual selection */
@@ -230,6 +232,9 @@ const KEY = 42
  */
 const WORD = 70 * TEMPO
 
+/** Frames of noise the sentence goes through on its way out */
+const OPENING_FRAMES = 14
+
 /**
  * With `from`, the clock does not wait until that chapter begins: the script
  * runs through what comes before in no time, which builds the state the
@@ -266,6 +271,42 @@ export function createClock(
         signal.addEventListener('abort', onAbort, { once: true })
       })
     },
+  }
+}
+
+/**
+ * The sentence at `progress` of its way out, from 0 to 1. Noise spreads over
+ * its letters, then the line shortens from its end, down to its first
+ * character: where the first scene's caret comes. The spaces stay, so the
+ * line wraps where the sentence did.
+ */
+function dissolve(text: string, progress: number): string {
+  // All noise at 60% of the way; the line shortens from 30% on
+  const share = Math.min(1, progress / 0.6)
+  const kept = Math.round(text.length * Math.min(1, (1 - progress) / 0.7))
+  let dissolved = ''
+  for (const char of text.slice(0, kept)) {
+    dissolved += char !== ' ' && Math.random() < share ? noise() : char
+  }
+  return dissolved
+}
+
+/**
+ * What comes before the first scene: the sentence on the page leaves as
+ * noise, like the words of the header's link. Resolves once nothing is left
+ * of it; rejects with the clock's AbortError when the run is stopped.
+ *
+ * The room for the stage opens meanwhile: the CSS transition that does it
+ * must not outlast this.
+ */
+export async function playOpening(
+  show: (sentence: string) => void,
+  clock: Clock,
+): Promise<void> {
+  for (let frame = 1; frame <= OPENING_FRAMES; frame++) {
+    show(dissolve(FINAL_SENTENCE, frame / OPENING_FRAMES))
+    // In real time, as in the link: the tempo does not change it
+    await clock.wait(NOISE_FRAME * TEMPO)
   }
 }
 
