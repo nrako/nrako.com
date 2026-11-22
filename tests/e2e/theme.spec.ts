@@ -80,20 +80,23 @@ test.describe('Theme toggle', () => {
     skipWithoutFixturePosts()
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('/posts/fixture-post', { waitUntil: 'networkidle' })
-    const code = page.locator('pre.shiki')
-    const background = () =>
-      code.evaluate((pre) => getComputedStyle(pre).backgroundColor)
-    const darkBackground = await background()
+    // A token's inline colour is the light theme's; dark mode overrides it
+    const token = page.locator('pre.shiki span[style*="--shiki-dark"]').first()
+    const lightColour = await token.evaluate((span) => {
+      const probe = document.createElement('span')
+      probe.style.color = span.style.color
+      document.body.append(probe)
+      const colour = getComputedStyle(probe).color
+      probe.remove()
+      return colour
+    })
+    await expect(token).not.toHaveCSS('color', lightColour)
 
     const toggleButton = page.getByRole('button', { name: 'Toggle Theme' })
     await expect(toggleButton).toBeEnabled({ timeout: 15000 })
     await toggleButton.click()
     await expect(page.locator('html')).toHaveClass(/light/)
 
-    expect(await background()).not.toBe(darkBackground)
-    await expect(code).toHaveCSS(
-      'background-color',
-      await code.evaluate((pre) => pre.style.backgroundColor),
-    )
+    await expect(token).toHaveCSS('color', lightColour)
   })
 })

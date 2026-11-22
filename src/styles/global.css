@@ -623,12 +623,17 @@ a:hover {
   text-decoration-color: var(--accent);
 }
 
-/* Shiki code highlighting */
+/*
+ * Shiki code highlighting. The block is tinted from the ink, like inline
+ * code, rather than drawn in the theme's own white or black: it follows the
+ * reading background, and the token colours are measured against it.
+ */
 .shiki {
   position: relative;
   padding-left: 0;
   padding-right: 0;
   overflow: auto;
+  background-color: color-mix(in srgb, var(--ink) 4%, var(--ground)) !important;
 }
 
 .shiki code {
@@ -676,10 +681,6 @@ a:hover {
 }
 
 /* Dark mode: the `.dark` class on <html> is the theme, set before render */
-.dark .shiki {
-  background-color: var(--shiki-dark-bg) !important;
-}
-
 .dark .shiki,
 .dark .shiki span {
   color: var(--shiki-dark) !important;

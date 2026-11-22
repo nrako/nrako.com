@@ -34,6 +34,8 @@ export interface BlogOptions {
       light: string
       dark: string
     }
+    /** Colours swapped in a theme, by theme name */
+    colorReplacements?: Record<string, Record<string, string>>
   }
   /** Authors of every post whose frontmatter names none */
   defaultAuthors?: PageFrontmatter['authors']
@@ -73,8 +75,14 @@ export const defaultOptions: BlogOptions = {
   generator: 'Feed (https://github.com/jpmonette/feed) for Node.js',
   highlighter: {
     themes: {
-      light: 'material-theme-lighter',
-      dark: 'material-theme-darker',
+      light: 'github-light-high-contrast',
+      dark: 'github-dark-high-contrast',
+    },
+    // Every token at 7:1 or more on the code's background in both themes and
+    // both reading backgrounds, as the text is; the light theme's comments
+    // alone fall short (4.5:1) and are darkened to reach it.
+    colorReplacements: {
+      'github-light-high-contrast': { '#66707b': '#474f58' },
     },
   },
   showAuthors: 'only_in_posts',
