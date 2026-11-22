@@ -25,7 +25,7 @@
  * post, 65 characters of its text.
  */
 :root {
-  --column: 46rem;
+  --column: calc(46rem * var(--reading-scale));
 }
 
 /*
@@ -46,12 +46,18 @@
   /* The text face's capital height, in em: the header aligns its icons on it */
   --type-cap: 0.7;
 
-  --size-meta: calc(0.875rem * var(--type-scale));
-  --size-ui: calc(1rem * var(--type-scale));
-  --size-text: calc(1.125rem * var(--type-scale));
-  --size-heading-text: calc(1.125rem * var(--type-heading-scale));
-  --size-heading: calc(1.5rem * var(--type-heading-scale));
-  --size-title: calc(2.25rem * var(--type-heading-scale));
+  --size-meta: calc(0.875rem * var(--type-scale) * var(--reading-scale));
+  --size-ui: calc(1rem * var(--type-scale) * var(--reading-scale));
+  --size-text: calc(1.125rem * var(--type-scale) * var(--reading-scale));
+  --size-heading-text: calc(
+    1.125rem * var(--type-heading-scale) * var(--reading-scale)
+  );
+  --size-heading: calc(
+    1.5rem * var(--type-heading-scale) * var(--reading-scale)
+  );
+  --size-title: calc(
+    2.25rem * var(--type-heading-scale) * var(--reading-scale)
+  );
   --size-name: calc(clamp(3.75rem, 17vw, 5.5rem) * var(--type-heading-scale));
 
   --muted: #6b7280;
@@ -62,6 +68,44 @@
 
 .dark {
   --muted: #9ca3af;
+}
+
+/*
+ * The reader's settings (`lib/reading.ts`, set on <html>).
+ *
+ * The size scales the column and every size of the scale but the name's;
+ * the header keeps its own. The typeface is the one of a post's text only:
+ * the header aligns on Fustat's capitals, and the headings keep theirs.
+ * Each face has its scale, which gives it Fustat's x-height: Source Serif 4's
+ * is 0.452 em, Atkinson Hyperlegible Next's 0.496.
+ */
+:root {
+  --type-serif:
+    'Source Serif 4 Variable', 'Source Serif 4 Fallback', Georgia, serif;
+  --type-hyperlegible:
+    'Atkinson Hyperlegible Next Variable',
+    'Atkinson Hyperlegible Next Fallback', system-ui, sans-serif;
+  --reading-scale: 1;
+  --type-reading: var(--type-text);
+  --type-reading-scale: 1;
+}
+
+:root[data-reading-size='small'] {
+  --reading-scale: 0.9;
+}
+
+:root[data-reading-size='large'] {
+  --reading-scale: 1.15;
+}
+
+:root[data-reading-font='serif'] {
+  --type-reading: var(--type-serif);
+  --type-reading-scale: 1.106;
+}
+
+:root[data-reading-font='hyperlegible'] {
+  --type-reading: var(--type-hyperlegible);
+  --type-reading-scale: 1.008;
 }
 
 /*
@@ -85,6 +129,25 @@
   size-adjust: 92.45%;
   ascent-override: 110.76%;
   descent-override: 43.27%;
+  line-gap-override: 0%;
+}
+
+/* The reading faces, measured the same way */
+@font-face {
+  font-family: 'Source Serif 4 Fallback';
+  src: local('Arial');
+  size-adjust: 90.71%;
+  ascent-override: 114.22%;
+  descent-override: 36.93%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next Fallback';
+  src: local('Arial');
+  size-adjust: 98.6%;
+  ascent-override: 99.8%;
+  descent-override: 32.05%;
   line-gap-override: 0%;
 }
 
@@ -167,7 +230,8 @@
   --tw-prose-quote-borders: var(--rule);
   --tw-prose-th-borders: var(--rule);
   --tw-prose-td-borders: var(--rule);
-  font-size: var(--size-text);
+  font-family: var(--type-reading);
+  font-size: calc(var(--size-text) * var(--type-reading-scale));
   line-height: 1.65;
 }
 
@@ -203,7 +267,8 @@
 
 .prose code {
   font-family: var(--type-mono);
-  font-size: 0.9em;
+  /* The code keeps its size whatever the text's face */
+  font-size: calc(0.9em / var(--type-reading-scale));
   font-weight: 400;
 }
 
@@ -294,6 +359,82 @@
 .site-header .home-plate {
   --nav-icon: calc(var(--plate) * var(--nav-cap));
   margin-left: calc(var(--nav-icon) / -2);
+}
+
+/* The reading settings' menu, under its button in the header */
+.reading-settings {
+  position: absolute;
+  inset: auto;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.25);
+  font-family: var(--type-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.reading-settings fieldset + fieldset {
+  margin-top: 0.75rem;
+}
+
+.reading-settings legend {
+  margin-bottom: 0.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.reading-settings fieldset {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.reading-settings label {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.reading-settings label:hover {
+  color: #dc2626;
+}
+
+.reading-settings label:has(:checked) {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.reading-settings label:has(:focus-visible) {
+  outline: 2px solid #dc2626;
+  outline-offset: 1px;
+}
+
+/* The radios are the labels: each shows its choice */
+.reading-settings input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reading-settings [data-reading-font-sample='sans'] {
+  font-family: var(--type-text);
+}
+
+.reading-settings [data-reading-font-sample='serif'] {
+  font-family: var(--type-serif);
+}
+
+.reading-settings [data-reading-font-sample='hyperlegible'] {
+  font-family: var(--type-hyperlegible);
+}
+
+.reading-settings [data-reading-size-sample='small'] {
+  font-size: 0.875rem;
+}
+
+.reading-settings [data-reading-size-sample='large'] {
+  font-size: 1.25rem;
 }
 
 /* Popover dark mode support */
@@ -469,7 +610,7 @@ a:hover {
 .freshBlog-post-subtitle {
   margin: 0.5rem 0;
   color: var(--muted);
-  font-size: var(--size-text);
+  font-size: calc(var(--size-text) * var(--type-reading-scale));
   line-height: 1.5;
 }
 
