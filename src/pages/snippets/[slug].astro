@@ -1,0 +1,65 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { getPosts, defaultOptions as options } from '@/lib/blogData'
+import { snippetPages, type PostSnippet } from '@/lib/snippets'
+
+interface Props {
+  snippet: PostSnippet
+  post: { slug: string; title: string }
+}
+
+// One page per snippet that has a label, whichever post it is in. The label
+// is the address, so two posts cannot use the same one.
+export async function getStaticPaths() {
+  const posts = await getPosts(options)
+
+  return snippetPages(posts).map(({ snippet, post }) => ({
+    params: { slug: snippet.slug },
+    props: {
+      snippet,
+      post: { slug: post.slug, title: post.frontmatter.title ?? post.slug },
+    },
+  }))
+}
+
+const { snippet, post } = Astro.props
+---
+
+<Layout
+  bare
+  title={`${snippet.title} - ${post.title}`}
+  description={snippet.title}
+>
+  {/* A demo only means something with its post */}
+  <meta name="robots" content="noindex" slot="head" />
+
+  {
+    /*
+     * The demo and nothing else that reads as text: what a browser does with
+     * the text of a page depends on what else the page says. The way back is
+     * an icon for that reason.
+     */
+  }
+  <div class="snippet-page prose mx-auto max-w-(--column)">
+    <a
+      class="snippet-back not-prose"
+      href={`/posts/${post.slug}#${snippet.slug}`}
+      aria-label={`Back to the post: ${post.title}`}
+      title={`Back to the post: ${post.title}`}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M5 12h14M5 12l6 6M5 12l6-6"></path>
+      </svg>
+    </a>
+    <Fragment set:html={snippet.demo} />
+  </div>
+</Layout>

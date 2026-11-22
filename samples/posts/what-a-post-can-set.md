@@ -287,6 +287,11 @@ A snippet is numbered and referred to as a figure is: [](#ex-unseen) hides
 part of its sentence. Select that sentence from end to end, copy it, and the
 hidden words come along.
 
+A snippet that has a label also has a page of its own, at `/snippets/` and
+its label, with the demo and nothing else. Here the demo's words are on the
+page twice, once rendered and once in its source; there they are the only
+text.
+
 ## Raw HTML
 
 A block of HTML passes through, and the Markdown inside it is still read:

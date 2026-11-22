@@ -1,6 +1,7 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
 import type { Messages } from './processor.ts'
 import type { CommitInfo } from './githubVersioning.ts'
+import type { PostSnippet } from './snippets.ts'
 import { extname, join } from 'node:path'
 import processor from './processor.ts'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
@@ -61,6 +62,8 @@ export interface Post {
   /** HTML content of the post */
   content: string
   messages: Messages
+  /** The snippets of the post that have a page of their own */
+  snippets: PostSnippet[]
   readingTimeMinutes: number
   versions?: CommitInfo[]
 }
@@ -136,7 +139,7 @@ export async function getPost(
   if (!existsSync(filePath)) return null
 
   const text = readFileSync(filePath, 'utf-8')
-  const { frontmatter, html, messages } = await processor(text, {
+  const { frontmatter, html, messages, snippets } = await processor(text, {
     ...options,
     loadFile(path) {
       const file = join(options.contentDir, path)
@@ -149,6 +152,7 @@ export async function getPost(
     frontmatter,
     content: html,
     messages,
+    snippets,
     readingTimeMinutes: calculateReadingTime(html),
   }
 

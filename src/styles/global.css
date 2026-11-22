@@ -871,7 +871,7 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
-.post-content .snippet-demo {
+.snippet-demo {
   position: relative;
   padding: 1rem;
   border: 1px solid var(--rule);
@@ -880,6 +880,30 @@ a:hover {
 
 .post-content .snippet pre {
   margin: 0.5rem 0 0;
+}
+
+/* Under the demo, the link to its own page */
+.post-content .snippet-alone {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: var(--size-meta);
+  text-align: right;
+}
+
+/* A snippet's own page: the demo, and an icon that leads back to its post */
+.snippet-back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--muted);
+}
+
+.snippet-back:hover {
+  color: var(--accent);
+}
+
+.snippet-back svg {
+  width: 1.25em;
+  height: 1.25em;
 }
 
 /* Image alignment */

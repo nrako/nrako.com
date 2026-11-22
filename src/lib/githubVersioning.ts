@@ -176,7 +176,7 @@ export async function getPostAtVersion(
   if (!content) return null
 
   // The files the post refers to are read at the same version as the post
-  const { frontmatter, html, messages } = await processor(content, {
+  const { frontmatter, html, messages, snippets } = await processor(content, {
     ...options,
     async loadFile(path) {
       return (await getFileAtVersion(path, sha, options)) ?? undefined
@@ -188,6 +188,7 @@ export async function getPostAtVersion(
     frontmatter,
     content: html,
     messages,
+    snippets,
     readingTimeMinutes: calculateReadingTime(html),
   }
 }

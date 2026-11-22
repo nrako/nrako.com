@@ -1,0 +1,28 @@
+---
+import TbRss from '@/components/icons/TbRss'
+---
+
+<footer class="site-footer container mx-auto my-4 px-4 md:px-12">
+  <div class="mx-auto flex max-w-(--column) justify-between">
+    <div class="site-footer-feeds">
+      <TbRss />
+      <ul class="feed-links">
+        <li>
+          <a href="/feed/atom" title="Atom 1.0">Atom</a>
+        </li>
+        <li>
+          <a href="/feed/json" title="JSON Feed 1.0">JSON</a>
+        </li>
+        <li>
+          <a href="/feed/rss" title="RSS 2.0">RSS</a>
+        </li>
+      </ul>
+    </div>
+    <a
+      class="hover:underline decoration-red-600 underline-offset-2 decoration-2"
+      href="https://github.com/nrako/nrako.com"
+    >
+      Source
+    </a>
+  </div>
+</footer>

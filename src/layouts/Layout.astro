@@ -1,11 +1,7 @@
 ---
-import AboutLink from '@/components/AboutLink.astro'
-import ThemeToggle from '@/components/preact/theme-toggle'
-import ReadingSettings from '@/components/preact/reading-settings'
+import SiteHeader from '@/components/SiteHeader.astro'
+import SiteFooter from '@/components/SiteFooter.astro'
 import { readingSettings } from '@/lib/reading'
-import TbGitBranch from '@/components/icons/TbGitBranch'
-import TbAt from '@/components/icons/TbAt'
-import TbRss from '@/components/icons/TbRss'
 import '@/styles/global.css'
 import '@fontsource-variable/fustat/wght.css'
 import '@fontsource-variable/source-sans-3/wght.css'
@@ -23,10 +19,15 @@ import headingLatin from '@fontsource-variable/source-sans-3/files/source-sans-3
 interface Props {
   title?: string
   description?: string
+  /** The page alone, without the site's header and footer */
+  bare?: boolean
 }
 
-const { title = 'nrako.com', description = "nrako's personal website" } =
-  Astro.props
+const {
+  title = 'nrako.com',
+  description = "nrako's personal website",
+  bare = false,
+} = Astro.props
 ---
 
 <html lang="en">
@@ -78,79 +79,10 @@ const { title = 'nrako.com', description = "nrako's personal website" } =
     <slot name="head" />
   </head>
   <body class="font-sans">
-    <header class="site-header container mx-auto pt-8 px-4 md:px-12">
-      <div class="site-header-row gap-3 sm:gap-4">
-        <nav class="gap-3 sm:gap-4 [&>a:hover]:text-red-600">
-          <a href="/" aria-label="Home Base" title="Home Base">
-            {
-              /* The view box is the outline of the stroke: the shape's edges are the icon's */
-            }
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0.7 0.7 22.6 22.6"
-              class="home-plate"
-              stroke-width="2.6"
-              stroke="currentColor"
-            >
-              <path
-                d="M 2,2 L 22,2 L 22,12 L 12,22 L 2,12 Z"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"></path>
-            </svg>
-          </a>
-          <a href="/posts" aria-label="Blog" title="Posts"> Posts </a>
-          {
-            /* The homepage plays its introduction when this anchor is reached */
-          }
-          <AboutLink />
-          <a
-            href="https://bsky.app/profile/nrako.com"
-            aria-label="Social"
-            title="Follow me and at-me on Bluesky"
-            class="ml-auto"
-          >
-            <TbAt />
-          </a>
-          <a
-            href="https://github.com/nrako"
-            title="Collaborate with me on code"
-            aria-label="Code"
-          >
-            <TbGitBranch />
-          </a>
-        </nav>
-        <ReadingSettings client:load />
-        <ThemeToggle client:load />
-      </div>
-    </header>
+    {!bare && <SiteHeader />}
     <main class="container mx-auto min-h-screen px-4 md:px-12 mt-20">
       <slot />
     </main>
-    <footer class="site-footer container mx-auto my-4 px-4 md:px-12">
-      <div class="mx-auto flex max-w-(--column) justify-between">
-        <div class="site-footer-feeds">
-          <TbRss />
-          <ul class="feed-links">
-            <li>
-              <a href="/feed/atom" title="Atom 1.0">Atom</a>
-            </li>
-            <li>
-              <a href="/feed/json" title="JSON Feed 1.0">JSON</a>
-            </li>
-            <li>
-              <a href="/feed/rss" title="RSS 2.0">RSS</a>
-            </li>
-          </ul>
-        </div>
-        <a
-          class="hover:underline decoration-red-600 underline-offset-2 decoration-2"
-          href="https://github.com/nrako/nrako.com"
-        >
-          Source
-        </a>
-      </div>
-    </footer>
+    {!bare && <SiteFooter />}
   </body>
 </html>

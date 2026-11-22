@@ -254,6 +254,64 @@ test.describe('Snippets', () => {
   })
 })
 
+test.describe('Snippet pages', () => {
+  test.beforeEach(() => {
+    skipWithoutFixturePosts()
+  })
+
+  test('a snippet with a label links to a page that shows its demo alone', async ({
+    page,
+  }) => {
+    const failed: string[] = []
+    page.on('response', (response) => {
+      if (response.status() >= 400) failed.push(response.url())
+    })
+
+    await page.goto('/posts/fixture-post')
+    await page
+      .locator('#ex-fixture')
+      .getByRole('link', { name: 'On a page of its own' })
+      .click()
+
+    await expect(page).toHaveURL(/\/snippets\/ex-fixture$/)
+    // The demo's text is all the text of the page: no source, no site chrome
+    await expect(page.locator('body')).toHaveText('Seen, unseen.', {
+      useInnerText: true,
+    })
+    await expect(page.locator('header, footer, pre')).toHaveCount(0)
+    await expect(page.locator('.secret')).toHaveCSS('opacity', '0')
+    expect(failed).toEqual([])
+  })
+
+  test("a snippet's page is not for search engines", async ({ page }) => {
+    await page.goto('/snippets/ex-fixture')
+
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      'content',
+      'noindex',
+    )
+  })
+
+  test("a snippet's page leads back to the snippet in its post", async ({
+    page,
+  }) => {
+    await page.goto('/snippets/ex-fixture')
+
+    await page
+      .getByRole('link', { name: 'Back to the post: Fixture post' })
+      .click()
+
+    await expect(page).toHaveURL(/\/posts\/fixture-post#ex-fixture$/)
+    await expect(page.locator('#ex-fixture')).toBeInViewport()
+  })
+
+  test('a snippet that does not exist is not found', async ({ page }) => {
+    const response = await page.goto('/snippets/no-such-snippet')
+
+    expect(response?.status()).toBe(404)
+  })
+})
+
 test.describe('Abbreviations', () => {
   test('an abbreviation is not underlined as a link is', async ({ page }) => {
     skipWithoutFixturePosts()

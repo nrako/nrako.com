@@ -158,7 +158,7 @@ async function parse(text: string, options: ParseOptions) {
 
   reportMessages(file, messages)
   crossReferencesTransform(mdastPre)
-  snippetsTransform(mdastPre)
+  const snippets = snippetsTransform(mdastPre)
 
   const references = citationsTransform(mdastPre, citationRenderers, messages)
 
@@ -195,7 +195,7 @@ async function parse(text: string, options: ParseOptions) {
 
   const html = r.value as string
 
-  return { frontmatter, html, messages }
+  return { frontmatter, html, messages, snippets }
 }
 
 export default async function processor(

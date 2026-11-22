@@ -2,6 +2,7 @@ import {
   fileError,
   fileWarn,
   normalizeLabel,
+  toText,
   type DirectiveSpec,
   type GenericNode,
 } from 'myst-common'
@@ -64,12 +65,13 @@ export const snippetDirective: DirectiveSpec = {
       })
     }
 
-    if (html) {
-      const style = css ? `<style>@scope {\n${css}\n}</style>` : ''
-      children.push({
-        type: 'html',
-        value: `<div class="snippet-demo not-prose">${style}${html}</div>`,
-      })
+    const style = css ? `<style>@scope {\n${css}\n}</style>` : ''
+    const demo = html
+      ? `<div class="snippet-demo not-prose">${style}${html}</div>`
+      : undefined
+
+    if (demo) {
+      children.push({ type: 'html', value: demo })
     } else {
       fileError(vfile, 'A snippet has no `html` block, so nothing to show', {
         node: data.node,
@@ -95,18 +97,60 @@ export const snippetDirective: DirectiveSpec = {
         kind: 'example',
         enumerated: true,
         ...normalizeLabel(data.options?.label as string | undefined),
+        demo,
         children,
       },
     ]
   },
 }
 
+/** A snippet that has a page of its own: one with a label */
+export interface PostSnippet {
+  /** Its label, which is its address: `/snippets/<slug>` */
+  slug: string
+  /** Its caption as text, or its number when it has none */
+  title: string
+  /** The markup of its demo, as set in the post */
+  demo: string
+}
+
+/** The address of a snippet's own page (`src/pages/snippets/[slug].astro`) */
+export function snippetAddress(slug: string): string {
+  return `/snippets/${encodeURIComponent(slug)}`
+}
+
+/**
+ * The snippets of the given posts that have a page, each with its post. A
+ * label is an address, so one that two posts share is an error.
+ */
+export function snippetPages<
+  P extends { slug: string; snippets: PostSnippet[] },
+>(posts: P[]): { snippet: PostSnippet; post: P }[] {
+  const postOf = new Map<string, string>()
+
+  return posts.flatMap((post) =>
+    post.snippets.map((snippet) => {
+      const other = postOf.get(snippet.slug)
+      if (other) {
+        throw new Error(
+          `The snippet label "${snippet.slug}" is used in the posts "${other}" and "${post.slug}": it names a page, ${snippetAddress(snippet.slug)}, and has to be unique across posts`,
+        )
+      }
+      postOf.set(snippet.slug, post.slug)
+      return { snippet, post }
+    }),
+  )
+}
+
 /**
  * Finishes the snippets once MyST has numbered them: each becomes a figure
  * whose caption starts with its number ("Example 1:"), and takes its label as
- * `id`.
+ * `id`. One with a label has a page of its own, which it links to; they are
+ * returned.
  */
-export function snippetsTransform(tree: GenericNode) {
+export function snippetsTransform(tree: GenericNode): PostSnippet[] {
+  const snippets: PostSnippet[] = []
+
   visit(tree as any, 'snippet', (node: GenericNode) => {
     node.data = {
       hName: 'figure',
@@ -126,6 +170,32 @@ export function snippetsTransform(tree: GenericNode) {
     }
 
     const captioned = Boolean(paragraph.children?.length)
+
+    if (node.identifier && node.demo) {
+      snippets.push({
+        slug: node.identifier,
+        title: captioned
+          ? toText(paragraph.children)
+          : `Example ${node.enumerator}`,
+        demo: node.demo,
+      })
+
+      // Under the demo, the way to it alone
+      const children: GenericNode[] = node.children ?? []
+      const demoIndex = children.findIndex((child) => child.type === 'html')
+      children.splice(demoIndex + 1, 0, {
+        type: 'paragraph',
+        data: { hProperties: { class: 'snippet-alone' } },
+        children: [
+          {
+            type: 'link',
+            url: snippetAddress(node.identifier),
+            children: [{ type: 'text', value: 'On a page of its own' }],
+          },
+        ],
+      })
+    }
+
     paragraph.children = [
       {
         type: 'captionNumber',
@@ -139,4 +209,6 @@ export function snippetsTransform(tree: GenericNode) {
       ...(paragraph.children ?? []),
     ]
   })
+
+  return snippets
 }
