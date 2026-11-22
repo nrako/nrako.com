@@ -83,7 +83,7 @@ export interface CanvasScene {
   /** The view has moved from the design frame to the shared board */
   panned: boolean
   amin: 'off' | 'in' | 'word' | 'away' | 'fetch' | 'drop'
-  dave: 'off' | 'in' | 'line' | 'draw'
+  dave: 'off' | 'in' | 'line' | 'draw' | 'away'
   /** The title written on the board */
   title: Seg[]
   /**
@@ -533,12 +533,17 @@ export async function playIntro(
   draw({ dave: 'line' })
   await wait(580)
   draw({ dave: 'draw' })
-  await wait(1050)
-  // An afterthought more than a title: "(Technical)", dropped askew
+  // An afterthought more than a title: "(Technical)", dropped askew. Amin
+  // does not wait for the underline: he sets off just after Dave starts it,
+  // and lets go of the word just after it is drawn.
+  await wait(200)
   draw({ amin: 'fetch' })
   await wait(600)
   draw({ amin: 'drop', note: 'held' })
-  await wait(650)
+  await wait(250)
+  // The underline is drawn: Dave steps aside while the word arrives
+  draw({ dave: 'away' })
+  await wait(400)
   draw({ note: 'placed' })
   await wait(250)
   draw({ amin: 'away' })

@@ -241,6 +241,60 @@ test.describe('Introduction', () => {
     expect(linesShown).toBeCloseTo(3, 1)
   })
 
+  test('on the board, Amin does not wait for the underline and both step aside', async ({
+    page,
+  }) => {
+    await page.goto('/?from=board#about')
+
+    // The board once the canvas is in `state`: who does what, how much of the
+    // underline is left to draw (from 1 to 0), and how far to the right of
+    // the underline's start Dave's cursor is
+    const when = async (state: Record<string, string>) => {
+      const board = await page.waitForFunction(
+        (state) => {
+          const canvas = document.querySelector<HTMLElement>('.aa-canvas')
+          if (!canvas) return null
+          for (const [name, value] of Object.entries(state)) {
+            if (canvas.dataset[name] !== value) return null
+          }
+          const underline = canvas.querySelector('.aa-underline')!
+          const pen = canvas.querySelector('.aa-dave .aa-pen')!
+          return {
+            dave: canvas.dataset.dave,
+            note: canvas.dataset.note,
+            toDraw: parseFloat(
+              getComputedStyle(underline.querySelector('path')!)
+                .strokeDashoffset,
+            ),
+            across:
+              pen.getBoundingClientRect().left -
+              underline.getBoundingClientRect().left,
+          }
+        },
+        state,
+        { polling: 'raf', timeout: 15_000 },
+      )
+      return board.jsonValue()
+    }
+
+    // Amin sets off for his word while Dave is still underlining
+    const setOff = await when({ amin: 'fetch' })
+    expect(setOff.dave).toBe('draw')
+    expect(setOff.toDraw).toBeGreaterThan(0)
+
+    // Dave steps aside once the underline is drawn, before the word is placed
+    const aside = await when({ dave: 'away' })
+    expect(aside.toDraw).toBeCloseTo(0, 1)
+    expect(aside.note).toBe('held')
+
+    // In the end the underline is still there, and Dave is beyond the
+    // scribble it ends on, 148px across
+    const end = await when({ amin: 'away', note: 'placed' })
+    expect(end.dave).toBe('away')
+    expect(end.toDraw).toBe(0)
+    expect(end.across).toBeGreaterThan(200)
+  })
+
   test('"?from=" starts the sequence at that chapter', async ({ page }) => {
     await page.goto('/?from=prompt#about')
 
