@@ -66,7 +66,8 @@ pnpm run deploy               # Build + wrangler deploy
 
 - `theme-toggle.tsx`
 - `about-animation/` — the introduction on the homepage. It shows one sentence and plays the animated sequence only when a link to `#about` is followed on the homepage, or when the homepage is reached with that anchor, which is what the "About" link does from other pages. `script.ts` is the sequence of scenes and its timing, `views.tsx` renders a scene, `about-animation.css` holds the transitions. `?speed=2` plays it twice as fast and `?from=<chapter>` starts it at a chapter (`CHAPTERS` in `script.ts`), both for tuning
-- Bluesky: `bluesky-interactions.tsx`, `author.tsx`, `reply.tsx`, `avatar.tsx`, `post-embed.tsx`, `reaction-bar.tsx`
+- `author.tsx` — a post's author from its frontmatter, with a popover of their details
+- Bluesky: `bluesky-interactions.tsx`, `bsky-author.tsx`, `reply.tsx`, `avatar.tsx`, `post-embed.tsx`, `reaction-bar.tsx`, `reaction-count.tsx`
 
 **Blog System** (`src/lib/`):
 
