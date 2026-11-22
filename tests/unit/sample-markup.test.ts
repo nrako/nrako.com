@@ -114,6 +114,13 @@ const pieces: Record<string, RegExp> = {
     /<\/pre><figcaption><p><span class="caption-number">Program\u00a01: <\/span>A function with a caption<\/p><\/figcaption>/,
   'removed and added lines':
     /<span class="line diff remove">[\s\S]*<span class="line diff add">/,
+  'a snippet with its number and caption':
+    /<figure class="snippet" id="ex-unseen"><figcaption><p><span class="caption-number">Example.1: <\/span>Words that are there/,
+  "a snippet's demo, with its CSS scoped to it":
+    /<div class="snippet-demo not-prose"><style>@scope \{\n\.unseen \{\n {2}opacity: 0;\n\}\n\}<\/style><p>A sentence with <span class="unseen">words nobody sees<\/span> in it\.<\/p><\/div>/,
+  "a snippet's sources":
+    /<\/div><pre class="shiki [^>]*>[\s\S]*?<\/pre><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/figure>/,
+  'a reference to a snippet': /<a href="#ex-unseen">Example.1<\/a> hides/,
   'a block of HTML with Markdown inside':
     /<summary>A disclosure, closed by default<\/summary><p>Its content is <em>Markdown<\/em>\.<\/p><\/details>/,
   'a comment': /<!--This line is only in the source\.-->/,

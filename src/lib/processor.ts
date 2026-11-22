@@ -43,6 +43,7 @@ import {
   crossReferencesTransform,
   reportMessages,
 } from './crossReferences.ts'
+import { snippetDirective, snippetsTransform } from './snippets.ts'
 
 export type ParseOptions = Pick<
   BlogOptions,
@@ -95,24 +96,25 @@ function getHighlighter(
  * the `@key` and `[@key]` citation syntax; the `{cite}` roles always parse.
  */
 function parseMyst(text: string, citations: boolean) {
+  const file = new VFile()
   const mdast = mystParse(text, {
     markdownit: { linkify: true },
     extensions: { citations },
-    vfile: new VFile() as any,
+    directives: [snippetDirective],
+    vfile: file as any,
   })
   const { frontmatter } = getFrontmatter(new VFile() as any, mdast, {
     propagateTargets: true,
   })
-  return { mdast, frontmatter }
+  return { mdast, frontmatter, file }
 }
 
 async function parse(text: string, options: ParseOptions) {
   // An @ is text, as in CommonMark, unless the post lists a bibliography:
   // only then do `@key` and `[@key]` cite. The frontmatter that says so is
   // only known once the post is parsed, hence the second parse.
-  const firstParse = parseMyst(text, false)
-  const rawPageFrontmatter = firstParse.frontmatter
-  let mdast = firstParse.mdast
+  let parsed = parseMyst(text, false)
+  const rawPageFrontmatter = parsed.frontmatter
 
   const messages: Messages = {}
   const frontmatter = validatePageFrontmatter(
@@ -125,8 +127,10 @@ async function parse(text: string, options: ParseOptions) {
 
   const bibliography = frontmatter.bibliography ?? []
   if (bibliography.length > 0) {
-    mdast = parseMyst(text, true).mdast
+    parsed = parseMyst(text, true)
   }
+  const { mdast } = parsed
+  reportMessages(parsed.file, messages)
   const citationRenderers = await loadBibliography(
     bibliography,
     options.loadFile,
@@ -154,6 +158,7 @@ async function parse(text: string, options: ParseOptions) {
 
   reportMessages(file, messages)
   crossReferencesTransform(mdastPre)
+  snippetsTransform(mdastPre)
 
   const references = citationsTransform(mdastPre, citationRenderers, messages)
 

@@ -211,6 +211,49 @@ test.describe('Markup', () => {
   }
 })
 
+test.describe('Snippets', () => {
+  test.beforeEach(async ({ page }) => {
+    skipWithoutFixturePosts()
+    await page.goto('/posts/fixture-post')
+  })
+
+  test("a snippet's CSS styles its demo and nothing else", async ({ page }) => {
+    const content = page.locator('.post-content')
+
+    await expect(content.locator('.snippet-demo .secret')).toHaveCSS(
+      'opacity',
+      '0',
+    )
+    await expect(
+      content.locator('.secret').filter({ hasText: 'the same class' }),
+    ).toHaveCSS('opacity', '1')
+  })
+
+  test("a snippet's demo is text of the page, not a frame", async ({
+    page,
+  }) => {
+    const snippet = page.locator('#ex-fixture')
+
+    await expect(snippet.locator('iframe')).toHaveCount(0)
+    await expect(snippet.locator('.snippet-demo')).toHaveText('Seen, unseen.')
+    // The demo, then its two sources
+    await expect(snippet.locator('pre.shiki')).toHaveCount(2)
+  })
+
+  test('a snippet is numbered, and a reference leads to it', async ({
+    page,
+  }) => {
+    await expect(page.locator('#ex-fixture figcaption')).toHaveText(
+      /^Example\s1: A fixture snippet$/,
+    )
+
+    await page.getByRole('link', { name: /^Example\s1$/ }).click()
+
+    await expect(page).toHaveURL(/#ex-fixture$/)
+    await expect(page.locator('#ex-fixture')).toBeInViewport()
+  })
+})
+
 test.describe('Abbreviations', () => {
   test('an abbreviation is not underlined as a link is', async ({ page }) => {
     skipWithoutFixturePosts()

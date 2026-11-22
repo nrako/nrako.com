@@ -862,6 +862,26 @@ a:hover {
   background: color-mix(in srgb, currentColor 7%, transparent);
 }
 
+/*
+ * A snippet: its caption, the demo as it renders, then its sources. The demo
+ * is a box of its own, and the containing block of what it positions.
+ */
+.post-content .snippet figcaption {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.post-content .snippet-demo {
+  position: relative;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.25rem;
+}
+
+.post-content .snippet pre {
+  margin: 0.5rem 0 0;
+}
+
 /* Image alignment */
 .post-content .align-center {
   margin: 0 auto;

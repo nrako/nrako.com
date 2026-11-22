@@ -31,6 +31,25 @@ not hold, as @missing2021, stays in the text.
 A post names a key to press, as {kbd}`Ctrl`, sets a <mark>highlight</mark> and
 spells out an abbreviation, as {abbr}`MyST (Markedly Structured Text)`.
 
+## Some snippet
+
+:::{snippet} A fixture snippet
+:label: ex-fixture
+
+```html
+<p>Seen, <span class="secret">unseen</span>.</p>
+```
+
+```css
+.secret {
+  opacity: 0;
+}
+```
+:::
+
+Outside [](#ex-fixture), <span class="secret">the same class</span> is not
+styled by it.
+
 ## Some code
 
 A post highlights its code in the site's theme:

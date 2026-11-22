@@ -59,6 +59,9 @@ importers:
       linkedom:
         specifier: ^0.18.12
         version: 0.18.15
+      myst-common:
+        specifier: ^1.11.0
+        version: 1.11.0
       myst-frontmatter:
         specifier: ^1.7.5
         version: 1.11.0

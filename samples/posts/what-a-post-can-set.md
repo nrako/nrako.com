@@ -262,6 +262,31 @@ const greeting = 'hello' // [!code --]
 const greeting = 'hello, world' // [!code ++]
 ```
 
+## Snippets
+
+A snippet shows a small piece of HTML and CSS twice from one source: as it
+renders, then as it is typed. The demo is part of the page, so its text is
+selected, searched and linked to like the rest, and its CSS styles nothing
+outside it.
+
+:::{snippet} Words that are there and cannot be seen
+:label: ex-unseen
+
+```html
+<p>A sentence with <span class="unseen">words nobody sees</span> in it.</p>
+```
+
+```css
+.unseen {
+  opacity: 0;
+}
+```
+:::
+
+A snippet is numbered and referred to as a figure is: [](#ex-unseen) hides
+part of its sentence. Select that sentence from end to end, copy it, and the
+hidden words come along.
+
 ## Raw HTML
 
 A block of HTML passes through, and the Markdown inside it is still read:
@@ -290,4 +315,5 @@ use them:
 - the number of an equation beside it, and the number of a figure or a table
   that has no label: both are counted, neither is shown;
 - `:linenos:`, `:emphasize-lines:` and `:filename:` on a block of code;
+- JavaScript in a snippet, which is shown and not run;
 - a citation followed at once by a note, which takes the note for its page.

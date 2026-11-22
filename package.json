@@ -35,6 +35,7 @@
     "hastscript": "^9.0.1",
     "katex": "^0.16.47",
     "linkedom": "^0.18.12",
+    "myst-common": "^1.11.0",
     "myst-frontmatter": "^1.7.5",
     "myst-parser": "^1.0.22",
     "myst-to-html": "^1.0.22",
