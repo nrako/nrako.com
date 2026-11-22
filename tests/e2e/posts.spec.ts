@@ -166,6 +166,37 @@ test.describe('Citations', () => {
   })
 })
 
+test.describe('Markup', () => {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`a key and a highlight are in the text's colour in ${colorScheme} mode`, async ({
+      page,
+    }) => {
+      skipWithoutFixturePosts()
+      await page.emulateMedia({ colorScheme })
+      await page.goto('/posts/fixture-post')
+
+      const textColour = await page
+        .locator('.post-content p')
+        .first()
+        .evaluate((paragraph) => getComputedStyle(paragraph).color)
+
+      await expect(page.locator('.post-content kbd')).toHaveCSS(
+        'color',
+        textColour,
+      )
+
+      const highlight = page.locator('.post-content mark')
+
+      await expect(highlight).toHaveCSS('color', textColour)
+      // Not the browser's own yellow
+      await expect(highlight).not.toHaveCSS(
+        'background-color',
+        'rgb(255, 255, 0)',
+      )
+    })
+  }
+})
+
 test.describe('Not found', () => {
   test('unknown addresses get the 404 page', async ({ page }) => {
     const response = await page.goto('/this-page-does-not-exist')

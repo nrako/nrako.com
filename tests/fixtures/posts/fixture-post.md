@@ -26,6 +26,10 @@ A post cites the works of its bibliography: @fixture2020 in the text, or in
 parentheses [see @sample2019, p. 3; @fixture2020]. A key the bibliography does
 not hold, as @missing2021, stays in the text.
 
+## Some keys
+
+A post names a key to press, as {kbd}`Ctrl`, and sets a <mark>highlight</mark>.
+
 ## Some code
 
 A post highlights its code in the site's theme:

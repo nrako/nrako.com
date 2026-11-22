@@ -83,6 +83,20 @@ function getHighlighter(
 }
 
 /**
+ * Rehype plugin: sets the number of a figure or a table apart from its
+ * caption. The renderer runs the two together ("Figure 1A caption"); the
+ * colon is added to the markup, not in CSS, so that a feed reader has it too.
+ */
+function rehypeCaptionNumbers() {
+  return (tree: any) => {
+    visit(tree, 'element', (node: any) => {
+      if (!node.properties?.className?.includes('caption-number')) return
+      node.children.push({ type: 'text', value: ': ' })
+    })
+  }
+}
+
+/**
  * Parses a post into its tree and its raw frontmatter. `citations` turns on
  * the `@key` and `[@key]` citation syntax; the `{cite}` roles always parse.
  */
@@ -160,6 +174,7 @@ async function parse(text: string, options: ParseOptions) {
       ...options.highlighter,
       transformers: [transformerNotationDiff()],
     })
+    .use(rehypeCaptionNumbers)
     .use(rehypeReferences, references)
     .use(rehypeExternalLinks, { rel: ['noopener'] })
     .use(rehypeKatex)

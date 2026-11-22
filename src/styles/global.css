@@ -369,6 +369,27 @@
   content: none;
 }
 
+/* A key to press: in the ink like inline code, with the outline of a key */
+.prose kbd {
+  padding: 0.1em 0.4em;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-bottom-width: 2px;
+  border-radius: 0.3em;
+  box-shadow: none;
+  color: inherit;
+  font-family: var(--type-mono);
+  font-size: calc(0.85em / var(--type-reading-scale));
+  font-weight: var(--weight-normal);
+}
+
+/* A highlight: the ground tinted with the accent, the text still in the ink */
+.prose mark {
+  padding: 0.05em 0.2em;
+  border-radius: 0.2em;
+  background: color-mix(in srgb, var(--accent) 28%, var(--ground));
+  color: inherit;
+}
+
 .site-footer {
   color: var(--muted);
   font-size: var(--size-meta);
