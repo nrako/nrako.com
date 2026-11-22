@@ -81,12 +81,18 @@
 /*
  * Weights: every weight of the site is its usual value moved by one shift,
  * so the whole hierarchy moves together and the distance between the text
- * and its bold stays the same. Light text on a dark ground looks heavier
- * than it is: in dark mode the shift draws everything a little thinner.
- * A face clamps a weight it does not have to its nearest one.
+ * and its bold stays the same. The shift is the sum of the theme's and the
+ * reader's (`data-reading-weight`). Light text on a dark ground looks
+ * heavier than it is: in dark mode the theme draws everything a little
+ * thinner. A face clamps a weight it does not have to its nearest one.
  */
 :root {
-  --weight-shift: 0;
+  --weight-theme: 0;
+  --weight-reading: 0;
+  /* The reader's steps, also drawn by the menu's samples */
+  --weight-step-light: -100;
+  --weight-step-heavy: 150;
+  --weight-shift: calc(var(--weight-theme) + var(--weight-reading));
   --weight-extralight: calc(200 + var(--weight-shift));
   --weight-light: calc(300 + var(--weight-shift));
   --weight-normal: calc(400 + var(--weight-shift));
@@ -97,7 +103,15 @@
 
 /* On <html>, like `:root`: the weights above are computed with it */
 .dark {
-  --weight-shift: -25;
+  --weight-theme: -25;
+}
+
+:root[data-reading-weight='light'] {
+  --weight-reading: var(--weight-step-light);
+}
+
+:root[data-reading-weight='heavy'] {
+  --weight-reading: var(--weight-step-heavy);
 }
 
 /*
@@ -393,7 +407,18 @@
   margin-left: calc(var(--nav-icon) / -2);
 }
 
-/* The reading settings' menu, under its button in the header */
+/* The reading settings' menu, under its button in the header: the
+   typefaces on a row, the size and the weight side by side under them */
+.reading-settings:popover-open {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.75rem 1.5rem;
+}
+
+.reading-settings fieldset:first-child {
+  grid-column: 1 / -1;
+}
+
 .reading-settings {
   position: absolute;
   inset: auto;
@@ -405,10 +430,6 @@
   font-family: var(--type-text);
   font-size: 1rem;
   line-height: 1.5;
-}
-
-.reading-settings fieldset + fieldset {
-  margin-top: 0.75rem;
 }
 
 .reading-settings legend {
@@ -467,6 +488,22 @@
 
 .reading-settings [data-reading-size-sample='large'] {
   font-size: 1.25rem;
+}
+
+/* Each sample is the weight the text would take, a little larger so that
+   it shows */
+.reading-settings [data-reading-weight-sample] {
+  --sample-step: 0;
+  font-size: 1.125rem;
+  font-weight: calc(400 + var(--weight-theme) + var(--sample-step));
+}
+
+.reading-settings [data-reading-weight-sample='light'] {
+  --sample-step: var(--weight-step-light);
+}
+
+.reading-settings [data-reading-weight-sample='heavy'] {
+  --sample-step: var(--weight-step-heavy);
 }
 
 /* Popover dark mode support */

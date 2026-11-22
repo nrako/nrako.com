@@ -3,36 +3,81 @@ import TextSize from '@/components/icons/TextSize'
 import {
   applyReadingSetting,
   readReadingSetting,
+  readingSettings,
   type ReadingFont,
   type ReadingSetting,
   type ReadingSize,
+  type ReadingWeight,
 } from '@/lib/reading'
 
 const POPOVER_ID = 'reading-settings'
 
-const fonts: { value: ReadingFont; label: string }[] = [
-  { value: 'sans', label: 'Sans' },
-  { value: 'serif', label: 'Serif' },
-  { value: 'hyperlegible', label: 'Hyperlegible' },
-]
+interface Choice<Value> {
+  value: Value
+  label: string
+}
 
-const sizes: { value: ReadingSize; label: string }[] = [
-  { value: 'small', label: 'Smaller' },
-  { value: 'medium', label: 'Default' },
-  { value: 'large', label: 'Larger' },
-]
+// A typeface shows its name; a size or a weight shows an "A" drawn with it
+const groups = [
+  {
+    setting: 'font',
+    legend: 'Typeface',
+    sample: 'label',
+    choices: [
+      { value: 'sans', label: 'Sans' },
+      { value: 'serif', label: 'Serif' },
+      { value: 'hyperlegible', label: 'Hyperlegible' },
+    ] satisfies Choice<ReadingFont>[],
+  },
+  {
+    setting: 'size',
+    legend: 'Size',
+    sample: 'letter',
+    choices: [
+      { value: 'small', label: 'Smaller' },
+      { value: 'medium', label: 'Default' },
+      { value: 'large', label: 'Larger' },
+    ] satisfies Choice<ReadingSize>[],
+  },
+  {
+    setting: 'weight',
+    legend: 'Weight',
+    sample: 'letter',
+    choices: [
+      { value: 'light', label: 'Lighter' },
+      { value: 'regular', label: 'Default' },
+      { value: 'heavy', label: 'Heavier' },
+    ] satisfies Choice<ReadingWeight>[],
+  },
+] as const satisfies {
+  setting: ReadingSetting
+  legend: string
+  sample: 'label' | 'letter'
+  choices: Choice<string>[]
+}[]
+
+type ReadingValues = Record<ReadingSetting, string>
+
+const defaults = Object.fromEntries(
+  Object.entries(readingSettings).map(([setting, { default: value }]) => [
+    setting,
+    value,
+  ]),
+) as ReadingValues
 
 export default function ReadingSettings() {
   // Disabled until hydrated: without JavaScript nothing would apply a choice
   const [ready, setReady] = useState(false)
-  const [font, setFont] = useState<string>('sans')
-  const [size, setSize] = useState<string>('medium')
+  const [values, setValues] = useState<ReadingValues>(defaults)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setFont(readReadingSetting('font'))
-    setSize(readReadingSetting('size'))
+    setValues({
+      font: readReadingSetting('font'),
+      size: readReadingSetting('size'),
+      weight: readReadingSetting('weight'),
+    })
     setReady(true)
   }, [])
 
@@ -61,8 +106,7 @@ export default function ReadingSettings() {
 
   const choose = (setting: ReadingSetting, value: string) => {
     applyReadingSetting(setting, value)
-    if (setting === 'font') setFont(value)
-    else setSize(value)
+    setValues((current) => ({ ...current, [setting]: value }))
   }
 
   return (
@@ -75,7 +119,7 @@ export default function ReadingSettings() {
         aria-label="Reading settings"
         title={
           ready
-            ? 'Typeface and text size'
+            ? 'Typeface, size and weight of the text'
             : 'Not available when JavaScript is disabled'
         }
         class="[&:not(:disabled):hover]:text-red-600 disabled:text-gray-500 cursor-pointer disabled:cursor-default"
@@ -89,37 +133,33 @@ export default function ReadingSettings() {
         class="reading-settings"
         aria-label="Reading settings"
       >
-        <fieldset>
-          <legend>Typeface</legend>
-          {fonts.map(({ value, label }) => (
-            <label key={value} data-reading-font-sample={value}>
-              <input
-                type="radio"
-                name="reading-font"
-                value={value}
-                checked={font === value}
-                onChange={() => choose('font', value)}
-              />
-              {label}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset>
-          <legend>Size</legend>
-          {sizes.map(({ value, label }) => (
-            <label key={value} data-reading-size-sample={value}>
-              <input
-                type="radio"
-                name="reading-size"
-                value={value}
-                checked={size === value}
-                onChange={() => choose('size', value)}
-              />
-              <span aria-hidden="true">A</span>
-              <span class="sr-only">{label}</span>
-            </label>
-          ))}
-        </fieldset>
+        {groups.map(({ setting, legend, sample, choices }) => (
+          <fieldset key={setting}>
+            <legend>{legend}</legend>
+            {choices.map(({ value, label }) => (
+              <label
+                key={value}
+                {...{ [`data-reading-${setting}-sample`]: value }}
+              >
+                <input
+                  type="radio"
+                  name={`reading-${setting}`}
+                  value={value}
+                  checked={values[setting] === value}
+                  onChange={() => choose(setting, value)}
+                />
+                {sample === 'label' ? (
+                  label
+                ) : (
+                  <>
+                    <span aria-hidden="true">A</span>
+                    <span class="sr-only">{label}</span>
+                  </>
+                )}
+              </label>
+            ))}
+          </fieldset>
+        ))}
       </div>
     </>
   )

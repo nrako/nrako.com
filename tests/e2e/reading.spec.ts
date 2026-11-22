@@ -101,6 +101,7 @@ test.describe('Reading settings', () => {
     const menu = await openMenu(page)
     await choose(menu, 'Hyperlegible')
     await choose(menu, 'Smaller')
+    await choose(menu, 'Heavier')
 
     // Recorded as the document is parsed, before any island hydrates
     await page.addInitScript(() => {
@@ -109,6 +110,7 @@ test.describe('Reading settings', () => {
         ;(window as unknown as { parsed: unknown }).parsed = {
           font: root.getAttribute('data-reading-font'),
           size: root.getAttribute('data-reading-size'),
+          weight: root.getAttribute('data-reading-weight'),
         }
       })
     })
@@ -118,7 +120,37 @@ test.describe('Reading settings', () => {
       await page.evaluate(
         () => (window as unknown as { parsed: unknown }).parsed,
       ),
-    ).toEqual({ font: 'hyperlegible', size: 'small' })
+    ).toEqual({ font: 'hyperlegible', size: 'small', weight: 'heavy' })
+  })
+
+  test('the weight moves every weight, on top of the theme', async ({
+    page,
+  }) => {
+    const weights = () =>
+      page.evaluate(() => {
+        const weight = (selector: string) =>
+          Number(getComputedStyle(document.querySelector(selector)!).fontWeight)
+        return { text: weight('.prose p'), title: weight('.prose h1') }
+      })
+
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto(PROSE_PAGE)
+    const menu = await openMenu(page)
+    await choose(menu, 'Heavier')
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-reading-weight',
+      'heavy',
+    )
+    expect(await weights()).toEqual({ text: 550, title: 450 })
+
+    await choose(menu, 'Lighter')
+    expect(await weights()).toEqual({ text: 300, title: 200 })
+
+    // Dark mode's -25 adds to the reader's step
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto(PROSE_PAGE)
+    await expect(page.locator('html')).toHaveClass(/dark/)
+    expect(await weights()).toEqual({ text: 275, title: 175 })
   })
 
   test('an unknown stored value is ignored', async ({ page }) => {
