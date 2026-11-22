@@ -31,6 +31,10 @@
    */
   --aa-drag-inset: 1.875rem;
 
+  /* The sentence's noise is drawn over it */
+  position: relative;
+  /* A length, not `auto`: the room opens and closes through a transition */
+  min-height: 0;
   margin-top: 1.5rem;
   /* Reached through a link to its anchor */
   scroll-margin-top: 6rem;
@@ -51,16 +55,45 @@
   }
 }
 
+.about-animation[data-phase='opening'],
 .about-animation[data-phase='playing'] {
   /* The stage, then the controls under it */
   min-height: calc(var(--aa-room) + 2.2rem);
+}
+
+/*
+ * The room opens while the sentence leaves, and is open when the stage
+ * comes: no longer than the opening in the script (`playOpening`).
+ */
+.about-animation[data-phase='opening'] {
+  transition: min-height calc(450ms / var(--aa-speed)) ease-out;
+}
+
+.about-animation[data-phase='playing'] {
   transition: none;
 }
 
-.aa-sentence {
+.aa-sentence,
+.aa-noise {
   margin: 0;
   font-size: var(--size-text);
   color: var(--aa-dim);
+}
+
+/*
+ * While it leaves, the sentence keeps its room, and screen readers still
+ * read it; what is seen is its noise, drawn in its place.
+ */
+.about-animation[data-phase='opening'] .aa-sentence {
+  opacity: 0;
+}
+
+.aa-noise {
+  position: absolute;
+  inset: 0 0 auto;
+  /* The red of the link that was followed, whose words are the same noise */
+  color: var(--color-red-600);
+  text-shadow: var(--noise-fringe);
 }
 
 /* Coming back after the sequence, not on page load */

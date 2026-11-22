@@ -6,6 +6,7 @@ import {
   createClock,
   FINAL_SENTENCE,
   playIntro,
+  playOpening,
   TEMPO,
   type Chapter,
   type Scene,
@@ -15,10 +16,14 @@ import { SceneView } from './views.tsx'
 /**
  * - `idle`: the sentence alone. It is what the server renders, and all there
  *   is without JavaScript.
- * - `playing`: the animated sequence. The sentence stays in the page for
- *   screen readers; the stage is decorative.
+ * - `opening`: the sentence leaves as noise while the room for the stage
+ *   opens.
+ * - `playing`: the animated sequence, on the stage.
+ *
+ * The sentence stays in the page for screen readers throughout; its noise
+ * and the stage are decorative.
  */
-type Phase = 'idle' | 'playing'
+type Phase = 'idle' | 'opening' | 'playing'
 
 /**
  * The introduction never plays on its own. A link to this anchor on the same
@@ -47,6 +52,8 @@ function readFrom(): Chapter | undefined {
 
 export default function AboutAnimation() {
   const [phase, setPhase] = useState<Phase>('idle')
+  // What is left of the sentence while it leaves
+  const [noise, setNoise] = useState('')
   const [scene, setScene] = useState<Scene | null>(null)
   const [speed, setSpeed] = useState(1)
   // Number of times the sequence was asked for; each request restarts it.
@@ -82,30 +89,47 @@ export default function AboutAnimation() {
     if (run === 0) return
 
     const controller = new AbortController()
+    const { signal } = controller
     const runSpeed = readSpeed() * TEMPO
     setSpeed(runSpeed)
-    setPhase('playing')
     stop.current = () => controller.abort()
 
-    const clock = createClock(controller.signal, runSpeed, readFrom())
-    playIntro(setScene, clock).then(
+    // `phase` is what the page showed when the sequence was asked for. Asked
+    // again while it plays, the stage is already there: it starts over at
+    // once. Noise is not for someone who asked for less motion.
+    const opens =
+      phase !== 'playing' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    const sequence = async () => {
+      if (opens) {
+        setPhase('opening')
+        // Its own clock: `?from=` skips scenes, not the opening
+        await playOpening(setNoise, createClock(signal, runSpeed))
+      }
+      setPhase('playing')
+      await playIntro(setScene, createClock(signal, runSpeed, readFrom()))
+    }
+
+    sequence().then(
       () => setPhase('idle'),
       (error: unknown) => {
         // Stopped by "Skip", a new request or unmount: whoever stopped it
         // sets the phase.
-        if (controller.signal.aborted) return
+        if (signal.aborted) return
         setPhase('idle')
         throw error
       },
     )
 
     return () => controller.abort()
+    // Runs once per request: `phase` is only read as it was at that time
   }, [run])
 
   // The header link shows that the animation is playing
   useEffect(() => {
     const root = document.documentElement
-    root.toggleAttribute('data-about-playing', phase === 'playing')
+    root.toggleAttribute('data-about-playing', phase !== 'idle')
     return () => root.removeAttribute('data-about-playing')
   }, [phase])
 
@@ -123,6 +147,11 @@ export default function AboutAnimation() {
       style={{ '--aa-speed': speed }}
     >
       <p class="aa-sentence">{FINAL_SENTENCE}</p>
+      {phase === 'opening' && (
+        <p class="aa-noise" aria-hidden="true">
+          {noise}
+        </p>
+      )}
       {phase === 'playing' && scene && (
         <>
           <div class="aa-stage" aria-hidden="true">

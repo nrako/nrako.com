@@ -56,6 +56,8 @@
 
   --muted: #6b7280;
   --rule: color-mix(in srgb, currentColor 16%, transparent);
+  /* The colour fringes of a text while it is noise (`lib/noise.ts`) */
+  --noise-fringe: 0.05em 0 #0ff, -0.05em 0 #f0f;
 }
 
 .dark {
