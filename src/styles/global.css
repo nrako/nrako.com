@@ -65,6 +65,8 @@
   --size-name: calc(clamp(3.75rem, 17vw, 5.5rem) * var(--type-heading-scale));
 
   --muted: #6b7280;
+  /* Hover, focus and a link's target: the one colour besides the ink */
+  --accent: #dc2626;
   --rule: color-mix(in srgb, currentColor 16%, transparent);
   /* The colour fringes of a text while it is noise (`lib/noise.ts`) */
   --noise-fringe: 0.05em 0 #0ff, -0.05em 0 #f0f;
@@ -254,7 +256,7 @@
 }
 
 .post-entry:hover .post-entry-title {
-  color: #dc2626;
+  color: var(--accent);
 }
 
 /* A long title wraps beside its date; the date stays whole on the first line */
@@ -513,7 +515,7 @@
 }
 
 .reading-settings label:hover {
-  color: #dc2626;
+  color: var(--accent);
 }
 
 .reading-settings label:has(:checked) {
@@ -521,7 +523,7 @@
 }
 
 .reading-settings label:has(:focus-visible) {
-  outline: 2px solid #dc2626;
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
@@ -612,13 +614,13 @@
 
 /* Prose link styling */
 .prose :where(a):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  @apply underline-offset-2;
-  @apply decoration-slate-900 dark:decoration-gray-400;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--muted);
 }
 
 .prose a:hover,
 a:hover {
-  @apply decoration-red-600;
+  text-decoration-color: var(--accent);
 }
 
 /* Shiki code highlighting */
@@ -745,7 +747,7 @@ a:hover {
 
 /* Anchor links */
 .post-content .anchorsign {
-  color: gray;
+  color: var(--muted);
   position: relative;
   opacity: 0;
   transition: opacity 0.3s;
@@ -771,14 +773,10 @@ a:hover {
 /* Admonitions/Callouts */
 .post-content .admonition {
   width: 100%;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  background-color: rgba(249, 250, 251, 0.1);
   overflow: hidden;
   border-radius: 0.25rem;
-  border-left-width: 4px;
-  border-color: #3b82f6;
+  border-left: 4px solid var(--rule);
+  background: color-mix(in srgb, currentColor 4%, transparent);
 }
 
 .post-content .admonition p {
@@ -791,8 +789,7 @@ a:hover {
   display: flex;
   min-width: 0;
   font-size: 1.125rem;
-  color: #2563eb;
-  background-color: #eff6ff;
+  background: color-mix(in srgb, currentColor 7%, transparent);
 }
 
 /* Image alignment */
@@ -811,7 +808,7 @@ a:hover {
   }
   25%,
   75% {
-    background-color: yellow;
+    background-color: color-mix(in srgb, var(--accent) 20%, transparent);
   }
 }
 
@@ -853,7 +850,7 @@ a:hover {
   background: none !important;
   border: none;
   padding: 0 !important;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .post-authors article address {
@@ -863,7 +860,7 @@ a:hover {
 }
 
 .post-authors article address a {
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .post-authors article address a:hover {
@@ -903,13 +900,12 @@ a:hover {
 .post-messages {
   margin-left: auto;
   margin-right: auto;
-  background-color: #fef2f2;
+  background: var(--surface);
   padding: 1rem;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--rule);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.25);
   margin-top: 1rem;
-  color: rgb(162, 94, 10);
+  color: var(--ink);
 }
 
 .post-messages dt {
@@ -917,11 +913,11 @@ a:hover {
 }
 
 .post-messages .post-messages-errors {
-  color: red;
+  color: var(--accent);
 }
 
 .post-messages button {
   font-weight: var(--weight-bold);
   float: right;
-  color: black;
+  color: inherit;
 }
