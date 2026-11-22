@@ -65,11 +65,6 @@ export interface InternalOptions {
    * @default { 'freshblog.css' }
    */
   cssFilename: string
-  /**
-   * Name of the JavaScript file (polyfill) which will be exported by the plugin for the blog
-   * @default { 'freshblog.js' }
-   */
-  jsFilename: string
   /** Determine the author(s) to display for all posts when the `authors` entry
    * is not defined in frontmatter. Useful for personal blog when the author is
    * often the same and rarely need to be overridden.
@@ -125,7 +120,6 @@ export const defaultOptions: InternalOptions = {
     },
   },
   cssFilename: 'freshblog.css',
-  jsFilename: 'freshblog.js',
   showAuthors: 'only_in_posts',
   versioning: {
     provider: 'github',

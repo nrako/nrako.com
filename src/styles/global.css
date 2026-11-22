@@ -615,23 +615,6 @@ a:hover {
   color: black;
 }
 
-.freshBlog-post header [anchor] {
-  position: absolute;
-  top: calc(anchor(bottom) + 0.5rem);
-  left: calc(anchor(left) - 1rem);
-  filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04))
-    drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
-  font-size: 0.875rem;
-  padding: 1rem;
-  border-radius: 6px;
-  margin: 0;
-  overflow: visible;
-}
-
-.freshBlog-authors article [anchor] h3 {
-  margin-bottom: 0.5rem;
-}
-
 .freshBlog-authors article dl {
   margin: 0;
 }
