@@ -436,15 +436,25 @@
 }
 
 /* The reading settings' menu, under its button in the header: the
-   typefaces on a row, the size and the weight side by side under them */
+   typefaces and the backgrounds each across the menu, the size and the
+   weight side by side between them */
 .reading-settings:popover-open {
   display: grid;
   grid-template-columns: auto auto;
   gap: 0.75rem 1.5rem;
 }
 
-.reading-settings fieldset:first-child {
+/* A row across the menu, its choices sharing the width */
+.reading-settings
+  fieldset:has([data-reading-font-sample], [data-reading-background-sample]) {
   grid-column: 1 / -1;
+}
+
+.reading-settings
+  :is([data-reading-font-sample], [data-reading-background-sample]) {
+  flex: 1 1 0;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .reading-settings {
@@ -510,20 +520,37 @@
   font-family: var(--type-hyperlegible);
 }
 
+/* The size and weight samples show the direction of a step, drawn further
+   than the step goes (a weight sample twice as far), so that the
+   difference reads at a glance */
+/* Whatever its letter, every size and weight button is the same square */
+.reading-settings
+  :is([data-reading-size-sample], [data-reading-weight-sample]) {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.reading-settings
+  fieldset:has([data-reading-size-sample], [data-reading-weight-sample]) {
+  align-items: center;
+}
+
 .reading-settings [data-reading-size-sample='small'] {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .reading-settings [data-reading-size-sample='large'] {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
 }
 
-/* Each sample is the weight the text would take, a little larger so that
-   it shows */
 .reading-settings [data-reading-weight-sample] {
   --sample-step: 0;
   font-size: 1.125rem;
-  font-weight: calc(400 + var(--weight-theme) + var(--sample-step));
+  font-weight: calc(400 + var(--weight-theme) + 2 * var(--sample-step));
 }
 
 .reading-settings [data-reading-weight-sample='light'] {
