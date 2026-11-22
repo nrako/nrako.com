@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { skipWithoutFixturePosts } from './fixtures'
 
 // The tests about posts only apply once a post is published. Call this after
 // loading /posts.
@@ -112,6 +113,56 @@ test.describe('Post versions', () => {
 
     await expect(page.getByText('You are looking at version')).toBeVisible()
     await expect(page.locator('.post-content')).toBeVisible()
+  })
+})
+
+test.describe('Citations', () => {
+  test.beforeEach(() => {
+    skipWithoutFixturePosts()
+  })
+
+  test('the references list the cited works, sorted by name', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post')
+
+    const references = page.locator('.post-content .references')
+
+    await expect(
+      references.getByRole('heading', { name: 'References' }),
+    ).toBeVisible()
+    await expect(references.getByRole('listitem')).toHaveText([
+      /^Fixture, A\. \(2020\)\. A Book That Stands In for a Book/,
+      /^Sample, B\., Fixture, A\., & Stub, C\. \(2019\)/,
+    ])
+  })
+
+  test('a citation leads to its entry in the references', async ({ page }) => {
+    await page.goto('/posts/fixture-post')
+
+    await page.getByRole('link', { name: 'Fixture (2020)' }).click()
+
+    await expect(page).toHaveURL(/#cite-fixture2020$/)
+    await expect(page.locator('#cite-fixture2020')).toBeInViewport()
+  })
+
+  test('a key the bibliography does not hold stays in the text', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post')
+
+    await expect(page.locator('.post-content')).toContainText(
+      'as @missing2021, stays in the text',
+    )
+  })
+
+  test('an @ is text in a post without a bibliography', async ({ page }) => {
+    await page.goto('/posts/fixture-short-post')
+
+    await expect(page.locator('.post-content')).toContainText(
+      '@someone, [@a-note].',
+    )
+    await expect(page.locator('.references')).toHaveCount(0)
   })
 })
 

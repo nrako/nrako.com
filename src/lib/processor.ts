@@ -29,8 +29,20 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import { h } from 'hastscript'
 import { defaultOptions, type BlogOptions } from './blogData.ts'
 import { validatePageFrontmatter } from 'myst-frontmatter'
+import {
+  citationsTransform,
+  loadBibliography,
+  rehypeReferences,
+  type LoadFile,
+} from './citations.ts'
 
-export type ParseOptions = Pick<BlogOptions, 'highlighter' | 'defaultAuthors'>
+export type ParseOptions = Pick<
+  BlogOptions,
+  'highlighter' | 'defaultAuthors'
+> & {
+  /** Reads the files a post refers to: the bibliographies it lists */
+  loadFile?: LoadFile
+}
 
 interface Message {
   property: string
@@ -70,28 +82,46 @@ function getHighlighter(
   return highlighter
 }
 
-async function parse(text: string, options: ParseOptions) {
-  const file = new VFile()
+/**
+ * Parses a post into its tree and its raw frontmatter. `citations` turns on
+ * the `@key` and `[@key]` citation syntax; the `{cite}` roles always parse.
+ */
+function parseMyst(text: string, citations: boolean) {
   const mdast = mystParse(text, {
     markdownit: { linkify: true },
-    vfile: file as any,
+    extensions: { citations },
+    vfile: new VFile() as any,
   })
+  const { frontmatter } = getFrontmatter(new VFile() as any, mdast, {
+    propagateTargets: true,
+  })
+  return { mdast, frontmatter }
+}
+
+async function parse(text: string, options: ParseOptions) {
+  // An @ is text, as in CommonMark, unless the post lists a bibliography:
+  // only then do `@key` and `[@key]` cite. The frontmatter that says so is
+  // only known once the post is parsed, hence the second parse.
+  const firstParse = parseMyst(text, false)
+  const rawPageFrontmatter = firstParse.frontmatter
+  let mdast = firstParse.mdast
 
   const messages: Messages = {}
-  const vfile = new VFile()
-  const { frontmatter: rawPageFrontmatter } = getFrontmatter(
-    vfile as any,
-    mdast,
-    {
-      propagateTargets: true,
-    },
-  )
   const frontmatter = validatePageFrontmatter(
     {
       authors: options.defaultAuthors,
       ...rawPageFrontmatter,
     },
     { property: 'frontmatter', messages },
+  )
+
+  const bibliography = frontmatter.bibliography ?? []
+  if (bibliography.length > 0) {
+    mdast = parseMyst(text, true).mdast
+  }
+  const citationRenderers = await loadBibliography(
+    bibliography,
+    options.loadFile,
   )
 
   const linkTransforms = [
@@ -109,6 +139,8 @@ async function parse(text: string, options: ParseOptions) {
     .use(inlineMathSimplificationPlugin)
     .use(linksPlugin, { transformers: linkTransforms })
     .runSync(mdastPre)
+
+  const references = citationsTransform(mdastPre, citationRenderers, messages)
 
   visit(mdastPre, (n) => delete (n as { position?: unknown }).position)
   const htmlString = mystToHtml(mdastPre, {
@@ -128,6 +160,7 @@ async function parse(text: string, options: ParseOptions) {
       ...options.highlighter,
       transformers: [transformerNotationDiff()],
     })
+    .use(rehypeReferences, references)
     .use(rehypeExternalLinks, { rel: ['noopener'] })
     .use(rehypeKatex)
     .use(rehypeAutolinkHeadings, {

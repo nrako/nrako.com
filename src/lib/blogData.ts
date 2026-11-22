@@ -136,7 +136,13 @@ export async function getPost(
   if (!existsSync(filePath)) return null
 
   const text = readFileSync(filePath, 'utf-8')
-  const { frontmatter, html, messages } = await processor(text, options)
+  const { frontmatter, html, messages } = await processor(text, {
+    ...options,
+    loadFile(path) {
+      const file = join(options.contentDir, path)
+      return existsSync(file) ? readFileSync(file, 'utf-8') : undefined
+    },
+  })
 
   const metadata: Post = {
     slug,

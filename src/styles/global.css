@@ -736,7 +736,8 @@ a:hover {
   font-family: monospace;
 }
 
-.post-content .footnotes ol :target {
+.post-content .footnotes ol :target,
+.post-content .reference-list :target {
   animation: flash 0.8s ease-in 2;
 }
 
@@ -744,6 +745,34 @@ a:hover {
 .post-content .footnotes p {
   margin: 0;
   font-size: 0.9em;
+}
+
+/* References: the works a post cites, each entry with a hanging indent */
+.post-content .references {
+  margin-top: 6rem;
+}
+
+.post-content .footnotes + .references {
+  margin-top: 2rem;
+}
+
+.post-content .references h2 {
+  font-size: 1em;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+.post-content .reference-list {
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.9em;
+}
+
+.post-content .reference-list li {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  text-indent: -1.5em;
+  overflow-wrap: anywhere;
 }
 
 /* Anchor links */

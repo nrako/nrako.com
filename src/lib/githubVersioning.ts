@@ -77,8 +77,20 @@ export async function getCommitHistory(
 /**
  * Fetches the raw content of a post at a specific version from GitHub.
  */
-export async function getPostContentAtVersion(
+export function getPostContentAtVersion(
   slug: string,
+  sha: string,
+  options: BlogOptions,
+): Promise<string | null> {
+  return getFileAtVersion(`${slug}.md`, sha, options)
+}
+
+/**
+ * Fetches the raw content of a file of the posts directory, by its path from
+ * that directory, at a specific version from GitHub.
+ */
+async function getFileAtVersion(
+  path: string,
   sha: string,
   options: BlogOptions,
 ): Promise<string | null> {
@@ -91,7 +103,7 @@ export async function getPostContentAtVersion(
     return null
   }
 
-  const filePath = `posts/${slug}.md`
+  const filePath = `posts/${path}`
 
   try {
     const response = await fetch(
@@ -163,7 +175,13 @@ export async function getPostAtVersion(
   const content = await getPostContentAtVersion(slug, sha, options)
   if (!content) return null
 
-  const { frontmatter, html, messages } = await processor(content, options)
+  // The files the post refers to are read at the same version as the post
+  const { frontmatter, html, messages } = await processor(content, {
+    ...options,
+    async loadFile(path) {
+      return (await getFileAtVersion(path, sha, options)) ?? undefined
+    },
+  })
 
   return {
     slug,

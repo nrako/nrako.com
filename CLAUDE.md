@@ -42,6 +42,7 @@ pnpm run check                # Astro type check
 pnpm run lint                 # ESLint
 pnpm run format               # Prettier (write)
 pnpm run format:check         # Prettier (check)
+pnpm run test:unit            # Unit tests of the post markup (node:test)
 pnpm run test:e2e             # Build, then Playwright e2e against the preview
 pnpm run test:e2e:fixtures    # Same, with the site built from tests/fixtures/posts
 pnpm run deploy               # Build + wrangler deploy
@@ -74,6 +75,7 @@ pnpm run deploy               # Build + wrangler deploy
 
 - `blogData.ts` — Post loading, reading time
 - `processor.ts` — MyST markdown processing with Shiki syntax highlighting
+- `citations.ts` — Citations of a post's BibTeX bibliography and its list of references
 - `githubVersioning.ts` — Post version history and old versions from the GitHub API
 - `bluesky.ts` — Bluesky API integration
 
@@ -108,6 +110,9 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Post versioning: the commit history and every older version are fetched from the GitHub API at build time and prerendered. A new commit to a post shows up after the next build and deploy.
 - Versioning needs `GITHUB_TOKEN` at build time (`.env` locally, `secrets.GITHUB_TOKEN` in CI). Without it the build succeeds with no version history and no version pages. A listed version that cannot be fetched fails the build.
 - The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.
+- Citations: a post lists BibTeX files under `bibliography` in its frontmatter, as paths from the posts directory, and cites their works by key: `@key`, `[@key, p. 3; @other]`, `[-@key]` or the `{cite}` roles (`citations.ts`). Each citation links to its entry in the "References" section, which lists the cited works in the APA style, sorted by name, after the footnotes; a `{bibliography}` directive places the list elsewhere. `citation-js-utils`, from the MyST project, parses and formats.
+- An @ only cites in a post that lists a bibliography; elsewhere it is text, which costs the post a second parse (`processor.ts`). A key the bibliography does not hold stays in the text as `@key` with a warning, shown in dev like the frontmatter's. A bibliography that is missing, outside the posts directory or not BibTeX fails the build.
+- An older version of a post reads its bibliography from GitHub at the same commit. A commit that only changes the `.bib` file adds no version to the post.
 - Code is highlighted with `github-light-high-contrast` / `github-dark-high-contrast` (`blogData.ts`): every token reaches 7:1 on the code block in both themes and both reading backgrounds, the light comments through a `colorReplacements` entry. The block's background is tinted from `--ink` and `--ground` (`global.css`), not the theme's. Measure the tokens again when changing either.
 - Syntax highlighting uses Shiki's JavaScript regex engine (`processor.ts`). The default Oniguruma engine decodes its WASM at module scope, which workerd rejects; the JavaScript engine keeps the pipeline usable from an on-demand route.
 - Feed `Content-Type` headers live in `public/_headers`: the feeds are prerendered to extensionless files, so the type set in `src/pages/feed/[type].ts` only applies in dev. Keep both in sync.
@@ -133,4 +138,5 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - `pnpm run test:e2e` builds the site and runs Playwright against `astro preview` on port 4390 (override with `E2E_PORT`), on chromium, firefox, webkit and mobile-chrome. It always starts its own server and fails if the port is taken. The tests target the production build, not the dev server: the dev server compiles pages and browser scripts on demand, which made first loads time out at random.
 - `POSTS_DIR` overrides the directory the posts are read from. `pnpm run test:e2e:fixtures` sets it to `tests/fixtures/posts`, which is how the post tests run while nothing is published. `pnpm run test:e2e` builds from `posts/` and skips the tests that need a post or a fixture. Run both. Version history is always looked up under `posts/` on GitHub, so fixture posts have none.
 - `samples/posts/` holds realistic sample posts for design work. They are never published: `POSTS_DIR=samples/posts pnpm run dev` serves the site with them.
+- `pnpm run test:unit` runs `tests/unit/` with Node's own test runner, which reads the TypeScript sources directly. It covers what a post's markup becomes (`processor.ts`), including the failures a built page cannot show.
 - Under a coding agent, Astro detects the agentic environment and runs `astro dev` / `astro preview` as background processes that return immediately (stop them with `pnpm exec astro dev stop` / `astro preview stop`). Pass `--ignore-lock` to keep the server in the foreground, as the Playwright config does.
