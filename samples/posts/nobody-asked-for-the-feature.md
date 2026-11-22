@@ -3,6 +3,9 @@
 title: Nobody asked for the feature
 description: The request, the need, and the distance between them.
 date: 2026-08-21
+# Borrowed from @bsky.app for its replies, to test the interactions
+site:
+  bskyUri: at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.post/3mzhhvhjfwk22
 ---
 
 Every feature request is a solution wearing the costume of a problem. "Can you

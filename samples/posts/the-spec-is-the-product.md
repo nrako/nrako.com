@@ -4,6 +4,9 @@ title: The spec is the product
 subtitle: What is left to decide once the code writes itself
 description: When agents write the code, the document that says what to build is the thing you ship.
 date: 2026-11-12
+# Borrowed from @bsky.app for its replies, to test the interactions
+site:
+  bskyUri: at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.post/3n2opitxdyc2j
 ---
 
 For twenty years the scarce thing was the code. A team argued about what to

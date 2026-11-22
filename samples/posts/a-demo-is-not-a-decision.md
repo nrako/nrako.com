@@ -3,6 +3,9 @@
 title: A demo is not a decision
 description: Why a working prototype settles less than it seems to.
 date: 2026-10-03
+# Borrowed from @bsky.app for its replies, to test the interactions
+site:
+  bskyUri: at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.post/3n2m24be4e223
 ---
 
 A prototype used to cost two weeks, so showing one meant somebody had already
