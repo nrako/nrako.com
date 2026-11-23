@@ -45,11 +45,17 @@ test('the sample of snippets at work has a page for each of its demos', async ()
       'flex-center',
       'svg-ring',
       'counter',
+      'debounce',
     ],
   )
   // The counter's script is part of its demo
   assert.ok(
-    snippets.at(-1)?.demo.includes('<script type="module">\nlet count = 0'),
+    snippets.at(-2)?.demo.includes('<script type="module">\nlet count = 0'),
+  )
+  // The function alone has a console, and no other snippet does
+  assert.deepEqual(
+    snippets.filter((snippet) => snippet.console).map(({ label }) => label),
+    ['debounce'],
   )
   assert.deepEqual(messages, {})
 })

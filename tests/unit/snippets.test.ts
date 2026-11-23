@@ -177,6 +177,145 @@ test('a snippet without HTML is an error, and still shows its sources', async ()
   assert.match(messages.errors![0].message, /no `html` or `svg` block/)
 })
 
+const logs = `${fence}js\nconsole.log(1 + 1)\n${fence}`
+const says = (text: string) => `${fence}console\n${text}\n${fence}`
+
+const consoleOf = (text: string) =>
+  `<div class="snippet-console not-prose"><pre role="log" aria-label="Console">${text}</pre></div>`
+
+test('a `console` block gives the snippet a console that holds its text', async () => {
+  const { html: page, messages } = await processor(
+    snippet('With a console', html, logs, says('2')),
+    options,
+  )
+
+  // After the sources, the script's the last of them, and not in the demo
+  assert.ok(page.includes(`</pre></div></div>${consoleOf('2')}</figure>`))
+  assert.ok(
+    page.includes(
+      '<span class="secret">unseen</span>.</p><script type="module">',
+    ),
+  )
+  assert.deepEqual(messages, {})
+})
+
+test('a console comes after the sources wherever its block is written', async () => {
+  const { html: page } = await processor(
+    snippet('With a console', says('2'), html, logs),
+    options,
+  )
+
+  assert.ok(page.includes(`</pre></div></div>${consoleOf('2')}</figure>`))
+})
+
+test('a console is under the tabs of long sources, not one of them', async () => {
+  const long = `${fence}js\n${'console.log(1)\n'.repeat(30)}${fence}`
+  const { html: page } = await processor(
+    snippet('With a console', html, long, says('1')),
+    options,
+  )
+
+  assert.ok(page.includes('class="snippet-sources snippet-tabs"'))
+  assert.ok(page.includes(`</pre></div></div>${consoleOf('1')}</figure>`))
+  assert.equal([...page.matchAll(/<input type="radio"/g)].length, 2)
+})
+
+test('the text of a console is text, whatever it holds', async () => {
+  const { html: page } = await processor(
+    snippet('With a console', html, logs, says('<b>bold</b> & more')),
+    options,
+  )
+
+  assert.ok(!page.includes('<b>bold</b>'))
+  assert.match(
+    page,
+    /aria-label="Console">(&lt;|&#x3C;)b>bold(&lt;|&#x3C;)\/b> (&amp;|&#x26;) more<\/pre>/,
+  )
+})
+
+test('a snippet with markup is not hidden', async () => {
+  const { html: page } = await processor(
+    snippet('With a console', html, logs, says('2')),
+    options,
+  )
+
+  assert.ok(page.includes('<div class="snippet-demo not-prose"><p>Seen,'))
+})
+
+test('a `console` block is not one of the sources', async () => {
+  const { html: page, snippets } = await processor(
+    snippet('With a console\n:label: ex-a', html, logs, says('2')),
+    options,
+  )
+
+  // Not shown as code, not named, not given to the page to edit
+  assert.equal([...page.matchAll(/<pre class="shiki/g)].length, 2)
+  assert.deepEqual(
+    [...page.matchAll(/<p class="snippet-language">([^<]+)<\/p>/g)].map(
+      (match) => match[1],
+    ),
+    ['HTML', 'JavaScript'],
+  )
+  assert.deepEqual(
+    snippets[0].files.map((file) => file.language),
+    ['html', 'js'],
+  )
+  // The page is told of the console, and not of its text
+  assert.equal(snippets[0].console, true)
+  assert.ok(!snippets[0].demo.includes('snippet-console'))
+})
+
+test('a script alone is a snippet when it has a console', async () => {
+  const {
+    html: page,
+    messages,
+    snippets,
+  } = await processor(
+    snippet('A function alone\n:label: ex-a', logs, says('2')),
+    options,
+  )
+
+  // Its demo has nothing to show: it is there to run the script, hidden
+  assert.ok(
+    page.includes(
+      '<div class="snippet-demo not-prose" hidden><script type="module">\nconsole.log(1 + 1)\n</script></div>',
+    ),
+  )
+  assert.ok(page.includes(consoleOf('2')))
+  assert.deepEqual(messages, {})
+  assert.equal(snippets.length, 1)
+})
+
+test('a console without a script to write to it shows nothing', async () => {
+  const { html: page, messages } = await processor(
+    snippet('Only a console', css, says('2')),
+    options,
+  )
+
+  assert.ok(!page.includes('snippet-demo'))
+  assert.equal(messages.errors?.length, 1)
+})
+
+test('a script alone without a console has nothing to show', async () => {
+  const { html: page, messages } = await processor(
+    snippet('A function alone', logs),
+    options,
+  )
+
+  assert.ok(!page.includes('snippet-demo'))
+  assert.equal(messages.errors?.length, 1)
+  assert.match(messages.errors![0].message, /with a `console` block/)
+})
+
+test('a snippet without a `console` block has no console', async () => {
+  const { html: page } = await processor(
+    snippet('A caption', html, logs),
+    options,
+  )
+
+  assert.ok(!page.includes('snippet-console'))
+})
+
 test('a snippet runs its script as a module, after its HTML', async () => {
   const script = 'const a = 1\nif (a < 2 && a > 0) document.title = "<b>"'
   const { html: page, messages } = await processor(
@@ -299,6 +438,7 @@ test('a snippet with a label has a page of its own under its post, which it link
         },
         { language: 'css', name: 'CSS', code: '.secret { opacity: 0; }' },
       ],
+      console: false,
     },
   ])
   // The link ends the caption's line: an arrow, named for who does not see it

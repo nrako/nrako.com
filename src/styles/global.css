@@ -914,6 +914,52 @@ a:hover {
   margin-top: 0.75rem;
 }
 
+/*
+ * A snippet's console, after its sources: what its script writes, in the code
+ * face and on the ground of a block of code, under a name set as a source's.
+ * The name is drawn and not text, so that the console's text is only what was
+ * written to it.
+ */
+.snippet-console {
+  margin-top: 0.75rem;
+}
+
+.snippet-console::before {
+  content: 'Console';
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+.snippet-console pre {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--ink) 4%, var(--ground));
+  color: inherit;
+  font-family: var(--type-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * In a post the console is set as the sources above it are: the size of a
+ * block of code (0.875em, and 0.9em for its code), its padding and its corners.
+ */
+.post-content .snippet-console pre {
+  padding: 0.9524em 1.5em;
+  border-radius: 0.375rem;
+  font-size: 0.7875em;
+}
+
+.snippet-console [data-level='warn'],
+.snippet-console [data-level='error'] {
+  color: var(--accent);
+}
+
 .snippet-language {
   margin: 0 0 0.25rem;
   color: var(--muted);
@@ -1100,6 +1146,20 @@ a:hover {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   gap: 1rem;
   margin-top: 1rem;
+}
+
+/*
+ * The console is the foot of the bench, under all the panes: it keeps a few
+ * lines to itself and scrolls past them, so that the sources keep the height.
+ */
+:root[data-snippet-source] .snippet-console {
+  margin-top: 1rem;
+}
+
+:root[data-snippet-source] .snippet-console pre {
+  height: 7.5rem;
+  overflow: auto;
+  border: 1px solid var(--rule);
 }
 
 .snippet-pane {

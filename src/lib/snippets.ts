@@ -8,8 +8,11 @@ import {
 } from 'myst-common'
 import { visit } from 'unist-util-visit'
 import {
+  CONSOLE_LANGUAGE,
+  consoleMarkup,
   DEMO_LANGUAGES,
   demoMarkup,
+  demoParts,
   type SnippetSource,
 } from './snippetDemo.ts'
 
@@ -50,6 +53,11 @@ const LANGUAGE_NAMES: Record<string, string> = {
  * else keeps it apart: it sees the whole page, and finds its elements by an
  * `id` or a class that the page does not use elsewhere.
  *
+ * A `console` block gives the snippet a console, set after its sources, and
+ * is what the post says the script writes: text, shown as written. A script
+ * alone is a snippet with one. The page of a snippet shows there what the
+ * script does write.
+ *
  * A snippet is numbered ("Example 1") and its label can be referred to, as a
  * figure's.
  */
@@ -67,7 +75,11 @@ export const snippetDirective: DirectiveSpec = {
   },
   run(data, vfile) {
     const body = (data.body ?? []) as GenericNode[]
-    const sources = body.filter((node) => node.type === 'code')
+    const blocks = body.filter((node) => node.type === 'code')
+    // A `console` block is not a source: it is what the post says the script
+    // writes, and it gives the snippet a console
+    const written = blocks.filter((block) => block.lang === CONSOLE_LANGUAGE)
+    const sources = blocks.filter((block) => block.lang !== CONSOLE_LANGUAGE)
     const files: SnippetFile[] = sources.map((source) => ({
       language: source.lang ?? '',
       name: languageName(source),
@@ -82,14 +94,17 @@ export const snippetDirective: DirectiveSpec = {
       })
     }
 
-    const demo = demoMarkup(files)
+    // Something to show: markup, or what a script writes to a console
+    const { markup, js } = demoParts(files)
+    const demo =
+      markup || (js && written.length > 0) ? demoMarkup(files) : undefined
 
     if (demo) {
       children.push({ type: 'html', value: demo })
     } else {
       fileError(
         vfile,
-        'A snippet has no `html` or `svg` block, so nothing to show',
+        'A snippet has no `html` or `svg` block, and no `js` block with a `console` block for what it writes, so nothing to show',
         { node: data.node },
       )
     }
@@ -129,6 +144,16 @@ export const snippetDirective: DirectiveSpec = {
       })
     }
 
+    // Then the console, under the sources whose script writes to it
+    if (written.length > 0) {
+      children.push({
+        type: 'html',
+        value: consoleMarkup(
+          written.map((block) => String(block.value)).join('\n'),
+        ),
+      })
+    }
+
     // And anything else written in the snippet, after them
     children.push(...body.filter((node) => node.type !== 'code'))
 
@@ -141,6 +166,7 @@ export const snippetDirective: DirectiveSpec = {
         ...normalizeLabel(data.options?.label as string | undefined),
         demo,
         files,
+        console: written.length > 0,
         children,
       },
     ]
@@ -191,6 +217,8 @@ export interface PostSnippet {
   demo: string
   /** Its sources as typed, which its page lets a reader edit */
   files: SnippetFile[]
+  /** Whether it has a console, for what its script writes */
+  console: boolean
 }
 
 /** The arrow of a link that leads elsewhere, drawn in the text's colour */
@@ -269,6 +297,7 @@ export function snippetsTransform(
           : `Example ${node.enumerator}`,
         demo: node.demo,
         files: node.files,
+        console: node.console,
       })
     }
 

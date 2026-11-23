@@ -90,6 +90,19 @@ document.getElementById('fixture-press').addEventListener('click', () => {
 ```
 :::
 
+:::{snippet} A fixture snippet with a console
+:label: ex-console
+
+```js
+console.log('counted', 1 + 1)
+console.warn({ of: 'an object' })
+```
+
+```console
+written by hand, <not> run
+```
+:::
+
 ## Some code
 
 A post highlights its code in the site's theme:

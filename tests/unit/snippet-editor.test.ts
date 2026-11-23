@@ -18,10 +18,12 @@ function configOf(address: URL) {
 }
 
 test('the playground opens with the parts of the demo, as the demo takes them', () => {
-  const address = new URL(playgroundAddress(sources, 'A snippet'))
+  const address = new URL(playgroundAddress(sources, { title: 'A snippet' }))
 
   assert.equal(address.origin, 'https://livecodes.io')
-  const { markup, style, script } = configOf(address)
+  const { markup, style, script, tools } = configOf(address)
+  // The playground's tools are left as it sets them
+  assert.equal(tools, undefined)
   // The markup is the HTML and the drawings together; what is not run is left
   assert.deepEqual(markup, {
     language: 'html',
@@ -31,8 +33,19 @@ test('the playground opens with the parts of the demo, as the demo takes them', 
   assert.deepEqual(script, { language: 'javascript', content: 'let a = 1' })
 })
 
+test('the playground of a snippet with a console opens with its console', () => {
+  const address = new URL(playgroundAddress(sources, { console: true }))
+
+  assert.deepEqual(configOf(address).tools, {
+    active: 'console',
+    status: 'open',
+  })
+  // Asked for in the fragment, as the sources are
+  assert.equal(address.search, '')
+})
+
 test('the sources are in the fragment of the address, which is not sent', () => {
-  const address = new URL(playgroundAddress(sources, 'A snippet'))
+  const address = new URL(playgroundAddress(sources, { title: 'A snippet' }))
 
   // Only the title, which the page already shows, is in what a server sees
   assert.deepEqual([...address.searchParams.keys()], ['title'])

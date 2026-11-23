@@ -34,6 +34,8 @@ export function mountSnippetEditor() {
 
   editor.append(template.content.cloneNode(true))
   const fields = [...editor.querySelectorAll('textarea')]
+  // The console of the snippet, when it has one, under the sources
+  const written = document.querySelector<HTMLElement>('.snippet-console pre')
   const sources = (): SnippetSource[] =>
     fields.map((field) => ({
       language: field.dataset.language ?? '',
@@ -44,7 +46,10 @@ export function mountSnippetEditor() {
     document.querySelector<HTMLAnchorElement>('.snippet-continue')
   const linkElsewhere = () => {
     if (elsewhere) {
-      elsewhere.href = playgroundAddress(sources(), elsewhere.dataset.title)
+      elsewhere.href = playgroundAddress(sources(), {
+        title: elsewhere.dataset.title,
+        console: written !== null,
+      })
     }
   }
 
@@ -89,6 +94,10 @@ export function mountSnippetEditor() {
         ...typed.filter((source) => !isScript(source)),
         ...working,
       ]) ?? ''
+
+    // The console is emptied: the page fills it with what the script writes
+    // as it runs again
+    if (written) written.textContent = ''
 
     // A script set through `innerHTML` does not run: each gives way to a new
     // one, which does
@@ -147,6 +156,8 @@ export function scriptError(js: string): string | undefined {
 /**
  * The address of a LiveCodes playground that opens with the given sources:
  * the markup, the CSS and the script of the demo, as the demo takes them.
+ * With `console`, the playground opens with its own console shown, as the
+ * snippet has one.
  *
  * LiveCodes is open source and runs in the browser. Its own SDK builds the
  * address and puts the sources, compressed, in its fragment, the part of an
@@ -155,7 +166,7 @@ export function scriptError(js: string): string | undefined {
  */
 export function playgroundAddress(
   sources: SnippetSource[],
-  title?: string,
+  { title, console }: { title?: string; console?: boolean } = {},
 ): string {
   const { markup, css, js } = demoParts(sources)
 
@@ -165,6 +176,7 @@ export function playgroundAddress(
       markup: { language: 'html', content: markup },
       style: { language: 'css', content: css },
       script: { language: 'javascript', content: js },
+      ...(console ? { tools: { active: 'console', status: 'open' } } : {}),
     },
   })
 }

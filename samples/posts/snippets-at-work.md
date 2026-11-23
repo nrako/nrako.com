@@ -1,7 +1,7 @@
 ---
 # Sample content for design work. Never published.
 title: Demos to try in the page
-subtitle: Words that hide, a box that centres, a ring, a counter that counts
+subtitle: Words that hide, a box that centres, a ring, a counter that counts, a function that says so
 description: Snippets at work, from the smallest demo of hidden text to one that needs a script.
 date: 2026-11-20
 ---
@@ -314,13 +314,17 @@ document.getElementById('reset').addEventListener('click', () => {
 ```
 :::
 
-A function on its own has nothing to render, and a block of code with a
-caption is enough for it:
+## A console
 
-```{code} js
-:label: code-debounce
-:caption: A function that waits for calls to stop
+A function on its own has nothing to render, but it has something to say. A
+`console` block gives a snippet a console and holds what the post says the
+script writes: it is text, written by hand, and it is what shows here. On the
+snippet's own page the console holds what the script does write, as it runs.
 
+:::{snippet} A function that waits for calls to stop
+:label: debounce
+
+```js
 function debounce(func, wait) {
   let timeout
 
@@ -329,4 +333,17 @@ function debounce(func, wait) {
     timeout = setTimeout(() => func(...args), wait)
   }
 }
+
+const save = debounce((text) => console.log('saved:', text), 300)
+
+save('d')
+save('dr')
+save('draft')
+console.log('typed three times')
 ```
+
+```console
+typed three times
+saved: draft
+```
+:::

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { decompress } from 'livecodes'
 import { skipWithoutFixturePosts } from './fixtures'
 
 // The tests about posts only apply once a post is published. Call this after
@@ -283,6 +284,100 @@ test.describe('Snippet scripts', () => {
       expect(errors).toEqual([])
     })
   }
+})
+
+test.describe('Snippet consoles', () => {
+  test.beforeEach(() => {
+    skipWithoutFixturePosts()
+  })
+
+  test("in a post, a snippet's console holds what the post says it writes", async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post')
+
+    // As written, and never what the script writes
+    await expect(page.locator('#ex-console .snippet-console')).toHaveText(
+      'written by hand, <not> run',
+    )
+    await expect(page.locator('#ex-console pre.shiki')).toHaveCount(1)
+    await expect(page.locator('#ex-console .snippet-language')).toHaveText([
+      'JavaScript',
+    ])
+
+    // After the script that writes to it, and a script alone shows no demo
+    const script = await page.locator('#ex-console pre.shiki').boundingBox()
+    const written = await page
+      .locator('#ex-console .snippet-console')
+      .boundingBox()
+    expect(written!.y).toBeGreaterThanOrEqual(script!.y + script!.height)
+    await expect(page.locator('#ex-console .snippet-demo')).toBeHidden()
+  })
+
+  test("on its page, a snippet's console holds what its script writes", async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-console')
+
+    const written = page.locator('.snippet-console')
+    await expect(written).toHaveText('counted 2\n{"of":"an object"}\n')
+    await expect(written.locator('[data-level="warn"]')).toHaveText(
+      '{"of":"an object"}\n',
+    )
+    // The console's text is all the text of the page
+    await expect(page.locator('body')).toHaveText(
+      /^counted 2\s+\{"of":"an object"\}\s*$/,
+      { useInnerText: true },
+    )
+  })
+
+  test('an edited script writes to the console again', async ({ page }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-console?source')
+
+    const written = page.locator('.snippet-console')
+    await expect(written).toHaveText('counted 2\n{"of":"an object"}\n')
+
+    await page.getByLabel('JavaScript').fill("console.log('edited', 2 + 2)")
+
+    // What was written before is gone with the demo that wrote it
+    await expect(written).toHaveText('edited 4\n')
+    // The console block is not a source: it has no field
+    await expect(page.locator('.snippet-pane')).toHaveCount(1)
+  })
+
+  test('the console is the foot of the page, under the sources', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-console?source')
+
+    const pane = await page.locator('.snippet-pane').boundingBox()
+    const written = await page.locator('.snippet-console').boundingBox()
+    expect(written!.y).toBeGreaterThanOrEqual(pane!.y + pane!.height)
+    // As wide as the bench, whatever the number of panes above it
+    const bench = await page.locator('.snippet-editor').boundingBox()
+    expect(Math.round(written!.width)).toBe(Math.round(bench!.width))
+  })
+
+  test('the playground of a snippet with a console opens with its console', async ({
+    page,
+  }) => {
+    // What the link asks of the playground, read back from its fragment
+    const tools = async (label: string) => {
+      await page.goto(`/posts/fixture-post/snippets/${label}?source`)
+      const link = page.locator('.snippet-continue')
+      await expect(link).toHaveAttribute('href', /#config=code/)
+
+      const address = new URL((await link.getAttribute('href'))!)
+      const config = new URLSearchParams(address.hash.slice(1)).get('config')!
+      return JSON.parse(decompress(config.slice('code/'.length))!).tools
+    }
+
+    expect(await tools('ex-console')).toEqual({
+      active: 'console',
+      status: 'open',
+    })
+    expect(await tools('ex-script')).toBeUndefined()
+  })
 })
 
 test.describe('Snippet sources', () => {

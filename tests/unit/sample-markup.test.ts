@@ -126,6 +126,10 @@ const pieces: Record<string, RegExp> = {
   'a reference to a snippet': /<a href="#ex-unseen">Example.1<\/a> hides/,
   "a snippet's script, as a module after its HTML":
     /<button id="ex-shown-button">Show or hide the words<\/button><script type="module">\nconst words = document\.getElementById\('ex-shown-words'\)\n[\s\S]*?\n<\/script><\/div>/,
+  'a script alone, run and not shown':
+    /<div class="snippet-demo not-prose" hidden><script type="module">\nconsole\.log\('2 \+ 2 =', 2 \+ 2\)\n<\/script><\/div>/,
+  "a snippet's console, after its sources":
+    /<\/pre><\/div><\/div><div class="snippet-console not-prose"><pre role="log" aria-label="Console">2 \+ 2 = 4<\/pre><\/div><\/figure>/,
   'a block of HTML with Markdown inside':
     /<summary>A disclosure, closed by default<\/summary><p>Its content is <em>Markdown<\/em>\.<\/p><\/details>/,
   'a comment': /<!--This line is only in the source\.-->/,

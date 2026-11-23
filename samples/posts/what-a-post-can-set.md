@@ -317,6 +317,23 @@ document.getElementById('ex-shown-button').addEventListener('click', () => {
 ```
 :::
 
+A `console` block gives a snippet a console, set after its sources. In the
+post it holds what the post says the script writes, as text; on the snippet's
+page it holds what the script does write. With one, a script alone is a
+snippet:
+
+:::{snippet} A sum that says its result
+:label: ex-said
+
+```js
+console.log('2 + 2 =', 2 + 2)
+```
+
+```console
+2 + 2 = 4
+```
+:::
+
 ## Raw HTML
 
 A block of HTML passes through, and the Markdown inside it is still read:

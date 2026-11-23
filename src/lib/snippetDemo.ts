@@ -45,20 +45,44 @@ export function demoParts(sources: SnippetSource[]) {
   }
 }
 
+/** The language of the block that gives a snippet a console */
+export const CONSOLE_LANGUAGE = 'console'
+
 /**
  * The markup of a demo: its HTML and its drawings in the order written, under
- * its CSS and before its script, or `undefined` for sources without markup.
+ * its CSS and before its script. `undefined` for a demo with nothing to set:
+ * no markup and no script.
  *
  * The CSS is wrapped in an `@scope` block with no root given: its root is then
  * the element that holds the `<style>`, the demo, so it styles nothing else.
  * The script is a module, which keeps what it declares to itself.
+ *
+ * A script alone has no markup to show: its demo is there to run it, hidden.
+ * What it has to show is what it writes, which a snippet's console holds.
  */
 export function demoMarkup(sources: SnippetSource[]): string | undefined {
   const { markup, css, js } = demoParts(sources)
-  if (!markup) return undefined
+  if (!markup && !js) return undefined
 
   const style = css ? `<style>@scope {\n${css}\n}</style>` : ''
   const script = js ? `<script type="module">\n${js}\n${END_OF_SCRIPT}` : ''
 
-  return `<div class="snippet-demo not-prose">${style}${markup}${script}</div>`
+  return `<div class="snippet-demo not-prose"${markup ? '' : ' hidden'}>${style}${markup}${script}</div>`
+}
+
+/**
+ * The console of a snippet, set under its sources: what its script writes,
+ * under a name that is drawn and not text (`global.css`), so that the text of
+ * the console is only what was written to it.
+ *
+ * In a post, `written` is what the post says the script writes: text, as
+ * typed. The page of a snippet sets it empty, and fills it with what the
+ * script does write.
+ */
+export function consoleMarkup(written = ''): string {
+  return `<div class="snippet-console not-prose"><pre role="log" aria-label="Console">${escapeText(written)}</pre></div>`
+}
+
+function escapeText(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 }

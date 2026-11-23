@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import { getPosts, defaultOptions as options } from '@/lib/blogData'
+import { consoleMarkup } from '@/lib/snippetDemo'
 import { snippetAddress, type PostSnippet } from '@/lib/snippets'
 
 interface Props {
@@ -160,6 +161,49 @@ const icon = {
         ))
       }
     </template>
+
+    {
+      /*
+       * In its post, a snippet's console holds what the post says the script
+       * writes. Here it starts empty and takes what the script does write:
+       * this page has one snippet, so all that is written to the console is
+       * its own. It comes last: under the demo, and under the sources when
+       * they are shown, across all of them.
+       *
+       * The script is inline, and not a module, to run before the demo's
+       * script, which is one and waits for the document. In dev, the page is
+       * not alone to write: what Vite says of itself is left out.
+       */
+    }
+    {snippet.console && <Fragment set:html={consoleMarkup()} />}
+    <script is:inline define:vars={{ dev: import.meta.env.DEV }}>
+      ;(() => {
+        const written = document.querySelector('.snippet-console pre')
+        if (!written) return
+
+        const say = (value) => {
+          if (typeof value === 'string') return value
+          if (value instanceof Error) return String(value)
+          try {
+            return JSON.stringify(value) ?? String(value)
+          } catch {
+            return String(value)
+          }
+        }
+
+        for (const level of ['log', 'info', 'warn', 'error', 'debug']) {
+          const write = console[level].bind(console)
+          console[level] = (...values) => {
+            write(...values)
+            if (dev && String(values[0]).startsWith('[vite]')) return
+            const line = document.createElement('span')
+            line.dataset.level = level
+            line.textContent = `${values.map(say).join(' ')}\n`
+            written.append(line)
+          }
+        }
+      })()
+    </script>
   </div>
 
   <script>
