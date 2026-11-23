@@ -1,15 +1,15 @@
 ---
 # Sample content for design work. Never published.
 title: Demos to try in the page
-subtitle: Words that hide, a box that centres, a counter that waits for its script
+subtitle: Words that hide, a box that centres, a counter that counts
 description: Snippets at work, from the smallest demo of hidden text to one that needs a script.
 date: 2026-11-20
 ---
 
 A demo is worth more than its description when the subject is what a browser
-does. Each snippet below is a few lines of HTML and CSS, rendered in the page
-and shown as typed. Each has a page of its own too, where its words are the
-only ones.
+does. Each snippet below is a few lines of HTML, CSS and sometimes JavaScript,
+rendered in the page and shown as typed. Each has a page of its own too, where
+its words are the only ones.
 
 ## Words a selection carries along
 
@@ -191,8 +191,9 @@ rule for `.box` colours no other box on the page.
 
 ## A script
 
-A snippet shows a script and does not run it: the counter of
-[](#counter) is drawn, and its buttons do nothing yet.
+A snippet runs its script too. The counter of [](#counter) counts, here and
+on its own page. The script sees the whole page, so it finds its elements by
+an `id` that nothing else on the page has.
 
 :::{snippet} A counter
 :label: counter

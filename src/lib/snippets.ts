@@ -8,12 +8,16 @@ import {
 } from 'myst-common'
 import { visit } from 'unist-util-visit'
 
+/** The languages of a script that a snippet runs */
+const SCRIPT_LANGUAGES = ['js', 'javascript']
+
 /** The languages of a snippet that make its demo; the others are only shown */
-const DEMO_LANGUAGES = ['html', 'css']
+const DEMO_LANGUAGES = ['html', 'css', ...SCRIPT_LANGUAGES]
 
 /**
- * The `{snippet}` directive: a small piece of HTML and CSS that a post shows
- * twice from one source, as it renders (the demo) and as it is typed.
+ * The `{snippet}` directive: a small piece of HTML, CSS and JavaScript that a
+ * post shows twice from one source, as it renders (the demo) and as it is
+ * typed.
  *
  *     :::{snippet} A caption
  *     :label: ex-opacity
@@ -31,12 +35,17 @@ const DEMO_LANGUAGES = ['html', 'css']
  * text, which a reader can select, search and link to. Its CSS is wrapped in
  * an `@scope` block, whose root is the demo, so that it styles nothing else.
  *
+ * A `js` block runs as a module script, after the demo's HTML: what it
+ * declares is its own, so two snippets can name a variable alike. Nothing
+ * else keeps it apart: it sees the whole page, and finds its elements by an
+ * `id` or a class that the page does not use elsewhere.
+ *
  * A snippet is numbered ("Example 1") and its label can be referred to, as a
  * figure's.
  */
 export const snippetDirective: DirectiveSpec = {
   name: 'snippet',
-  doc: 'A piece of HTML and CSS, shown as it renders and as it is typed',
+  doc: 'HTML, CSS and JavaScript, shown as they render and as they are typed',
   arg: { type: 'myst', doc: 'The caption of the snippet' },
   options: {
     label: { type: String, doc: 'The label to refer to the snippet by' },
@@ -44,18 +53,19 @@ export const snippetDirective: DirectiveSpec = {
   body: {
     type: 'myst',
     required: true,
-    doc: 'One `html` block, and the `css` blocks that style it',
+    doc: 'One `html` block, with the `css` that styles it and the `js` that runs in it',
   },
   run(data, vfile) {
     const body = (data.body ?? []) as GenericNode[]
     const sources = body.filter((node) => node.type === 'code')
-    const sourcesOf = (lang: string) =>
-      sources.filter((source) => source.lang === lang)
+    const sourcesOf = (...langs: string[]) =>
+      sources.filter((source) => langs.includes(source.lang))
     const join = (blocks: GenericNode[]) =>
       blocks.map((block) => block.value).join('\n')
 
     const html = join(sourcesOf('html'))
     const css = join(sourcesOf('css'))
+    const js = join(sourcesOf(...SCRIPT_LANGUAGES))
 
     const children: GenericNode[] = []
     if (data.arg) {
@@ -66,8 +76,9 @@ export const snippetDirective: DirectiveSpec = {
     }
 
     const style = css ? `<style>@scope {\n${css}\n}</style>` : ''
+    const script = js ? `<script type="module">\n${js}\n</script>` : ''
     const demo = html
-      ? `<div class="snippet-demo not-prose">${style}${html}</div>`
+      ? `<div class="snippet-demo not-prose">${style}${html}${script}</div>`
       : undefined
 
     if (demo) {
@@ -82,7 +93,7 @@ export const snippetDirective: DirectiveSpec = {
       if (DEMO_LANGUAGES.includes(source.lang)) continue
       fileWarn(
         vfile,
-        `A snippet shows its \`${source.lang}\` block but does not run it: only \`html\` and \`css\` make the demo`,
+        `A snippet shows its \`${source.lang}\` block but does not run it: only \`html\`, \`css\` and \`js\` make the demo`,
         { node: source },
       )
     }

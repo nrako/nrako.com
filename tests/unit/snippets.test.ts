@@ -113,16 +113,57 @@ test('a snippet without HTML is an error, and still shows its sources', async ()
   assert.match(messages.errors![0].message, /no `html` block/)
 })
 
-test('a snippet shows a script without running it, with a warning', async () => {
+test('a snippet runs its script as a module, after its HTML', async () => {
+  const script = 'const a = 1\nif (a < 2 && a > 0) document.title = "<b>"'
   const { html: page, messages } = await processor(
-    snippet('With a script', html, `${fence}js\nalert(1)\n${fence}`),
+    snippet('With a script', html, css, `${fence}js\n${script}\n${fence}`),
+    options,
+  )
+
+  // As typed: nothing in it is escaped or rewritten
+  assert.ok(
+    page.includes(
+      `<span class="secret">unseen</span>.</p><script type="module">\n${script}\n</script></div>`,
+    ),
+  )
+  // And shown, as the other sources are
+  assert.equal([...page.matchAll(/<pre class="shiki/g)].length, 3)
+  assert.deepEqual(messages, {})
+})
+
+test('a snippet runs the scripts written as `javascript` too', async () => {
+  const { html: page, messages } = await processor(
+    snippet('With a script', html, `${fence}javascript\nlet a = 1\n${fence}`),
+    options,
+  )
+
+  assert.ok(page.includes('<script type="module">\nlet a = 1\n</script>'))
+  assert.deepEqual(messages, {})
+})
+
+test('a snippet without a script has none', async () => {
+  const { html: page } = await processor(
+    snippet('A caption', html, css),
+    options,
+  )
+
+  assert.ok(!page.includes('<script'))
+})
+
+test('a snippet shows another language without running it, with a warning', async () => {
+  const { html: page, messages } = await processor(
+    snippet(
+      'With TypeScript',
+      html,
+      `${fence}ts\nconst a: number = 1\n${fence}`,
+    ),
     options,
   )
 
   assert.ok(!page.includes('<script'))
   assert.equal([...page.matchAll(/<pre class="shiki/g)].length, 2)
   assert.equal(messages.warnings?.length, 1)
-  assert.match(messages.warnings![0].message, /`js` block but does not run it/)
+  assert.match(messages.warnings![0].message, /`ts` block but does not run it/)
 })
 
 test('a snippet keeps what else is written in it', async () => {

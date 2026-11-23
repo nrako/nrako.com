@@ -123,6 +123,8 @@ const pieces: Record<string, RegExp> = {
   "a snippet's link to its own page":
     /<\/div><p class="snippet-alone"><a href="\/snippets\/ex-unseen">On a page of its own<\/a><\/p>/,
   'a reference to a snippet': /<a href="#ex-unseen">Example.1<\/a> hides/,
+  "a snippet's script, as a module after its HTML":
+    /<button id="ex-shown-button">Show or hide the words<\/button><script type="module">\nconst words = document\.getElementById\('ex-shown-words'\)\n[\s\S]*?\n<\/script><\/div>/,
   'a block of HTML with Markdown inside':
     /<summary>A disclosure, closed by default<\/summary><p>Its content is <em>Markdown<\/em>\.<\/p><\/details>/,
   'a comment': /<!--This line is only in the source\.-->/,

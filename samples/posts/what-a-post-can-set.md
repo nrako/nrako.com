@@ -264,8 +264,8 @@ const greeting = 'hello, world' // [!code ++]
 
 ## Snippets
 
-A snippet shows a small piece of HTML and CSS twice from one source: as it
-renders, then as it is typed. The demo is part of the page, so its text is
+A snippet shows a small piece of HTML, CSS and JavaScript twice from one
+source: as it renders, then as it is typed. The demo is part of the page, so its text is
 selected, searched and linked to like the rest, and its CSS styles nothing
 outside it.
 
@@ -291,6 +291,26 @@ A snippet that has a label also has a page of its own, at `/snippets/` and
 its label, with the demo and nothing else. Here the demo's words are on the
 page twice, once rendered and once in its source; there they are the only
 text.
+
+A `js` block is the demo's script. It runs in the page, after the demo's
+HTML, and finds its elements by an `id` that nothing else on the page has:
+
+:::{snippet} Words that a button shows
+:label: ex-shown
+
+```html
+<p>A sentence with <span id="ex-shown-words" hidden>more words</span> in it.</p>
+<button id="ex-shown-button">Show or hide the words</button>
+```
+
+```js
+const words = document.getElementById('ex-shown-words')
+
+document.getElementById('ex-shown-button').addEventListener('click', () => {
+  words.hidden = !words.hidden
+})
+```
+:::
 
 ## Raw HTML
 
@@ -320,5 +340,4 @@ use them:
 - the number of an equation beside it, and the number of a figure or a table
   that has no label: both are counted, neither is shown;
 - `:linenos:`, `:emphasize-lines:` and `:filename:` on a block of code;
-- JavaScript in a snippet, which is shown and not run;
 - a citation followed at once by a note, which takes the note for its page.

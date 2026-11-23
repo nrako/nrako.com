@@ -50,6 +50,23 @@ spells out an abbreviation, as {abbr}`MyST (Markedly Structured Text)`.
 Outside [](#ex-fixture), <span class="secret">the same class</span> is not
 styled by it.
 
+:::{snippet} A fixture snippet with a script
+:label: ex-script
+
+```html
+<button id="fixture-press">Press</button>
+<output id="fixture-pressed">0</output>
+```
+
+```js
+const pressed = document.getElementById('fixture-pressed')
+
+document.getElementById('fixture-press').addEventListener('click', () => {
+  pressed.textContent = Number(pressed.textContent) + 1
+})
+```
+:::
+
 ## Some code
 
 A post highlights its code in the site's theme:

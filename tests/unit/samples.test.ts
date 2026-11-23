@@ -59,6 +59,9 @@ test('the sample of snippets at work has a page for each of its demos', async ()
       'counter',
     ],
   )
-  // The counter's script is shown and not run
-  assert.equal(messages.warnings?.length, 1)
+  // The counter's script is part of its demo
+  assert.ok(
+    snippets.at(-1)?.demo.includes('<script type="module">\nlet count = 0'),
+  )
+  assert.deepEqual(messages, {})
 })

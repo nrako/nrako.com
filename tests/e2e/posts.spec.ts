@@ -254,6 +254,30 @@ test.describe('Snippets', () => {
   })
 })
 
+test.describe('Snippet scripts', () => {
+  // A snippet's script runs wherever its demo is set
+  for (const address of ['/posts/fixture-post', '/snippets/ex-script']) {
+    test(`a snippet's script runs in its demo on ${address}`, async ({
+      page,
+    }) => {
+      skipWithoutFixturePosts()
+      const errors: string[] = []
+      page.on('pageerror', (error) => errors.push(error.message))
+
+      await page.goto(address)
+
+      const pressed = page.locator('#fixture-pressed')
+      await expect(pressed).toHaveText('0')
+
+      await page.getByRole('button', { name: 'Press' }).click()
+      await page.getByRole('button', { name: 'Press' }).click()
+
+      await expect(pressed).toHaveText('2')
+      expect(errors).toEqual([])
+    })
+  }
+})
+
 test.describe('Snippet pages', () => {
   test.beforeEach(() => {
     skipWithoutFixturePosts()
