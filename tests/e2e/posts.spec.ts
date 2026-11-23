@@ -531,6 +531,120 @@ test.describe('Snippet pages', () => {
     await expect(demo.locator('.secret')).toHaveCSS('opacity', '0.5')
   })
 
+  test('a field is coloured as its source is in the post', async ({ page }) => {
+    // The colour of each token, in the order written
+    const colours = (spans: SVGElement[] | HTMLElement[]) =>
+      spans
+        .filter((span) => span.textContent?.trim())
+        .map((span) => getComputedStyle(span).color)
+
+    await page.goto('/posts/fixture-post')
+    const inPost = await page
+      .locator('#ex-script .snippet-source')
+      .last()
+      .locator('pre.shiki span[style]')
+      .evaluateAll(colours)
+    expect(new Set(inPost).size).toBeGreaterThan(2)
+
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+    const field = page.getByLabel('JavaScript')
+    const drawing = page
+      .locator('.snippet-field', { has: field })
+      .locator('.snippet-highlight')
+
+    await expect(drawing.locator('span[style]').first()).toBeAttached()
+    expect(await drawing.locator('span[style]').evaluateAll(colours)).toEqual(
+      inPost,
+    )
+    // The drawing is what is read: the field's own text is not drawn, and
+    // the drawing is not there for who does not see it
+    await expect(field).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+    await expect(drawing).toHaveAttribute('aria-hidden', 'true')
+    // A selection still shows, under the drawing
+    expect(
+      await field.evaluate(
+        (field) => getComputedStyle(field, '::selection').backgroundColor,
+      ),
+    ).not.toBe('rgba(0, 0, 0, 0)')
+  })
+
+  test('the colours of a field follow what is typed and how it scrolls', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+    const field = page.getByLabel('JavaScript')
+    const drawing = page
+      .locator('.snippet-field', { has: field })
+      .locator('.snippet-highlight')
+    await expect(drawing.locator('span[style]').first()).toBeAttached()
+
+    const typed = Array.from(
+      { length: 80 },
+      (_, line) => `const line${line} = ${line} // ${'far '.repeat(40)}`,
+    ).join('\n')
+    await field.fill(typed)
+    await expect(drawing).toHaveText(typed.replaceAll('\n', ''))
+
+    // Scrolled, the drawing has moved by as much as the field's text
+    await field.evaluate((field: HTMLTextAreaElement) => {
+      field.scrollTop = 300
+      field.scrollLeft = 200
+    })
+    await expect(drawing.locator('code')).toHaveCSS(
+      'transform',
+      'matrix(1, 0, 0, 1, -200, -300)',
+    )
+  })
+
+  test('the page loads and is edited before the highlighter arrives', async ({
+    page,
+  }) => {
+    // The highlighter is held back until the test lets it through
+    let release = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    await page.route(/snippetHighlight/, async (route) => {
+      await held
+      await route.continue()
+    })
+
+    // The load of the page does not wait for it
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+    const field = page.getByLabel('JavaScript')
+    await expect(field).toBeVisible()
+    await expect(page.locator('.snippet-highlight')).toHaveCount(0)
+    // The field shows its own text meanwhile, and takes what is typed
+    await expect(field).not.toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+    await field.fill('const early = true')
+
+    release()
+
+    const drawing = page
+      .locator('.snippet-field', { has: field })
+      .locator('.snippet-highlight')
+    await expect(drawing).toHaveText('const early = true')
+    await expect(field).toHaveCSS('color', 'rgba(0, 0, 0, 0)')
+  })
+
+  test('the highlighter is only fetched with the sources', async ({ page }) => {
+    const scripts: string[] = []
+    page.on('response', (response) => {
+      if (response.request().resourceType() === 'script') {
+        scripts.push(response.url())
+      }
+    })
+
+    await page.goto('/posts/fixture-post/snippets/ex-script')
+    await expect(page.locator('#fixture-press')).toBeVisible()
+    await page.waitForLoadState('networkidle')
+    const without = scripts.length
+
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+    await expect(page.locator('.snippet-highlight').first()).toBeAttached()
+    expect(scripts.length - without).toBeGreaterThan(without)
+  })
+
   test('an edited script runs in the demo', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))

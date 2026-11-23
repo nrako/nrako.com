@@ -13,6 +13,7 @@ import {
   DEMO_LANGUAGES,
   demoMarkup,
   demoParts,
+  highlightedAs,
   type SnippetSource,
 } from './snippetDemo.ts'
 
@@ -137,8 +138,7 @@ export const snippetDirective: DirectiveSpec = {
               data: { hProperties: { class: 'snippet-language' } },
               children: [{ type: 'text', value: languageName(source) }],
             },
-            // The highlighter has no SVG of its own: it is XML
-            source.lang === 'svg' ? { ...source, lang: 'xml' } : source,
+            { ...source, lang: highlightedAs(source.lang ?? '') },
           ],
         })),
       })

@@ -1191,22 +1191,77 @@ a:hover {
   border-color: var(--accent);
 }
 
-/* Drawn as a block of code is: same ground, same face */
-.snippet-pane textarea {
+/*
+ * A field, and over it the same text drawn in colours once the highlighter is
+ * there (`.snippet-highlight`, set by the editor). Both are set alike to the
+ * letter, so that each glyph of the drawing is where the field has its own.
+ */
+.snippet-field {
+  position: relative;
+  display: flex;
   flex: 1;
   min-height: 12rem;
+}
+
+.snippet-pane textarea,
+.snippet-highlight {
+  margin: 0;
   padding: 0.75rem 1rem;
   border: 1px solid var(--rule);
   border-radius: 0.25rem;
-  background: color-mix(in srgb, var(--ink) 4%, var(--ground));
-  color: inherit;
   font-family: var(--type-mono);
   font-size: 0.875rem;
+  font-variant-ligatures: none;
   line-height: 1.7;
+  letter-spacing: 0;
   tab-size: 2;
   white-space: pre;
+}
+
+/* Drawn as a block of code is: same ground, same face */
+.snippet-pane textarea {
+  flex: 1;
+  min-width: 0;
+  background: color-mix(in srgb, var(--ink) 4%, var(--ground));
+  color: inherit;
   overflow: auto;
   resize: none;
+}
+
+/*
+ * The drawing lets the pointer through to the field, which keeps the caret
+ * and the selection: its own text is then no longer drawn, selected or not.
+ */
+.snippet-highlight {
+  position: absolute;
+  inset: 0;
+  border-color: transparent;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.snippet-highlight code {
+  display: block;
+  width: max-content;
+  font: inherit;
+}
+
+.dark .snippet-highlight span {
+  color: var(--shiki-dark) !important;
+}
+
+.snippet-field[data-highlighted] textarea {
+  color: transparent;
+  caret-color: var(--ink);
+}
+
+/*
+ * A selection that is given a colour loses the ground the browser gives it:
+ * it takes one from the ink, under the drawing, in both themes.
+ */
+.snippet-field[data-highlighted] textarea::selection {
+  background-color: color-mix(in srgb, var(--ink) 25%, transparent);
+  color: transparent;
 }
 
 .snippet-pane textarea:focus-visible {

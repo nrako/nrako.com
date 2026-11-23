@@ -3,6 +3,7 @@ import type { Messages } from './processor.ts'
 import type { CommitInfo } from './githubVersioning.ts'
 import type { PostSnippet } from './snippets.ts'
 import { extname, join } from 'node:path'
+import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
 import processor from './processor.ts'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { parseHTML } from 'linkedom'
@@ -77,16 +78,8 @@ export const defaultOptions: BlogOptions = {
   copyright: 'Copyright 2024 www.nrako.com',
   generator: 'Feed (https://github.com/jpmonette/feed) for Node.js',
   highlighter: {
-    themes: {
-      light: 'github-light-high-contrast',
-      dark: 'github-dark-high-contrast',
-    },
-    // Every token at 7:1 or more on the code's background in both themes and
-    // both reading backgrounds, as the text is; the light theme's comments
-    // alone fall short (4.5:1) and are darkened to reach it.
-    colorReplacements: {
-      'github-light-high-contrast': { '#66707b': '#474f58' },
-    },
+    themes: CODE_THEMES,
+    colorReplacements: CODE_COLOR_REPLACEMENTS,
   },
   showAuthors: 'only_in_posts',
   versioning: {

@@ -149,14 +149,17 @@ const icon = {
         snippet.files.map((file, index) => (
           <div class="snippet-pane">
             <label for={`snippet-file-${index}`}>{file.name}</label>
-            <textarea
-              id={`snippet-file-${index}`}
-              data-language={file.language}
-              spellcheck="false"
-              autocomplete="off"
-              autocapitalize="off"
-              set:text={file.code}
-            />
+            {/* The field, and over it its text drawn in colours by the editor */}
+            <div class="snippet-field">
+              <textarea
+                id={`snippet-file-${index}`}
+                data-language={file.language}
+                spellcheck="false"
+                autocomplete="off"
+                autocapitalize="off"
+                set:text={file.code}
+              />
+            </div>
           </div>
         ))
       }

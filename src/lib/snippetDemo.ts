@@ -21,6 +21,14 @@ export const SCRIPT_LANGUAGES = ['js', 'javascript']
 export const DEMO_LANGUAGES = [...MARKUP_LANGUAGES, 'css', ...SCRIPT_LANGUAGES]
 
 /**
+ * The language a source is highlighted as. The highlighter has no SVG of its
+ * own: it is XML.
+ */
+export function highlightedAs(language: string): string {
+  return language === 'svg' ? 'xml' : language
+}
+
+/**
  * The end of a script element, in two pieces: this module is also sent to the
  * browser, possibly inline in a page, where the tag written whole would end
  * the script that holds it.

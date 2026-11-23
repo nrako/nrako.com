@@ -5,6 +5,7 @@ import {
   SCRIPT_LANGUAGES,
   type SnippetSource,
 } from './snippetDemo.ts'
+import type { Highlight } from './snippetHighlight.ts'
 
 /** How long the keys rest, in milliseconds, before the demo is drawn again */
 const PAUSE = 250
@@ -22,6 +23,9 @@ const PAUSE = 250
  *
  * A script that does not parse leaves the demo as it last worked, and one that
  * fails is said to on its pane: no more is shown of an error than that.
+ *
+ * The fields are coloured as code is in a post, once the highlighter is
+ * fetched (`snippetHighlight.ts`).
  */
 export function mountSnippetEditor() {
   if (!document.documentElement.hasAttribute('data-snippet-source')) return
@@ -128,6 +132,64 @@ export function mountSnippetEditor() {
 
   report()
   linkElsewhere()
+
+  // The colours come after the fields, which are edited without them: the
+  // highlighter is most of what this page weighs, and is fetched apart. It
+  // is asked for once the page has loaded, so that neither its fetch nor its
+  // work is part of that load: WebKit holds the load of a page for a module
+  // asked for before it.
+  const colourFields = async () => {
+    const { snippetHighlighter } = await import('./snippetHighlight.ts')
+    const highlight = await snippetHighlighter()
+    for (const field of fields) colour(field, highlight)
+  }
+  if (document.readyState === 'complete') colourFields()
+  else window.addEventListener('load', colourFields, { once: true })
+}
+
+/**
+ * Colours a field. A field cannot colour its own text, so the text is drawn a
+ * second time, highlighted, over the field, whose own is no longer drawn
+ * (`data-highlighted`, `global.css`): the field keeps the caret, the selection
+ * and the keys, and what is read is the drawing.
+ *
+ * The drawing is made again as the field changes, before the next frame, and
+ * moves as the field scrolls. It is moved, not scrolled: it would not scroll as far as
+ * a field that has scrollbars. They are left out of its box, for the same
+ * reason.
+ */
+function colour(field: HTMLTextAreaElement, highlight: Highlight) {
+  const drawing = document.createElement('pre')
+  drawing.className = 'snippet-highlight'
+  drawing.setAttribute('aria-hidden', 'true')
+  const code = drawing.appendChild(document.createElement('code'))
+
+  const follow = () => {
+    code.style.transform = `translate(${-field.scrollLeft}px, ${-field.scrollTop}px)`
+    // What the field's box holds beside its content and its border, 1px a side
+    drawing.style.right = `${field.offsetWidth - field.clientWidth - 2}px`
+    drawing.style.bottom = `${field.offsetHeight - field.clientHeight - 2}px`
+  }
+  const draw = () => {
+    code.innerHTML = highlight(field.value, field.dataset.language ?? '')
+    follow()
+  }
+
+  // Once a frame at most, however many times the field changes before it: the
+  // frame that shows a key is the one that shows it coloured
+  let frame = 0
+  field.addEventListener('input', () => {
+    frame ||= requestAnimationFrame(() => {
+      frame = 0
+      draw()
+    })
+  })
+  field.addEventListener('scroll', follow)
+  new ResizeObserver(follow).observe(field)
+
+  field.after(drawing)
+  draw()
+  field.parentElement?.toggleAttribute('data-highlighted', true)
 }
 
 /** The constructor of async functions, which has no name of its own */
