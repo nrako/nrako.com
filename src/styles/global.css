@@ -894,6 +894,14 @@ a:hover {
 }
 
 /*
+ * In a post, a long source scrolls in a box of some twenty lines, so that it
+ * does not push the text far down. On the snippet's own page it runs in full.
+ */
+.post-content .snippet-source pre {
+  max-height: 28rem;
+}
+
+/*
  * Long sources as tabs. The tabs are radio buttons, kept for the keyboard and
  * not drawn: the one checked shows the source at its position, with no script.
  * The name above a source is the tab's, so it is not shown twice.
@@ -960,9 +968,9 @@ a:hover {
 
 /*
  * A snippet's own page: the demo, under icons that lead back to its post and
- * show or hide its sources. The sources are not rendered unless the address
+ * show or hide its sources. The sources are only in the page when the address
  * asks for them (`data-snippet-source` on <html>, set from `?source` before
- * render): what is not rendered is not text of the page.
+ * render), and the icon to show them gives way to the one that hides them.
  */
 .snippet-tools {
   display: flex;
@@ -984,14 +992,9 @@ a:hover {
   height: 1.25em;
 }
 
-.snippet-page-sources,
 .snippet-tools .snippet-hide-source,
 :root[data-snippet-source] .snippet-tools .snippet-show-source {
   display: none;
-}
-
-:root[data-snippet-source] .snippet-page-sources {
-  display: block;
 }
 
 /* Drawn in the ink while the sources are shown */

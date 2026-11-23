@@ -357,9 +357,28 @@ test.describe('Snippet pages', () => {
       useInnerText: true,
     })
     await expect(page.locator('header, footer')).toHaveCount(0)
-    await expect(page.locator('.snippet-page-sources')).toBeHidden()
     await expect(page.locator('.secret')).toHaveCSS('opacity', '0')
     expect(failed).toEqual([])
+  })
+
+  test("a snippet's sources are not in the document until asked for", async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-fixture')
+
+    // Not hidden: absent. They wait in a <template>, outside the document.
+    await expect(page.locator('pre')).toHaveCount(0)
+    expect(await page.evaluate(() => document.body.textContent)).not.toContain(
+      '<p>Seen',
+    )
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            document.getElementById('snippet-sources') as HTMLTemplateElement
+          ).content.querySelectorAll('pre').length,
+      ),
+    ).toBe(2)
   })
 
   test("a snippet's page shows its sources when its address asks for them", async ({
