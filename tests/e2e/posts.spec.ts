@@ -260,7 +260,10 @@ test.describe('Snippets', () => {
 
 test.describe('Snippet scripts', () => {
   // A snippet's script runs wherever its demo is set
-  for (const address of ['/posts/fixture-post', '/snippets/ex-script']) {
+  for (const address of [
+    '/posts/fixture-post',
+    '/posts/fixture-post/snippets/ex-script',
+  ]) {
     test(`a snippet's script runs in its demo on ${address}`, async ({
       page,
     }) => {
@@ -301,7 +304,7 @@ test.describe('Snippet pages', () => {
       .getByRole('link', { name: 'On a page of its own' })
       .click()
 
-    await expect(page).toHaveURL(/\/snippets\/ex-fixture$/)
+    await expect(page).toHaveURL(/\/posts\/fixture-post\/snippets\/ex-fixture$/)
     // The demo's text is all the text of the page: no source, no site chrome
     await expect(page.locator('body')).toHaveText('Seen, unseen.', {
       useInnerText: true,
@@ -312,7 +315,7 @@ test.describe('Snippet pages', () => {
   })
 
   test("a snippet's page is not for search engines", async ({ page }) => {
-    await page.goto('/snippets/ex-fixture')
+    await page.goto('/posts/fixture-post/snippets/ex-fixture')
 
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
       'content',
@@ -323,7 +326,7 @@ test.describe('Snippet pages', () => {
   test("a snippet's page leads back to the snippet in its post", async ({
     page,
   }) => {
-    await page.goto('/snippets/ex-fixture')
+    await page.goto('/posts/fixture-post/snippets/ex-fixture')
 
     await page
       .getByRole('link', { name: 'Back to the post: Fixture post' })
@@ -334,7 +337,9 @@ test.describe('Snippet pages', () => {
   })
 
   test('a snippet that does not exist is not found', async ({ page }) => {
-    const response = await page.goto('/snippets/no-such-snippet')
+    const response = await page.goto(
+      '/posts/fixture-post/snippets/no-such-snippet',
+    )
 
     expect(response?.status()).toBe(404)
   })

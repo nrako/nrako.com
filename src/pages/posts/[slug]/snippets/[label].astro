@@ -1,25 +1,27 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import { getPosts, defaultOptions as options } from '@/lib/blogData'
-import { snippetPages, type PostSnippet } from '@/lib/snippets'
+import type { PostSnippet } from '@/lib/snippets'
 
 interface Props {
   snippet: PostSnippet
   post: { slug: string; title: string }
 }
 
-// One page per snippet that has a label, whichever post it is in. The label
-// is the address, so two posts cannot use the same one.
+// One page per snippet that has a label, under its post: a label only has to
+// be unique within its post.
 export async function getStaticPaths() {
   const posts = await getPosts(options)
 
-  return snippetPages(posts).map(({ snippet, post }) => ({
-    params: { slug: snippet.slug },
-    props: {
-      snippet,
-      post: { slug: post.slug, title: post.frontmatter.title ?? post.slug },
-    },
-  }))
+  return posts.flatMap((post) =>
+    post.snippets.map((snippet) => ({
+      params: { slug: post.slug, label: snippet.label },
+      props: {
+        snippet,
+        post: { slug: post.slug, title: post.frontmatter.title ?? post.slug },
+      },
+    })),
+  )
 }
 
 const { snippet, post } = Astro.props
@@ -43,7 +45,7 @@ const { snippet, post } = Astro.props
   <div class="snippet-page prose mx-auto max-w-(--column)">
     <a
       class="snippet-back not-prose"
-      href={`/posts/${post.slug}#${snippet.slug}`}
+      href={`/posts/${post.slug}#${snippet.label}`}
       aria-label={`Back to the post: ${post.title}`}
       title={`Back to the post: ${post.title}`}
     >

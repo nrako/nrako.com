@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import processor from '../../src/lib/processor.ts'
-import { snippetPages } from '../../src/lib/snippets.ts'
 
 const options = {
   highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
@@ -240,24 +239,34 @@ test('a snippet keeps what else is written in it', async () => {
   assert.match(page, /<\/pre><\/div><p>A note about it\.<\/p><\/figure>/)
 })
 
-test('a snippet with a label has a page of its own, which it links to', async () => {
+test('a snippet with a label has a page of its own under its post, which it links to', async () => {
   const { html: page, snippets } = await processor(
     snippet('A *caption*\n:label: ex-a', html, css),
-    options,
+    { ...options, address: '/posts/a-post' },
   )
 
   assert.deepEqual(snippets, [
     {
-      slug: 'ex-a',
+      label: 'ex-a',
       title: 'A caption',
       demo: '<div class="snippet-demo not-prose"><style>@scope {\n.secret { opacity: 0; }\n}</style><p>Seen, <span class="secret">unseen</span>.</p></div>',
     },
   ])
   assert.ok(
     page.includes(
-      '</div><p class="snippet-alone"><a href="/snippets/ex-a">On a page of its own</a></p>',
+      '</div><p class="snippet-alone"><a href="/posts/a-post/snippets/ex-a">On a page of its own</a></p>',
     ),
   )
+})
+
+test('a snippet does not link to its page when the address of its post is not known', async () => {
+  const { html: page, snippets } = await processor(
+    snippet('A caption\n:label: ex-a', html),
+    options,
+  )
+
+  assert.equal(snippets.length, 1)
+  assert.ok(!page.includes('snippet-alone'))
 })
 
 test('a snippet without a caption is titled by its number', async () => {
@@ -267,42 +276,19 @@ test('a snippet without a caption is titled by its number', async () => {
 })
 
 test('a snippet without a label has no page', async () => {
-  const { html: page, snippets } = await processor(
-    snippet('A caption', html),
-    options,
-  )
+  const { html: page, snippets } = await processor(snippet('A caption', html), {
+    ...options,
+    address: '/posts/a-post',
+  })
 
   assert.deepEqual(snippets, [])
   assert.ok(!page.includes('snippet-alone'))
 })
 
-test('a label that two posts share is an error', () => {
-  const page = (slug: string) => ({ slug, title: slug, demo: '<p></p>' })
-  const posts = [
-    { slug: 'first', snippets: [page('ex-a'), page('ex-b')] },
-    { slug: 'second', snippets: [page('ex-c')] },
-  ]
-
-  assert.deepEqual(
-    snippetPages(posts).map(({ snippet, post }) => [snippet.slug, post.slug]),
-    [
-      ['ex-a', 'first'],
-      ['ex-b', 'first'],
-      ['ex-c', 'second'],
-    ],
-  )
-
-  posts[1].snippets.push(page('ex-a'))
-  assert.throws(
-    () => snippetPages(posts),
-    /"ex-a" is used in the posts "first" and "second".*\/snippets\/ex-a/,
-  )
-})
-
 test('a snippet without HTML has no page', async () => {
   const { html: page, snippets } = await processor(
     snippet('Only CSS\n:label: ex-a', css),
-    options,
+    { ...options, address: '/posts/a-post' },
   )
 
   assert.deepEqual(snippets, [])

@@ -51,6 +51,8 @@ export type ParseOptions = Pick<
 > & {
   /** Reads the files a post refers to: the bibliographies it lists */
   loadFile?: LoadFile
+  /** The address of the post, which the pages of its snippets are under */
+  address?: string
 }
 
 interface Message {
@@ -158,7 +160,7 @@ async function parse(text: string, options: ParseOptions) {
 
   reportMessages(file, messages)
   crossReferencesTransform(mdastPre)
-  const snippets = snippetsTransform(mdastPre)
+  const snippets = snippetsTransform(mdastPre, options.address)
 
   const references = citationsTransform(mdastPre, citationRenderers, messages)
 

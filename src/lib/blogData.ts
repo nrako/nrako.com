@@ -141,6 +141,7 @@ export async function getPost(
   const text = readFileSync(filePath, 'utf-8')
   const { frontmatter, html, messages, snippets } = await processor(text, {
     ...options,
+    address: `/posts/${slug}`,
     loadFile(path) {
       const file = join(options.contentDir, path)
       return existsSync(file) ? readFileSync(file, 'utf-8') : undefined

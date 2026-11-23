@@ -178,6 +178,8 @@ export async function getPostAtVersion(
   // The files the post refers to are read at the same version as the post
   const { frontmatter, html, messages, snippets } = await processor(content, {
     ...options,
+    // The pages of its snippets are those of the post as it is now
+    address: `/posts/${slug}`,
     async loadFile(path) {
       return (await getFileAtVersion(path, sha, options)) ?? undefined
     },

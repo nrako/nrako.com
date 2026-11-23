@@ -17,6 +17,7 @@ before(async () => {
     readFileSync(join(directory, 'what-a-post-can-set.md'), 'utf-8'),
     {
       highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
+      address: '/posts/what-a-post-can-set',
       loadFile(path) {
         const file = join(directory, path)
         return existsSync(file) ? readFileSync(file, 'utf-8') : undefined
@@ -121,7 +122,7 @@ const pieces: Record<string, RegExp> = {
   "a snippet's sources":
     /<div class="snippet-source"><p class="snippet-language">HTML<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><div class="snippet-source"><p class="snippet-language">CSS<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><\/figure>/,
   "a snippet's link to its own page":
-    /<\/div><p class="snippet-alone"><a href="\/snippets\/ex-unseen">On a page of its own<\/a><\/p>/,
+    /<\/div><p class="snippet-alone"><a href="\/posts\/what-a-post-can-set\/snippets\/ex-unseen">On a page of its own<\/a><\/p>/,
   'a reference to a snippet': /<a href="#ex-unseen">Example.1<\/a> hides/,
   "a snippet's script, as a module after its HTML":
     /<button id="ex-shown-button">Show or hide the words<\/button><script type="module">\nconst words = document\.getElementById\('ex-shown-words'\)\n[\s\S]*?\n<\/script><\/div>/,

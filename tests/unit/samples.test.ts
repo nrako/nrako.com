@@ -3,11 +3,9 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import processor from '../../src/lib/processor.ts'
-import { snippetPages } from '../../src/lib/snippets.ts'
 
 // The sample posts are built together when the site is served with them
-// (`POSTS_DIR=samples/posts`): each has to render, and they share one space of
-// snippet labels.
+// (`POSTS_DIR=samples/posts`): each has to render.
 const directory = join(import.meta.dirname, '../../samples/posts')
 const slugs = readdirSync(directory)
   .filter((file) => file.endsWith('.md'))
@@ -32,22 +30,11 @@ for (const slug of slugs) {
   })
 }
 
-test('no two sample posts share a snippet label', async () => {
-  const posts = await Promise.all(
-    slugs.map(async (slug) => ({
-      slug,
-      snippets: (await render(slug)).snippets,
-    })),
-  )
-
-  assert.doesNotThrow(() => snippetPages(posts))
-})
-
 test('the sample of snippets at work has a page for each of its demos', async () => {
   const { snippets, messages } = await render('snippets-at-work')
 
   assert.deepEqual(
-    snippets.map((snippet) => snippet.slug),
+    snippets.map((snippet) => snippet.label),
     [
       'hidden-by-transform',
       'hidden-by-position',

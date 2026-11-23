@@ -157,49 +157,32 @@ export const snippetDirective: DirectiveSpec = {
 
 /** A snippet that has a page of its own: one with a label */
 export interface PostSnippet {
-  /** Its label, which is its address: `/snippets/<slug>` */
-  slug: string
+  /** Its label, the last part of its page's address */
+  label: string
   /** Its caption as text, or its number when it has none */
   title: string
   /** The markup of its demo, as set in the post */
   demo: string
 }
 
-/** The address of a snippet's own page (`src/pages/snippets/[slug].astro`) */
-export function snippetAddress(slug: string): string {
-  return `/snippets/${encodeURIComponent(slug)}`
-}
-
 /**
- * The snippets of the given posts that have a page, each with its post. A
- * label is an address, so one that two posts share is an error.
+ * The address of a snippet's own page, under its post's
+ * (`src/pages/posts/[slug]/snippets/[label].astro`).
  */
-export function snippetPages<
-  P extends { slug: string; snippets: PostSnippet[] },
->(posts: P[]): { snippet: PostSnippet; post: P }[] {
-  const postOf = new Map<string, string>()
-
-  return posts.flatMap((post) =>
-    post.snippets.map((snippet) => {
-      const other = postOf.get(snippet.slug)
-      if (other) {
-        throw new Error(
-          `The snippet label "${snippet.slug}" is used in the posts "${other}" and "${post.slug}": it names a page, ${snippetAddress(snippet.slug)}, and has to be unique across posts`,
-        )
-      }
-      postOf.set(snippet.slug, post.slug)
-      return { snippet, post }
-    }),
-  )
+export function snippetAddress(postAddress: string, label: string): string {
+  return `${postAddress}/snippets/${encodeURIComponent(label)}`
 }
 
 /**
  * Finishes the snippets once MyST has numbered them: each becomes a figure
  * whose caption starts with its number ("Example 1:"), and takes its label as
- * `id`. One with a label has a page of its own, which it links to; they are
- * returned.
+ * `id`. One with a label has a page of its own; they are returned, and each
+ * links to its page when the address of the post is given.
  */
-export function snippetsTransform(tree: GenericNode): PostSnippet[] {
+export function snippetsTransform(
+  tree: GenericNode,
+  postAddress?: string,
+): PostSnippet[] {
   const snippets: PostSnippet[] = []
 
   visit(tree as any, 'snippet', (node: GenericNode) => {
@@ -224,13 +207,15 @@ export function snippetsTransform(tree: GenericNode): PostSnippet[] {
 
     if (node.identifier && node.demo) {
       snippets.push({
-        slug: node.identifier,
+        label: node.identifier,
         title: captioned
           ? toText(paragraph.children)
           : `Example ${node.enumerator}`,
         demo: node.demo,
       })
+    }
 
+    if (node.identifier && node.demo && postAddress) {
       // Under the demo, the way to it alone
       const children: GenericNode[] = node.children ?? []
       const demoIndex = children.findIndex((child) => child.type === 'html')
@@ -240,7 +225,7 @@ export function snippetsTransform(tree: GenericNode): PostSnippet[] {
         children: [
           {
             type: 'link',
-            url: snippetAddress(node.identifier),
+            url: snippetAddress(postAddress, node.identifier),
             children: [{ type: 'text', value: 'On a page of its own' }],
           },
         ],
