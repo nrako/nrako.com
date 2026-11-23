@@ -28,6 +28,24 @@ export const DEMO_LANGUAGES = [...MARKUP_LANGUAGES, 'css', ...SCRIPT_LANGUAGES]
 const END_OF_SCRIPT = ['</', 'script>'].join('')
 
 /**
+ * The three parts of a demo, each the sources of its languages joined in the
+ * order written: its markup, its CSS and its script.
+ */
+export function demoParts(sources: SnippetSource[]) {
+  const codeOf = (languages: string[]) =>
+    sources
+      .filter((source) => languages.includes(source.language))
+      .map((source) => source.code)
+      .join('\n')
+
+  return {
+    markup: codeOf(MARKUP_LANGUAGES),
+    css: codeOf(['css']),
+    js: codeOf(SCRIPT_LANGUAGES),
+  }
+}
+
+/**
  * The markup of a demo: its HTML and its drawings in the order written, under
  * its CSS and before its script, or `undefined` for sources without markup.
  *
@@ -36,17 +54,9 @@ const END_OF_SCRIPT = ['</', 'script>'].join('')
  * The script is a module, which keeps what it declares to itself.
  */
 export function demoMarkup(sources: SnippetSource[]): string | undefined {
-  const codeOf = (languages: string[]) =>
-    sources
-      .filter((source) => languages.includes(source.language))
-      .map((source) => source.code)
-      .join('\n')
-
-  const markup = codeOf(MARKUP_LANGUAGES)
+  const { markup, css, js } = demoParts(sources)
   if (!markup) return undefined
 
-  const css = codeOf(['css'])
-  const js = codeOf(SCRIPT_LANGUAGES)
   const style = css ? `<style>@scope {\n${css}\n}</style>` : ''
   const script = js ? `<script type="module">\n${js}\n${END_OF_SCRIPT}` : ''
 

@@ -491,6 +491,39 @@ test.describe('Snippet pages', () => {
     expect(boxes[2].left).toBeGreaterThan(boxes[1].right)
   })
 
+  test('the editor links to a playground that holds the sources as they stand', async ({
+    page,
+    baseURL,
+  }) => {
+    const elsewhere: string[] = []
+    page.on('request', (request) => {
+      if (new URL(request.url()).origin !== new URL(baseURL!).origin) {
+        elsewhere.push(request.url())
+      }
+    })
+    const link = page.getByRole('link', { name: /^Continue in LiveCodes/ })
+
+    await page.goto('/posts/fixture-post/snippets/ex-fixture')
+    await expect(link).toBeHidden()
+
+    await page.goto('/posts/fixture-post/snippets/ex-fixture?source', {
+      waitUntil: 'networkidle',
+    })
+    // The sources are in the fragment, which is not sent to the playground
+    await expect(link).toHaveAttribute(
+      'href',
+      /^https:\/\/livecodes\.io\/\?title=A\+fixture\+snippet#config=code(\/|%2F)/,
+    )
+    await expect(link).toHaveAttribute('target', '_blank')
+    const asWritten = await link.getAttribute('href')
+
+    await page.getByLabel('HTML').fill('<p>Changed.</p>')
+    await expect(link).not.toHaveAttribute('href', asWritten!)
+
+    // Nothing is asked of the playground until the link is followed
+    expect(elsewhere).toEqual([])
+  })
+
   test("a snippet's page is not for search engines", async ({ page }) => {
     await page.goto('/posts/fixture-post/snippets/ex-fixture')
 

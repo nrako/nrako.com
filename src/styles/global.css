@@ -1017,11 +1017,13 @@ a:hover {
 
 .snippet-tools .snippet-hide-source,
 .snippet-tools .snippet-start-again,
+.snippet-tools .snippet-continue,
 :root[data-snippet-source] .snippet-tools .snippet-show-source {
   display: none;
 }
 
-:root[data-snippet-source] .snippet-tools .snippet-start-again {
+:root[data-snippet-source] .snippet-tools .snippet-start-again,
+:root[data-snippet-source] .snippet-tools .snippet-continue {
   display: inline-block;
 }
 

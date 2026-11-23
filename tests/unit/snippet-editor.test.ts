@@ -1,0 +1,49 @@
+import assert from 'node:assert/strict'
+import { test } from 'node:test'
+import { decompress } from 'livecodes'
+import { playgroundAddress } from '../../src/lib/snippetEditor.ts'
+
+const sources = [
+  { language: 'html', code: '<p>Seen.</p>' },
+  { language: 'svg', code: '<svg width="1"></svg>' },
+  { language: 'css', code: 'p { color: red; }' },
+  { language: 'js', code: 'let a = 1' },
+  { language: 'ts', code: 'const shown: string = "and not run"' },
+]
+
+function configOf(address: URL) {
+  const config = new URLSearchParams(address.hash.slice(1)).get('config')
+  assert.ok(config?.startsWith('code/'))
+  return JSON.parse(decompress(config.slice('code/'.length)) ?? '')
+}
+
+test('the playground opens with the parts of the demo, as the demo takes them', () => {
+  const address = new URL(playgroundAddress(sources, 'A snippet'))
+
+  assert.equal(address.origin, 'https://livecodes.io')
+  const { markup, style, script } = configOf(address)
+  // The markup is the HTML and the drawings together; what is not run is left
+  assert.deepEqual(markup, {
+    language: 'html',
+    content: '<p>Seen.</p>\n<svg width="1"></svg>',
+  })
+  assert.deepEqual(style, { language: 'css', content: 'p { color: red; }' })
+  assert.deepEqual(script, { language: 'javascript', content: 'let a = 1' })
+})
+
+test('the sources are in the fragment of the address, which is not sent', () => {
+  const address = new URL(playgroundAddress(sources, 'A snippet'))
+
+  // Only the title, which the page already shows, is in what a server sees
+  assert.deepEqual([...address.searchParams.keys()], ['title'])
+  assert.equal(address.searchParams.get('title'), 'A snippet')
+  assert.ok(!address.search.includes('Seen'))
+  assert.equal(configOf(address).title, 'A snippet')
+})
+
+test('a playground without a title sends nothing to the server', () => {
+  const address = new URL(playgroundAddress(sources))
+
+  assert.equal(address.search, '')
+  assert.equal(address.pathname, '/')
+})

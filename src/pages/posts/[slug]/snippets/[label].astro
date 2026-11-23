@@ -104,6 +104,28 @@ const icon = {
           <path d="M19.9 13a8 8 0 1 1-2-6.4M20 4v5h-5"></path>
         </svg>
       </a>
+      {
+        /*
+         * An edit is not kept here. The editor gives this link the address of
+         * a LiveCodes playground holding the sources as they stand; it opens
+         * apart, so that leaving does not lose them.
+         */
+      }
+      <a
+        class="snippet-continue"
+        href="https://livecodes.io"
+        target="_blank"
+        rel="noopener"
+        data-title={snippet.title}
+        aria-label="Continue in LiveCodes, in a new tab"
+        title="Continue in LiveCodes, in a new tab"
+      >
+        <svg {...icon}>
+          <path
+            d="M11 6H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-4M10 14 20 4M14 4h6v6"
+          ></path>
+        </svg>
+      </a>
     </nav>
 
     <div class="snippet-preview" set:html={snippet.demo} />
