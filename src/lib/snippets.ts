@@ -6,17 +6,12 @@ import {
   type DirectiveSpec,
   type GenericNode,
 } from 'myst-common'
-import { parseHTML } from 'linkedom'
 import { visit } from 'unist-util-visit'
-
-/** The languages of the markup a snippet's demo is made of */
-const MARKUP_LANGUAGES = ['html', 'svg']
-
-/** The languages of a script that a snippet runs */
-const SCRIPT_LANGUAGES = ['js', 'javascript']
-
-/** The languages of a snippet that make its demo; the others are only shown */
-const DEMO_LANGUAGES = [...MARKUP_LANGUAGES, 'css', ...SCRIPT_LANGUAGES]
+import {
+  DEMO_LANGUAGES,
+  demoMarkup,
+  type SnippetSource,
+} from './snippetDemo.ts'
 
 /** How a source is named above it; another language is named as typed */
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -73,14 +68,11 @@ export const snippetDirective: DirectiveSpec = {
   run(data, vfile) {
     const body = (data.body ?? []) as GenericNode[]
     const sources = body.filter((node) => node.type === 'code')
-    const sourcesOf = (...langs: string[]) =>
-      sources.filter((source) => langs.includes(source.lang))
-    const join = (blocks: GenericNode[]) =>
-      blocks.map((block) => block.value).join('\n')
-
-    const html = join(sourcesOf(...MARKUP_LANGUAGES))
-    const css = join(sourcesOf('css'))
-    const js = join(sourcesOf(...SCRIPT_LANGUAGES))
+    const files: SnippetFile[] = sources.map((source) => ({
+      language: source.lang ?? '',
+      name: languageName(source),
+      code: String(source.value),
+    }))
 
     const children: GenericNode[] = []
     if (data.arg) {
@@ -90,11 +82,7 @@ export const snippetDirective: DirectiveSpec = {
       })
     }
 
-    const style = css ? `<style>@scope {\n${css}\n}</style>` : ''
-    const script = js ? `<script type="module">\n${js}\n</script>` : ''
-    const demo = html
-      ? `<div class="snippet-demo not-prose">${style}${html}${script}</div>`
-      : undefined
+    const demo = demoMarkup(files)
 
     if (demo) {
       children.push({ type: 'html', value: demo })
@@ -152,6 +140,7 @@ export const snippetDirective: DirectiveSpec = {
         enumerated: true,
         ...normalizeLabel(data.options?.label as string | undefined),
         demo,
+        files,
         children,
       },
     ]
@@ -187,6 +176,11 @@ function sourceTabs(languages: string[], name: string): GenericNode {
   }
 }
 
+/** A source of a snippet, with the name its language is shown under */
+export interface SnippetFile extends SnippetSource {
+  name: string
+}
+
 /** A snippet that has a page of its own: one with a label */
 export interface PostSnippet {
   /** Its label, the last part of its page's address */
@@ -195,27 +189,18 @@ export interface PostSnippet {
   title: string
   /** The markup of its demo, as set in the post */
   demo: string
-  /** The markup of its sources, highlighted, as set in the post */
-  sources: string
+  /** Its sources as typed, which its page lets a reader edit */
+  files: SnippetFile[]
 }
 
-/**
- * Gives each snippet the markup of its sources, taken from the rendered post:
- * they are highlighted with the rest of it.
- */
-export function withSources(
-  snippets: Omit<PostSnippet, 'sources'>[],
-  html: string,
-): PostSnippet[] {
-  if (snippets.length === 0) return []
+/** The arrow of a link that leads elsewhere, drawn in the text's colour */
+const ARROW = icon('M17 7 7 17M8 7h9v9')
 
-  const { document } = parseHTML(`<html><body>${html}</body></html>`)
-  return snippets.map((snippet) => ({
-    ...snippet,
-    sources:
-      document.getElementById(snippet.label)?.querySelector('.snippet-sources')
-        ?.outerHTML ?? '',
-  }))
+/** The brackets of code, for what leads to the sources */
+const CODE = icon('M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16')
+
+function icon(path: string): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${path}"></path></svg>`
 }
 
 /**
@@ -235,8 +220,8 @@ export function snippetAddress(postAddress: string, label: string): string {
 export function snippetsTransform(
   tree: GenericNode,
   postAddress?: string,
-): Omit<PostSnippet, 'sources'>[] {
-  const snippets: Omit<PostSnippet, 'sources'>[] = []
+): PostSnippet[] {
+  const snippets: PostSnippet[] = []
 
   visit(tree as any, 'snippet', (node: GenericNode) => {
     node.data = {
@@ -283,6 +268,7 @@ export function snippetsTransform(
           ? toText(paragraph.children)
           : `Example ${node.enumerator}`,
         demo: node.demo,
+        files: node.files,
       })
     }
 
@@ -292,15 +278,20 @@ export function snippetsTransform(
       const caption: GenericNode | undefined = node.children?.find(
         (child: GenericNode) => child.type === 'caption',
       )
+      const address = snippetAddress(postAddress, node.identifier)
+      // An icon each, named for those who do not see it
+      const iconLink = (url: string, name: string, icon: string) => ({
+        type: 'link',
+        url,
+        data: { hProperties: { 'aria-label': name, title: name } },
+        children: [{ type: 'html', value: icon }],
+      })
       caption?.children?.push({
         type: 'paragraph',
         data: { hProperties: { class: 'snippet-alone' } },
         children: [
-          {
-            type: 'link',
-            url: snippetAddress(postAddress, node.identifier),
-            children: [{ type: 'text', value: 'On a page of its own' }],
-          },
+          iconLink(`${address}?source`, 'Edit its sources', CODE),
+          iconLink(address, 'On a page of its own', ARROW),
         ],
       })
     }

@@ -285,22 +285,26 @@ test('a snippet with a label has a page of its own under its post, which it link
     { ...options, address: '/posts/a-post' },
   )
 
-  const [{ sources, ...page0 }] = snippets
-  assert.equal(snippets.length, 1)
-  assert.deepEqual(page0, {
-    label: 'ex-a',
-    title: 'A caption',
-    demo: '<div class="snippet-demo not-prose"><style>@scope {\n.secret { opacity: 0; }\n}</style><p>Seen, <span class="secret">unseen</span>.</p></div>',
-  })
-  // Its sources as the post shows them: named and highlighted
+  assert.deepEqual(snippets, [
+    {
+      label: 'ex-a',
+      title: 'A caption',
+      demo: '<div class="snippet-demo not-prose"><style>@scope {\n.secret { opacity: 0; }\n}</style><p>Seen, <span class="secret">unseen</span>.</p></div>',
+      // Its sources as typed, for its page to let a reader edit them
+      files: [
+        {
+          language: 'html',
+          name: 'HTML',
+          code: '<p>Seen, <span class="secret">unseen</span>.</p>',
+        },
+        { language: 'css', name: 'CSS', code: '.secret { opacity: 0; }' },
+      ],
+    },
+  ])
+  // The link ends the caption's line: an arrow, named for who does not see it
   assert.match(
-    sources,
-    /^<div class="snippet-sources"><div class="snippet-source"><p class="snippet-language">HTML<\/p><pre class="shiki [\s\S]*<p class="snippet-language">CSS<\/p><pre class="shiki [\s\S]*<\/pre><\/div><\/div>$/,
-  )
-  assert.ok(
-    page.includes(
-      '<p class="snippet-alone"><a href="/posts/a-post/snippets/ex-a">On a page of its own</a></p></figcaption><div class="snippet-demo',
-    ),
+    page,
+    /<p class="snippet-alone"><a href="\/posts\/a-post\/snippets\/ex-a\?source" aria-label="Edit its sources" title="Edit its sources"><svg [^>]*aria-hidden="true"><path [^>]*><\/path><\/svg><\/a><a href="\/posts\/a-post\/snippets\/ex-a" aria-label="On a page of its own" title="On a page of its own"><svg [^>]*aria-hidden="true"><path [^>]*><\/path><\/svg><\/a><\/p><\/figcaption><div class="snippet-demo/,
   )
 })
 

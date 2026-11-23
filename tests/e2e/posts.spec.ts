@@ -367,7 +367,7 @@ test.describe('Snippet pages', () => {
     await page.goto('/posts/fixture-post/snippets/ex-fixture')
 
     // Not hidden: absent. They wait in a <template>, outside the document.
-    await expect(page.locator('pre')).toHaveCount(0)
+    await expect(page.locator('pre, textarea')).toHaveCount(0)
     expect(await page.evaluate(() => document.body.textContent)).not.toContain(
       '<p>Seen',
     )
@@ -375,8 +375,8 @@ test.describe('Snippet pages', () => {
       await page.evaluate(
         () =>
           (
-            document.getElementById('snippet-sources') as HTMLTemplateElement
-          ).content.querySelectorAll('pre').length,
+            document.getElementById('snippet-editor') as HTMLTemplateElement
+          ).content.querySelectorAll('textarea').length,
       ),
     ).toBe(2)
   })
@@ -386,23 +386,109 @@ test.describe('Snippet pages', () => {
   }) => {
     await page.goto('/posts/fixture-post/snippets/ex-fixture')
 
-    const sources = page.locator('.snippet-page-sources')
-    await expect(sources).toBeHidden()
+    const fields = page.locator('.snippet-editor textarea')
+    await expect(fields).toHaveCount(0)
 
-    await page.getByRole('link', { name: 'Show the sources' }).click()
+    await page.getByRole('link', { name: 'Show and edit the sources' }).click()
 
     await expect(page).toHaveURL(/\/snippets\/ex-fixture\?source$/)
-    await expect(sources).toBeVisible()
-    await expect(sources.locator('.snippet-language')).toHaveText([
-      'HTML',
-      'CSS',
-    ])
-    await expect(sources.locator('pre.shiki')).toHaveCount(2)
+    // Each source as typed, in a field named after its language
+    await expect(page.getByLabel('HTML')).toHaveValue(
+      '<p>Seen, <span class="secret">unseen</span>.</p>',
+    )
+    await expect(page.getByLabel('CSS')).toHaveValue(
+      '.secret {\n  opacity: 0;\n}',
+    )
+    await expect(fields).toHaveCount(2)
 
     await page.getByRole('link', { name: 'Hide the sources' }).click()
 
     await expect(page).toHaveURL(/\/snippets\/ex-fixture$/)
-    await expect(sources).toBeHidden()
+    await expect(fields).toHaveCount(0)
+  })
+
+  test("a snippet's sources are edited from its post", async ({ page }) => {
+    await page.goto('/posts/fixture-post')
+
+    await page
+      .locator('#ex-fixture')
+      .getByRole('link', { name: 'Edit its sources' })
+      .click()
+
+    await expect(page).toHaveURL(
+      /\/posts\/fixture-post\/snippets\/ex-fixture\?source$/,
+    )
+    await expect(page.getByLabel('HTML')).toBeVisible()
+  })
+
+  test('editing a source draws the demo again', async ({ page }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-fixture?source')
+
+    const demo = page.locator('.snippet-preview')
+    await expect(demo.locator('.secret')).toHaveCSS('opacity', '0')
+
+    await page.getByLabel('CSS').fill('.secret {\n  opacity: 0.5;\n}')
+    await expect(demo.locator('.secret')).toHaveCSS('opacity', '0.5')
+
+    await page.getByLabel('HTML').fill('<p class="secret">Changed.</p>')
+    await expect(demo).toHaveText('Changed.', { useInnerText: true })
+    // The edited CSS still applies to the edited HTML
+    await expect(demo.locator('.secret')).toHaveCSS('opacity', '0.5')
+  })
+
+  test('an edited script runs in the demo', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+
+    const script = page.getByLabel('JavaScript')
+    await script.fill((await script.inputValue()).replace('+ 1', '+ 5'))
+
+    const pressed = page.locator('#fixture-pressed')
+    await expect(async () => {
+      await page.getByRole('button', { name: 'Press' }).click()
+      expect(Number(await pressed.textContent()) % 5).toBe(0)
+      expect(Number(await pressed.textContent())).toBeGreaterThan(0)
+    }).toPass()
+    expect(errors).toEqual([])
+  })
+
+  test('starting again gives the snippet as written', async ({ page }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-fixture?source')
+
+    await page.getByLabel('HTML').fill('<p>Changed.</p>')
+    await expect(page.locator('.snippet-preview')).toHaveText('Changed.', {
+      useInnerText: true,
+    })
+
+    await page
+      .getByRole('link', { name: 'Start again from the snippet as written' })
+      .click()
+
+    await expect(page.locator('.snippet-preview')).toHaveText('Seen, unseen.', {
+      useInnerText: true,
+    })
+    await expect(page.getByLabel('HTML')).toHaveValue(
+      '<p>Seen, <span class="secret">unseen</span>.</p>',
+    )
+  })
+
+  test('the sources are side by side when the window has room for them', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+
+    const panes = page.locator('.snippet-pane')
+    await expect(panes).toHaveCount(3)
+    const boxes = await panes.evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect()),
+    )
+    // One line: each starts where the one before ends
+    expect(boxes[0].top).toBe(boxes[1].top)
+    expect(boxes[1].top).toBe(boxes[2].top)
+    expect(boxes[1].left).toBeGreaterThan(boxes[0].right)
+    expect(boxes[2].left).toBeGreaterThan(boxes[1].right)
   })
 
   test("a snippet's page is not for search engines", async ({ page }) => {

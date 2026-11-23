@@ -290,8 +290,9 @@ hidden words come along.
 A snippet that has a label also has a page of its own under its post, at
 `snippets/` and its label, with the demo and nothing else. Here the demo's
 words are on the page twice, once rendered and once in its source; there they
-are the only text, until `?source` is added to the address, which shows the
-sources there too.
+are the only text. With `?source` added to its address, the page shows the
+sources too, each in a field to edit, and draws the demo again as they change.
+The two icons that end a snippet's caption lead to one and the other.
 
 Sources that run long are set as tabs, one shown at a time, so that the demo
 stays in view. The ones on this page are short and stay one under the other.

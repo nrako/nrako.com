@@ -881,8 +881,25 @@ a:hover {
   margin: 0;
 }
 
+/* Two icons: to the snippet's sources to edit, and to its demo alone */
 .post-content .snippet-alone {
+  display: flex;
   flex: none;
+  gap: 0.75rem;
+}
+
+.post-content .snippet-alone a {
+  color: inherit;
+}
+
+.post-content .snippet-alone a:hover {
+  color: var(--accent);
+}
+
+.post-content .snippet-alone svg {
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0;
 }
 
 .snippet-demo {
@@ -999,14 +1016,71 @@ a:hover {
 }
 
 .snippet-tools .snippet-hide-source,
+.snippet-tools .snippet-start-again,
 :root[data-snippet-source] .snippet-tools .snippet-show-source {
   display: none;
+}
+
+:root[data-snippet-source] .snippet-tools .snippet-start-again {
+  display: inline-block;
 }
 
 /* Drawn in the ink while the sources are shown */
 :root[data-snippet-source] .snippet-tools .snippet-hide-source {
   display: inline-block;
   color: inherit;
+}
+
+/*
+ * With its sources, the page is a bench: it leaves the column for the width of
+ * the window, the demo on top and the sources side by side under it, each in a
+ * field to edit. The panes take one line while there is room for them, and
+ * come one under the other when there is not.
+ */
+:root[data-snippet-source] .snippet-page {
+  max-width: none;
+}
+
+.snippet-editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.snippet-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.snippet-pane label {
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+/* Drawn as a block of code is: same ground, same face */
+.snippet-pane textarea {
+  height: 45vh;
+  min-height: 12rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--ink) 4%, var(--ground));
+  color: inherit;
+  font-family: var(--type-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+  resize: vertical;
+}
+
+.snippet-pane textarea:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
 }
 
 /* Image alignment */
