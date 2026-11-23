@@ -58,6 +58,29 @@ styled by it.
 <output id="fixture-pressed">0</output>
 ```
 
+```css
+button {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  border-style: dashed;
+}
+
+output {
+  display: inline-block;
+  min-width: 2ch;
+  margin-left: 0.5rem;
+  text-align: right;
+}
+```
+
 ```js
 const pressed = document.getElementById('fixture-pressed')
 

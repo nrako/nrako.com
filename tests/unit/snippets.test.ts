@@ -230,13 +230,53 @@ test('a snippet shows another language without running it, with a warning', asyn
   assert.match(messages.warnings![0].message, /`ts` block but does not run it/)
 })
 
-test('a snippet keeps what else is written in it', async () => {
+test('a snippet keeps what else is written in it, after its sources', async () => {
   const { html: page } = await processor(
-    snippet('A caption', html, 'A note about it.'),
+    snippet('A caption', html, 'A note about it.', css),
     options,
   )
 
-  assert.match(page, /<\/pre><\/div><p>A note about it\.<\/p><\/figure>/)
+  assert.match(page, /<\/pre><\/div><\/div><p>A note about it\.<\/p><\/figure>/)
+})
+
+const long = (lines: number) =>
+  `${fence}css\n${Array.from({ length: lines }, (_, line) => `.rule-${line} {}`).join('\n')}\n${fence}`
+
+test('a snippet sets short sources one under the other', async () => {
+  const { html: page } = await processor(
+    snippet('A caption', html, long(22)),
+    options,
+  )
+
+  assert.ok(
+    page.includes('<div class="snippet-sources"><div class="snippet-source">'),
+  )
+  assert.ok(!page.includes('snippet-tab'))
+})
+
+test('a snippet sets long sources as tabs, one per source', async () => {
+  const { html: page } = await processor(
+    `${snippet('Short', html)}\n\n${snippet('Long', html, long(23), `${fence}js\nlet a = 1\n${fence}`)}`,
+    options,
+  )
+
+  // Named after the snippet's number, the first source shown
+  assert.ok(
+    page.includes(
+      '<div class="snippet-sources snippet-tabs"><div class="snippet-tablist" role="radiogroup" aria-label="Source shown"><label><input type="radio" name="snippet-sources-2" checked>HTML</label><label><input type="radio" name="snippet-sources-2">CSS</label><label><input type="radio" name="snippet-sources-2">JavaScript</label></div><div class="snippet-source"><p class="snippet-language">HTML</p>',
+    ),
+  )
+  // Every source is in the page: the stylesheet shows the one chosen
+  assert.equal([...page.matchAll(/<pre class="shiki/g)].length, 4)
+})
+
+test('a snippet with one long source has no tabs', async () => {
+  const { html: page } = await processor(
+    snippet('A caption', `${fence}html\n${'<p>x</p>\n'.repeat(40)}${fence}`),
+    options,
+  )
+
+  assert.ok(!page.includes('snippet-tab'))
 })
 
 test('a snippet with a label has a page of its own under its post, which it links to', async () => {
@@ -245,13 +285,18 @@ test('a snippet with a label has a page of its own under its post, which it link
     { ...options, address: '/posts/a-post' },
   )
 
-  assert.deepEqual(snippets, [
-    {
-      label: 'ex-a',
-      title: 'A caption',
-      demo: '<div class="snippet-demo not-prose"><style>@scope {\n.secret { opacity: 0; }\n}</style><p>Seen, <span class="secret">unseen</span>.</p></div>',
-    },
-  ])
+  const [{ sources, ...page0 }] = snippets
+  assert.equal(snippets.length, 1)
+  assert.deepEqual(page0, {
+    label: 'ex-a',
+    title: 'A caption',
+    demo: '<div class="snippet-demo not-prose"><style>@scope {\n.secret { opacity: 0; }\n}</style><p>Seen, <span class="secret">unseen</span>.</p></div>',
+  })
+  // Its sources as the post shows them: named and highlighted
+  assert.match(
+    sources,
+    /^<div class="snippet-sources"><div class="snippet-source"><p class="snippet-language">HTML<\/p><pre class="shiki [\s\S]*<p class="snippet-language">CSS<\/p><pre class="shiki [\s\S]*<\/pre><\/div><\/div>$/,
+  )
   assert.ok(
     page.includes(
       '</div><p class="snippet-alone"><a href="/posts/a-post/snippets/ex-a">On a page of its own</a></p>',

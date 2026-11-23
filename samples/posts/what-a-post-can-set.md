@@ -288,9 +288,13 @@ part of its sentence. Select that sentence from end to end, copy it, and the
 hidden words come along.
 
 A snippet that has a label also has a page of its own under its post, at
-`snippets/` and its label, with the demo and nothing else. Here the demo's words are on the
-page twice, once rendered and once in its source; there they are the only
-text.
+`snippets/` and its label, with the demo and nothing else. Here the demo's
+words are on the page twice, once rendered and once in its source; there they
+are the only text, until `?source` is added to the address, which shows the
+sources there too.
+
+Sources that run long are set as tabs, one shown at a time, so that the demo
+stays in view. The ones on this page are short and stay one under the other.
 
 A `js` block is the demo's script. It runs in the page, after the demo's
 HTML, and finds its elements by an `id` that nothing else on the page has:

@@ -6,6 +6,7 @@ import {
   type DirectiveSpec,
   type GenericNode,
 } from 'myst-common'
+import { parseHTML } from 'linkedom'
 import { visit } from 'unist-util-visit'
 
 /** The languages of the markup a snippet's demo is made of */
@@ -114,32 +115,34 @@ export const snippetDirective: DirectiveSpec = {
       )
     }
 
-    // Each source as typed, under the name of its language, and anything else
-    // written in the snippet where it was
-    children.push(
-      ...body.map((node) =>
-        node.type === 'code'
-          ? {
-              type: 'snippetSource',
-              data: { hName: 'div', hProperties: { class: 'snippet-source' } },
-              children: [
-                {
-                  type: 'paragraph',
-                  data: { hProperties: { class: 'snippet-language' } },
-                  children: [
-                    {
-                      type: 'text',
-                      value: LANGUAGE_NAMES[node.lang] ?? node.lang ?? 'Text',
-                    },
-                  ],
-                },
-                // The highlighter has no SVG of its own: it is XML
-                node.lang === 'svg' ? { ...node, lang: 'xml' } : node,
-              ],
-            }
-          : node,
-      ),
-    )
+    // The sources as typed, each under the name of its language
+    if (sources.length > 0) {
+      children.push({
+        type: 'snippetSources',
+        data: { hName: 'div', hProperties: { class: 'snippet-sources' } },
+        languages: sources.map(languageName),
+        lines: sources.reduce(
+          (lines, source) => lines + String(source.value).split('\n').length,
+          0,
+        ),
+        children: sources.map((source) => ({
+          type: 'snippetSource',
+          data: { hName: 'div', hProperties: { class: 'snippet-source' } },
+          children: [
+            {
+              type: 'paragraph',
+              data: { hProperties: { class: 'snippet-language' } },
+              children: [{ type: 'text', value: languageName(source) }],
+            },
+            // The highlighter has no SVG of its own: it is XML
+            source.lang === 'svg' ? { ...source, lang: 'xml' } : source,
+          ],
+        })),
+      })
+    }
+
+    // And anything else written in the snippet, after them
+    children.push(...body.filter((node) => node.type !== 'code'))
 
     return [
       {
@@ -155,6 +158,35 @@ export const snippetDirective: DirectiveSpec = {
   },
 }
 
+function languageName(source: GenericNode): string {
+  return LANGUAGE_NAMES[source.lang] ?? source.lang ?? 'Text'
+}
+
+/**
+ * From how many lines the sources of a snippet are set as tabs, one shown at a
+ * time, instead of one under the other.
+ */
+const TABS_FROM_LINES = 24
+
+/**
+ * The tabs of a snippet's sources: a group of radio buttons, one per source,
+ * which CSS alone reads to show the source chosen (`global.css`). Without the
+ * stylesheet, in a feed, the sources are one under the other, each named.
+ */
+function sourceTabs(languages: string[], name: string): GenericNode {
+  const escape = (text: string) =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
+  const tabs = languages.map(
+    (language, index) =>
+      `<label><input type="radio" name="${escape(name)}"${index === 0 ? ' checked' : ''}>${escape(language)}</label>`,
+  )
+
+  return {
+    type: 'html',
+    value: `<div class="snippet-tablist" role="radiogroup" aria-label="Source shown">${tabs.join('')}</div>`,
+  }
+}
+
 /** A snippet that has a page of its own: one with a label */
 export interface PostSnippet {
   /** Its label, the last part of its page's address */
@@ -163,6 +195,27 @@ export interface PostSnippet {
   title: string
   /** The markup of its demo, as set in the post */
   demo: string
+  /** The markup of its sources, highlighted, as set in the post */
+  sources: string
+}
+
+/**
+ * Gives each snippet the markup of its sources, taken from the rendered post:
+ * they are highlighted with the rest of it.
+ */
+export function withSources(
+  snippets: Omit<PostSnippet, 'sources'>[],
+  html: string,
+): PostSnippet[] {
+  if (snippets.length === 0) return []
+
+  const { document } = parseHTML(`<html><body>${html}</body></html>`)
+  return snippets.map((snippet) => ({
+    ...snippet,
+    sources:
+      document.getElementById(snippet.label)?.querySelector('.snippet-sources')
+        ?.outerHTML ?? '',
+  }))
 }
 
 /**
@@ -182,8 +235,8 @@ export function snippetAddress(postAddress: string, label: string): string {
 export function snippetsTransform(
   tree: GenericNode,
   postAddress?: string,
-): PostSnippet[] {
-  const snippets: PostSnippet[] = []
+): Omit<PostSnippet, 'sources'>[] {
+  const snippets: Omit<PostSnippet, 'sources'>[] = []
 
   visit(tree as any, 'snippet', (node: GenericNode) => {
     node.data = {
@@ -204,6 +257,24 @@ export function snippetsTransform(
     }
 
     const captioned = Boolean(paragraph.children?.length)
+
+    // Long sources are set as tabs: one is read at a time, and the demo stays
+    // in view. The group of tabs is named after the snippet's number, which
+    // is unique in the post.
+    const sources: GenericNode | undefined = node.children?.find(
+      (child: GenericNode) => child.type === 'snippetSources',
+    )
+    if (
+      sources &&
+      sources.languages.length > 1 &&
+      sources.lines >= TABS_FROM_LINES
+    ) {
+      sources.data.hProperties.class = 'snippet-sources snippet-tabs'
+      sources.children = [
+        sourceTabs(sources.languages, `snippet-sources-${node.enumerator}`),
+        ...(sources.children ?? []),
+      ]
+    }
 
     if (node.identifier && node.demo) {
       snippets.push({

@@ -879,18 +879,75 @@ a:hover {
 }
 
 /* Each source, under the name of its language */
-.post-content .snippet-source {
+.snippet-source {
   margin-top: 0.75rem;
 }
 
-.post-content .snippet-language {
+.snippet-language {
   margin: 0 0 0.25rem;
   color: var(--muted);
   font-size: var(--size-meta);
 }
 
-.post-content .snippet pre {
+.snippet-source pre {
   margin: 0;
+}
+
+/*
+ * Long sources as tabs. The tabs are radio buttons, kept for the keyboard and
+ * not drawn: the one checked shows the source at its position, with no script.
+ * The name above a source is the tab's, so it is not shown twice.
+ */
+.snippet-tablist {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0.75rem 0 0.25rem;
+  font-size: var(--size-meta);
+}
+
+.snippet-tablist label {
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.snippet-tablist input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.snippet-tablist label:hover {
+  color: var(--accent);
+}
+
+.snippet-tablist label:has(:checked) {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.snippet-tablist label:has(:focus-visible) {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.snippet-tabs .snippet-source {
+  display: none;
+  margin-top: 0;
+}
+
+.snippet-tabs .snippet-language {
+  display: none;
+}
+
+/* The tabs are the first child, so the source of the nth tab is the next one */
+.snippet-tabs:has(label:nth-child(1) :checked) > .snippet-source:nth-child(2),
+.snippet-tabs:has(label:nth-child(2) :checked) > .snippet-source:nth-child(3),
+.snippet-tabs:has(label:nth-child(3) :checked) > .snippet-source:nth-child(4),
+.snippet-tabs:has(label:nth-child(4) :checked) > .snippet-source:nth-child(5),
+.snippet-tabs:has(label:nth-child(5) :checked) > .snippet-source:nth-child(6),
+.snippet-tabs:has(label:nth-child(6) :checked) > .snippet-source:nth-child(7) {
+  display: block;
 }
 
 /* Under the demo, the link to its own page */
@@ -901,20 +958,46 @@ a:hover {
   text-align: right;
 }
 
-/* A snippet's own page: the demo, and an icon that leads back to its post */
-.snippet-back {
-  display: inline-block;
+/*
+ * A snippet's own page: the demo, under icons that lead back to its post and
+ * show or hide its sources. The sources are not rendered unless the address
+ * asks for them (`data-snippet-source` on <html>, set from `?source` before
+ * render): what is not rendered is not text of the page.
+ */
+.snippet-tools {
+  display: flex;
+  gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.snippet-tools a {
+  display: inline-block;
   color: var(--muted);
 }
 
-.snippet-back:hover {
+.snippet-tools a:hover {
   color: var(--accent);
 }
 
-.snippet-back svg {
+.snippet-tools svg {
   width: 1.25em;
   height: 1.25em;
+}
+
+.snippet-page-sources,
+.snippet-tools .snippet-hide-source,
+:root[data-snippet-source] .snippet-tools .snippet-show-source {
+  display: none;
+}
+
+:root[data-snippet-source] .snippet-page-sources {
+  display: block;
+}
+
+/* Drawn in the ink while the sources are shown */
+:root[data-snippet-source] .snippet-tools .snippet-hide-source {
+  display: inline-block;
+  color: inherit;
 }
 
 /* Image alignment */

@@ -120,7 +120,7 @@ const pieces: Record<string, RegExp> = {
   "a snippet's demo, with its CSS scoped to it":
     /<div class="snippet-demo not-prose"><style>@scope \{\n\.unseen \{\n {2}opacity: 0;\n\}\n\}<\/style><p>A sentence with <span class="unseen">words nobody sees<\/span> in it\.<\/p><\/div>/,
   "a snippet's sources":
-    /<div class="snippet-source"><p class="snippet-language">HTML<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><div class="snippet-source"><p class="snippet-language">CSS<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><\/figure>/,
+    /<div class="snippet-sources"><div class="snippet-source"><p class="snippet-language">HTML<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><div class="snippet-source"><p class="snippet-language">CSS<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><\/div><\/figure>/,
   "a snippet's link to its own page":
     /<\/div><p class="snippet-alone"><a href="\/posts\/what-a-post-can-set\/snippets\/ex-unseen">On a page of its own<\/a><\/p>/,
   'a reference to a snippet': /<a href="#ex-unseen">Example.1<\/a> hides/,

@@ -1,7 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import { getPosts, defaultOptions as options } from '@/lib/blogData'
-import type { PostSnippet } from '@/lib/snippets'
+import { snippetAddress, type PostSnippet } from '@/lib/snippets'
 
 interface Props {
   snippet: PostSnippet
@@ -25,6 +25,7 @@ export async function getStaticPaths() {
 }
 
 const { snippet, post } = Astro.props
+const address = snippetAddress(`/posts/${post.slug}`, snippet.label)
 ---
 
 <Layout
@@ -34,34 +35,81 @@ const { snippet, post } = Astro.props
 >
   {/* A demo only means something with its post */}
   <meta name="robots" content="noindex" slot="head" />
+  <script is:inline slot="head">
+    // `?source` shows the sources. Decided before render, as the theme is.
+    if (new URLSearchParams(location.search).has('source')) {
+      document.documentElement.setAttribute('data-snippet-source', '')
+    }
+  </script>
 
   {
     /*
      * The demo and nothing else that reads as text: what a browser does with
-     * the text of a page depends on what else the page says. The way back is
-     * an icon for that reason.
+     * the text of a page depends on what else the page says. The links are
+     * icons for that reason, and the sources, which repeat the demo's words,
+     * are not rendered unless the address asks for them with `?source`.
      */
   }
   <div class="snippet-page prose mx-auto max-w-(--column)">
-    <a
-      class="snippet-back not-prose"
-      href={`/posts/${post.slug}#${snippet.label}`}
-      aria-label={`Back to the post: ${post.title}`}
-      title={`Back to the post: ${post.title}`}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
+    <nav class="snippet-tools not-prose">
+      <a
+        href={`/posts/${post.slug}#${snippet.label}`}
+        aria-label={`Back to the post: ${post.title}`}
+        title={`Back to the post: ${post.title}`}
       >
-        <path d="M5 12h14M5 12l6 6M5 12l6-6"></path>
-      </svg>
-    </a>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14M5 12l6 6M5 12l6-6"></path>
+        </svg>
+      </a>
+      <a
+        class="snippet-show-source"
+        href={`${address}?source`}
+        aria-label="Show the sources"
+        title="Show the sources"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"></path>
+        </svg>
+      </a>
+      <a
+        class="snippet-hide-source"
+        href={address}
+        aria-label="Hide the sources"
+        title="Hide the sources"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"></path>
+        </svg>
+      </a>
+    </nav>
     <Fragment set:html={snippet.demo} />
+    <div class="snippet-page-sources" set:html={snippet.sources} />
   </div>
 </Layout>

@@ -43,7 +43,7 @@ import {
   crossReferencesTransform,
   reportMessages,
 } from './crossReferences.ts'
-import { snippetDirective, snippetsTransform } from './snippets.ts'
+import { snippetDirective, snippetsTransform, withSources } from './snippets.ts'
 
 export type ParseOptions = Pick<
   BlogOptions,
@@ -197,7 +197,12 @@ async function parse(text: string, options: ParseOptions) {
 
   const html = r.value as string
 
-  return { frontmatter, html, messages, snippets }
+  return {
+    frontmatter,
+    html,
+    messages,
+    snippets: withSources(snippets, html),
+  }
 }
 
 export default async function processor(

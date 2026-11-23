@@ -285,6 +285,53 @@ test.describe('Snippet scripts', () => {
   }
 })
 
+test.describe('Snippet sources', () => {
+  test('long sources are tabs that show one source at a time', async ({
+    page,
+  }) => {
+    skipWithoutFixturePosts()
+    await page.goto('/posts/fixture-post')
+
+    const snippet = page.locator('#ex-script')
+    const sources = snippet.locator('.snippet-source')
+    const tab = (name: string) =>
+      snippet.locator('.snippet-tablist label', { hasText: name })
+
+    await expect(snippet.locator('.snippet-tablist label')).toHaveText([
+      'HTML',
+      'CSS',
+      'JavaScript',
+    ])
+    await expect(sources.nth(0)).toBeVisible()
+    await expect(sources.nth(1)).toBeHidden()
+    await expect(sources.nth(2)).toBeHidden()
+
+    await tab('CSS').click()
+
+    await expect(sources.nth(0)).toBeHidden()
+    await expect(sources.nth(1)).toBeVisible()
+    await expect(sources.nth(2)).toBeHidden()
+
+    await tab('JavaScript').click()
+
+    await expect(sources.nth(1)).toBeHidden()
+    await expect(sources.nth(2)).toBeVisible()
+  })
+
+  test('short sources are one under the other, without tabs', async ({
+    page,
+  }) => {
+    skipWithoutFixturePosts()
+    await page.goto('/posts/fixture-post')
+
+    const snippet = page.locator('#ex-fixture')
+
+    await expect(snippet.locator('.snippet-tablist')).toHaveCount(0)
+    await expect(snippet.locator('.snippet-source').nth(0)).toBeVisible()
+    await expect(snippet.locator('.snippet-source').nth(1)).toBeVisible()
+  })
+})
+
 test.describe('Snippet pages', () => {
   test.beforeEach(() => {
     skipWithoutFixturePosts()
@@ -309,9 +356,34 @@ test.describe('Snippet pages', () => {
     await expect(page.locator('body')).toHaveText('Seen, unseen.', {
       useInnerText: true,
     })
-    await expect(page.locator('header, footer, pre')).toHaveCount(0)
+    await expect(page.locator('header, footer')).toHaveCount(0)
+    await expect(page.locator('.snippet-page-sources')).toBeHidden()
     await expect(page.locator('.secret')).toHaveCSS('opacity', '0')
     expect(failed).toEqual([])
+  })
+
+  test("a snippet's page shows its sources when its address asks for them", async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-fixture')
+
+    const sources = page.locator('.snippet-page-sources')
+    await expect(sources).toBeHidden()
+
+    await page.getByRole('link', { name: 'Show the sources' }).click()
+
+    await expect(page).toHaveURL(/\/snippets\/ex-fixture\?source$/)
+    await expect(sources).toBeVisible()
+    await expect(sources.locator('.snippet-language')).toHaveText([
+      'HTML',
+      'CSS',
+    ])
+    await expect(sources.locator('pre.shiki')).toHaveCount(2)
+
+    await page.getByRole('link', { name: 'Hide the sources' }).click()
+
+    await expect(page).toHaveURL(/\/snippets\/ex-fixture$/)
+    await expect(sources).toBeHidden()
   })
 
   test("a snippet's page is not for search engines", async ({ page }) => {
