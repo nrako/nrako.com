@@ -1,9 +1,9 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import PostCard from '@/components/PostCard.astro'
-import { getPosts, defaultOptions as options } from '@/lib/blogData'
+import { getListedPosts, defaultOptions as options } from '@/lib/blogData'
 
-const posts = await getPosts(options)
+const posts = await getListedPosts(options)
 ---
 
 <Layout title="Posts | nrako.com" description="All posts on nrako.com">

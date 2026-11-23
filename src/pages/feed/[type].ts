@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import { Feed, type Item as FeedItem } from 'feed'
-import { defaultOptions as options, getPosts } from '@/lib/blogData'
+import { defaultOptions as options, getListedPosts } from '@/lib/blogData'
 
 const feedPathPrefix = '/feed'
 
@@ -19,7 +19,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     .replace('{{year}}', `${new Date().getFullYear()}`)
     .replace('{{url}}', origin)
 
-  const posts = await getPosts(options)
+  const posts = await getListedPosts(options)
 
   let updated: Date | undefined = undefined
   if (posts[0]?.frontmatter.date) {

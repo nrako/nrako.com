@@ -54,13 +54,13 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Pages** (`src/pages/`):
 
-- `index.astro` — Homepage (static): the site name, one sentence about the author with its animated introduction, and the post listing
-- `posts/index.astro` — Post listing (static), linked as "Posts" in the header. It lists the same posts as the homepage and says so when nothing is published
+- `index.astro` — Homepage (static): the site name, one sentence about the author with its animated introduction, and the listing of the listed posts
+- `posts/index.astro` — Post listing (static), linked as "Posts" in the header. It lists the same posts as the homepage and says so when nothing is listed
 - `posts/[slug].astro` — Single post (static, prerendered)
 - `posts/[slug]/[sha].astro` — Post at an older commit (static, one page per version)
 - `posts/[slug]/snippets/[label].astro` — A snippet's demo alone (static, one page per snippet that has a label)
 - `404.astro` — Not-found page (static)
-- `feed/[type].ts` — RSS/Atom/JSON feed endpoints (static)
+- `feed/[type].ts` — RSS/Atom/JSON feed endpoints (static), of the listed posts
 
 **Layouts** (`src/layouts/`): `Layout.astro` (root, with header/footer/theme toggle). The header and the footer are `components/SiteHeader.astro` and `components/SiteFooter.astro`; a page that passes `bare` gets neither, only the head (fonts, theme, reading settings) and its own content. Its header links "Posts" to `/posts` and "About" to `/#about` on every page. The latter is `components/AboutLink.astro`: named "About Me" for assistive technology, it adds "Me", "Myself", "I" in turn under a mouse or keyboard focus, and reads "About..." while the homepage animation plays (`data-about-playing` on `<html>`, set by the island).
 
@@ -74,7 +74,7 @@ pnpm run deploy               # Build + wrangler deploy
 
 **Blog System** (`src/lib/`):
 
-- `blogData.ts` — Post loading, reading time
+- `blogData.ts` — Post loading (`getPosts` for the pages, `getListedPosts` for the listings and the feeds), reading time
 - `processor.ts` — MyST markdown processing with Shiki syntax highlighting
 - `citations.ts` — Citations of a post's BibTeX bibliography and its list of references
 - `crossReferences.ts` — What MyST's resolved references still need from the HTML renderer
@@ -114,6 +114,7 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 ## Key Patterns
 
 - Preact islands use `client:load`
+- Unlisted posts: `listed: false` in a post's frontmatter keeps it out of the homepage, `/posts` and the feeds, and nothing else: its page, the pages of its snippets and its version pages are built as any post's, so it is reached by its address or by a link. The rule is `getListedPosts` (`blogData.ts`) and only there: a page that lists posts calls it, one that builds pages calls `getPosts`. With every post unlisted, the listings read as with no post. `listed` is the site's own key: `processor.ts` takes it out of the frontmatter before MyST's validation, which would drop it with a warning. A value that is neither `true` nor `false` fails the build.
 - Post versioning: the commit history and every older version are fetched from the GitHub API at build time and prerendered. A new commit to a post shows up after the next build and deploy.
 - Versioning needs `GITHUB_TOKEN` at build time (`.env` locally, `secrets.GITHUB_TOKEN` in CI). Without it the build succeeds with no version history and no version pages. A listed version that cannot be fetched fails the build.
 - The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.

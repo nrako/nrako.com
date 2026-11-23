@@ -2,9 +2,9 @@
 import Layout from '@/layouts/Layout.astro'
 import Time from '@/components/Time.astro'
 import AboutAnimation from '@/components/preact/about-animation'
-import { getPosts, defaultOptions as options } from '@/lib/blogData'
+import { getListedPosts, defaultOptions as options } from '@/lib/blogData'
 
-const posts = await getPosts(options)
+const posts = await getListedPosts(options)
 ---
 
 <Layout title="nrako.com" description="nrako's personal website">

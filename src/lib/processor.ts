@@ -31,7 +31,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import { h } from 'hastscript'
 import { defaultOptions, type BlogOptions } from './blogData.ts'
-import { validatePageFrontmatter } from 'myst-frontmatter'
+import { validatePageFrontmatter, type PageFrontmatter } from 'myst-frontmatter'
 import {
   citationsTransform,
   loadBibliography,
@@ -53,6 +53,17 @@ export type ParseOptions = Pick<
   loadFile?: LoadFile
   /** The address of the post, which the pages of its snippets are under */
   address?: string
+}
+
+/**
+ * A post's frontmatter: MyST's, and what the site adds to it.
+ */
+export type PostFrontmatter = PageFrontmatter & {
+  /**
+   * `false` keeps the post out of the listings and the feeds. Its pages are
+   * built all the same.
+   */
+  listed?: boolean
 }
 
 interface Message {
@@ -116,16 +127,24 @@ async function parse(text: string, options: ParseOptions) {
   // only then do `@key` and `[@key]` cite. The frontmatter that says so is
   // only known once the post is parsed, hence the second parse.
   let parsed = parseMyst(text, false)
-  const rawPageFrontmatter = parsed.frontmatter
+  // `listed` is the site's own key: MyST's validation would drop it with a
+  // warning, so it is taken out first.
+  const { listed, ...rawPageFrontmatter } = parsed.frontmatter
+  if (listed !== undefined && typeof listed !== 'boolean') {
+    throw new Error(
+      `"listed" is true or false in a post's frontmatter, not ${JSON.stringify(listed)}`,
+    )
+  }
 
   const messages: Messages = {}
-  const frontmatter = validatePageFrontmatter(
+  const frontmatter: PostFrontmatter = validatePageFrontmatter(
     {
       authors: options.defaultAuthors,
       ...rawPageFrontmatter,
     },
     { property: 'frontmatter', messages },
   )
+  if (listed !== undefined) frontmatter.listed = listed
 
   const bibliography = frontmatter.bibliography ?? []
   if (bibliography.length > 0) {

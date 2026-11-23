@@ -1,5 +1,5 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
-import type { Messages } from './processor.ts'
+import type { Messages, PostFrontmatter } from './processor.ts'
 import type { CommitInfo } from './githubVersioning.ts'
 import type { PostSnippet } from './snippets.ts'
 import { extname, join } from 'node:path'
@@ -59,7 +59,7 @@ export interface BlogOptions {
 export interface Post {
   /** slug of the post, derived from the filename */
   slug: string
-  frontmatter: PageFrontmatter
+  frontmatter: PostFrontmatter
   /** HTML content of the post */
   content: string
   messages: Messages
@@ -91,8 +91,8 @@ export const defaultOptions: BlogOptions = {
 }
 
 /**
- * Get all posts, newest first. Reads the filesystem, so it only runs in Node
- * (build and dev), never in workerd.
+ * Get all posts, newest first, listed or not: every post has its pages. Reads
+ * the filesystem, so it only runs in Node (build and dev), never in workerd.
  */
 export async function getPosts(
   options: BlogOptions = defaultOptions,
@@ -118,6 +118,17 @@ export async function getPosts(
       Date.parse(a.frontmatter.date ?? ''),
   )
   return posts
+}
+
+/**
+ * Get the posts a listing or a feed shows, newest first: all of them but
+ * those whose frontmatter says `listed: false`.
+ */
+export async function getListedPosts(
+  options: BlogOptions = defaultOptions,
+): Promise<Post[]> {
+  const posts = await getPosts(options)
+  return posts.filter((post) => post.frontmatter.listed !== false)
 }
 
 /**

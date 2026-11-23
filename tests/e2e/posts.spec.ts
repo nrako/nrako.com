@@ -59,6 +59,55 @@ test.describe('Posts listing', () => {
   })
 })
 
+test.describe('Unlisted posts', () => {
+  test.beforeEach(() => {
+    skipWithoutFixturePosts()
+  })
+
+  for (const listing of ['/', '/posts']) {
+    test(`${listing} lists the other posts and not an unlisted one`, async ({
+      page,
+    }) => {
+      await page.goto(listing)
+
+      await expect(page.getByRole('article').getByRole('heading')).toHaveText([
+        'Fixture post',
+        'Fixture short post',
+      ])
+      await expect(
+        page.locator('a[href*="fixture-unlisted-post"]'),
+      ).toHaveCount(0)
+    })
+  }
+
+  test('an unlisted post is reached by its address', async ({ page }) => {
+    const response = await page.goto('/posts/fixture-unlisted-post')
+
+    expect(response?.status()).toBe(200)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Fixture unlisted post' }),
+    ).toBeVisible()
+    await expect(page.locator('.post-content')).toContainText(
+      'no listing or feed shows it',
+    )
+  })
+
+  test('a snippet of an unlisted post has its page', async ({ page }) => {
+    await page.goto('/posts/fixture-unlisted-post')
+    await page
+      .locator('#ex-unlisted')
+      .getByRole('link', { name: 'On a page of its own' })
+      .click()
+
+    await expect(page).toHaveURL(
+      /\/posts\/fixture-unlisted-post\/snippets\/ex-unlisted$/,
+    )
+    await expect(page.locator('body')).toHaveText('Reached by its address.', {
+      useInnerText: true,
+    })
+  })
+})
+
 test.describe('Individual post', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/posts')

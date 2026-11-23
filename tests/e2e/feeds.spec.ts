@@ -53,4 +53,15 @@ test.describe('RSS/Atom/JSON Feeds', () => {
       'https://nrako.com/posts/fixture-short-post',
     ])
   })
+
+  for (const type of ['atom', 'rss', 'json']) {
+    test(`the ${type} feed has no unlisted post`, async ({ request }) => {
+      skipWithoutFixturePosts()
+
+      const body = await (await request.get(`/feed/${type}`)).text()
+
+      expect(body).toContain('/posts/fixture-short-post')
+      expect(body).not.toContain('fixture-unlisted-post')
+    })
+  }
 })
