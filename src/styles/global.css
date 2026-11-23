@@ -864,11 +864,25 @@ a:hover {
 
 /*
  * A snippet: its caption, the demo as it renders, then its sources. The demo
- * is a box of its own, and the containing block of what it positions.
+ * is a box of its own, and the containing block of what it positions. The
+ * link to the demo's own page ends the caption's line, so that nothing comes
+ * between the demo and its sources.
  */
 .post-content .snippet figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
   margin-top: 0;
   margin-bottom: 0.75rem;
+}
+
+.post-content .snippet figcaption p {
+  margin: 0;
+}
+
+.post-content .snippet-alone {
+  flex: none;
 }
 
 .snippet-demo {
@@ -956,14 +970,6 @@ a:hover {
 .snippet-tabs:has(label:nth-child(5) :checked) > .snippet-source:nth-child(6),
 .snippet-tabs:has(label:nth-child(6) :checked) > .snippet-source:nth-child(7) {
   display: block;
-}
-
-/* Under the demo, the link to its own page */
-.post-content .snippet-alone {
-  margin: 0.25rem 0 0;
-  color: var(--muted);
-  font-size: var(--size-meta);
-  text-align: right;
 }
 
 /*

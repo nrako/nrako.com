@@ -122,7 +122,7 @@ const pieces: Record<string, RegExp> = {
   "a snippet's sources":
     /<div class="snippet-sources"><div class="snippet-source"><p class="snippet-language">HTML<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><div class="snippet-source"><p class="snippet-language">CSS<\/p><pre class="shiki [^>]*>[\s\S]*?<\/pre><\/div><\/div><\/figure>/,
   "a snippet's link to its own page":
-    /<\/div><p class="snippet-alone"><a href="\/posts\/what-a-post-can-set\/snippets\/ex-unseen">On a page of its own<\/a><\/p>/,
+    /<p class="snippet-alone"><a href="\/posts\/what-a-post-can-set\/snippets\/ex-unseen">On a page of its own<\/a><\/p><\/figcaption><div class="snippet-demo/,
   'a reference to a snippet': /<a href="#ex-unseen">Example.1<\/a> hides/,
   "a snippet's script, as a module after its HTML":
     /<button id="ex-shown-button">Show or hide the words<\/button><script type="module">\nconst words = document\.getElementById\('ex-shown-words'\)\n[\s\S]*?\n<\/script><\/div>/,

@@ -247,7 +247,7 @@ test.describe('Snippets', () => {
   test('a snippet is numbered, and a reference leads to it', async ({
     page,
   }) => {
-    await expect(page.locator('#ex-fixture figcaption')).toHaveText(
+    await expect(page.locator('#ex-fixture figcaption p').first()).toHaveText(
       /^Example\s1: A fixture snippet$/,
     )
 

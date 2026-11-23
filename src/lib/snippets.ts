@@ -287,10 +287,12 @@ export function snippetsTransform(
     }
 
     if (node.identifier && node.demo && postAddress) {
-      // Under the demo, the way to it alone
-      const children: GenericNode[] = node.children ?? []
-      const demoIndex = children.findIndex((child) => child.type === 'html')
-      children.splice(demoIndex + 1, 0, {
+      // Beside the caption, the way to the demo alone: nothing then comes
+      // between the demo and its sources
+      const caption: GenericNode | undefined = node.children?.find(
+        (child: GenericNode) => child.type === 'caption',
+      )
+      caption?.children?.push({
         type: 'paragraph',
         data: { hProperties: { class: 'snippet-alone' } },
         children: [

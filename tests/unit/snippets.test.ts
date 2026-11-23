@@ -299,7 +299,7 @@ test('a snippet with a label has a page of its own under its post, which it link
   )
   assert.ok(
     page.includes(
-      '</div><p class="snippet-alone"><a href="/posts/a-post/snippets/ex-a">On a page of its own</a></p>',
+      '<p class="snippet-alone"><a href="/posts/a-post/snippets/ex-a">On a page of its own</a></p></figcaption><div class="snippet-demo',
     ),
   )
 })
