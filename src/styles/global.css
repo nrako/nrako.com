@@ -1072,13 +1072,25 @@ a:hover {
  * fields are for editing, and there is no reason to keep them short.
  */
 :root[data-snippet-source] main {
+  max-width: none;
   min-height: 0;
 }
 
+/*
+ * As wide as the window, up to what lets every pane show a line of 120
+ * characters: more is of no use to a field. With several sources that is past
+ * most windows, so the bench takes them whole; one source stops short.
+ * `--snippet-panes` is the number of sources, set by the page. A character of
+ * the code face is 0.6em wide and the fields are set at 0.875rem, so 120 of
+ * them are 63rem, to which a pane adds its padding and its border.
+ */
 :root[data-snippet-source] .snippet-page {
+  --pane: calc(63rem + 2rem + 2px);
   display: flex;
   flex-direction: column;
-  max-width: none;
+  max-width: calc(
+    var(--snippet-panes, 1) * var(--pane) + (var(--snippet-panes, 1) - 1) * 1rem
+  );
   min-height: calc(100dvh - 7rem);
 }
 

@@ -491,6 +491,20 @@ test.describe('Snippet pages', () => {
     expect(boxes[2].left).toBeGreaterThan(boxes[1].right)
   })
 
+  test('the editor takes the width of a wide window', async ({ page }) => {
+    await page.setViewportSize({ width: 2000, height: 1000 })
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+
+    await expect(page.locator('.snippet-pane')).toHaveCount(3)
+    const { left, right } = await page
+      .locator('.snippet-page')
+      .evaluate((element) => element.getBoundingClientRect())
+
+    // From one margin of the window to the other, not the layout's column
+    expect(left).toBeLessThan(60)
+    expect(right).toBeGreaterThan(1940)
+  })
+
   test('the sources take the height the demo leaves in the window', async ({
     page,
   }) => {

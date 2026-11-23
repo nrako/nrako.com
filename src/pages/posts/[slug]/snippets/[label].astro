@@ -62,7 +62,10 @@ const icon = {
      * are not in the document unless the address asks for them with `?source`.
      */
   }
-  <div class="snippet-page prose mx-auto max-w-(--column)">
+  <div
+    class="snippet-page prose mx-auto max-w-(--column)"
+    style={`--snippet-panes: ${snippet.files.length}`}
+  >
     <nav class="snippet-tools not-prose">
       <a
         href={`/posts/${post.slug}#${snippet.label}`}
