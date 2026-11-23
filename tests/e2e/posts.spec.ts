@@ -491,6 +491,27 @@ test.describe('Snippet pages', () => {
     expect(boxes[2].left).toBeGreaterThan(boxes[1].right)
   })
 
+  test('the sources take the height the demo leaves in the window', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+
+    const field = page.getByLabel('JavaScript')
+    await expect(field).toBeVisible()
+    const { bottom, height } = await field.evaluate((element) =>
+      element.getBoundingClientRect(),
+    )
+
+    // Down to the foot of the window, which the page does not run past
+    expect(height).toBeGreaterThan(400)
+    expect(bottom).toBeGreaterThan(740)
+    expect(bottom).toBeLessThanOrEqual(800)
+    expect(
+      await page.evaluate(() => document.documentElement.scrollHeight),
+    ).toBeLessThanOrEqual(800)
+  })
+
   test('the editor links to a playground that holds the sources as they stand', async ({
     page,
     baseURL,
@@ -516,9 +537,18 @@ test.describe('Snippet pages', () => {
     )
     await expect(link).toHaveAttribute('target', '_blank')
     const asWritten = await link.getAttribute('href')
+    // An icon, until a source is edited: it then says what it is for
+    await expect(link.getByText('Continue in LiveCodes')).toBeHidden()
 
     await page.getByLabel('HTML').fill('<p>Changed.</p>')
     await expect(link).not.toHaveAttribute('href', asWritten!)
+    await expect(link.getByText('Continue in LiveCodes')).toBeVisible()
+
+    // And is an icon again once the source is as it was written
+    await page
+      .getByLabel('HTML')
+      .fill('<p>Seen, <span class="secret">unseen</span>.</p>')
+    await expect(link.getByText('Continue in LiveCodes')).toBeHidden()
 
     // Nothing is asked of the playground until the link is followed
     expect(elsewhere).toEqual([])

@@ -997,8 +997,36 @@ a:hover {
  */
 .snippet-tools {
   display: flex;
+  align-items: center;
   gap: 1rem;
+  min-height: 1.75rem;
   margin-bottom: 1rem;
+}
+
+/*
+ * The link to the playground is an icon until a source is edited
+ * (`data-snippet-edited` on <html>, set by the editor): it then says what it
+ * is for, since the edit is lost otherwise.
+ */
+.snippet-continue span {
+  display: none;
+}
+
+:root[data-snippet-source][data-snippet-edited]
+  .snippet-tools
+  .snippet-continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.1rem 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: inherit;
+  font-size: var(--size-meta);
+}
+
+:root[data-snippet-edited] .snippet-continue span {
+  display: inline;
 }
 
 .snippet-tools a {
@@ -1038,13 +1066,25 @@ a:hover {
  * the window, the demo on top and the sources side by side under it, each in a
  * field to edit. The panes take one line while there is room for them, and
  * come one under the other when there is not.
+ *
+ * The page is as tall as the window, less the space the layout leaves above
+ * it and as much below, and the sources take the height the demo leaves: the
+ * fields are for editing, and there is no reason to keep them short.
  */
+:root[data-snippet-source] main {
+  min-height: 0;
+}
+
 :root[data-snippet-source] .snippet-page {
+  display: flex;
+  flex-direction: column;
   max-width: none;
+  min-height: calc(100dvh - 7rem);
 }
 
 .snippet-editor {
   display: grid;
+  flex: 1;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   gap: 1rem;
   margin-top: 1rem;
@@ -1064,7 +1104,7 @@ a:hover {
 
 /* Drawn as a block of code is: same ground, same face */
 .snippet-pane textarea {
-  height: 45vh;
+  flex: 1;
   min-height: 12rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--rule);
@@ -1077,7 +1117,7 @@ a:hover {
   tab-size: 2;
   white-space: pre;
   overflow: auto;
-  resize: vertical;
+  resize: none;
 }
 
 .snippet-pane textarea:focus-visible {

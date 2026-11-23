@@ -58,6 +58,13 @@ export function mountSnippetEditor() {
   let pause: number | undefined
   for (const field of fields) {
     field.addEventListener('input', () => {
+      // Edited as soon as a source differs from what was written: the link to
+      // the playground then says what it is for (`global.css`)
+      document.documentElement.toggleAttribute(
+        'data-snippet-edited',
+        fields.some((field) => field.value !== field.defaultValue),
+      )
+
       window.clearTimeout(pause)
       pause = window.setTimeout(draw, PAUSE)
     })
