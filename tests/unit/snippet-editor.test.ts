@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { decompress } from 'livecodes'
-import { playgroundAddress } from '../../src/lib/snippetEditor.ts'
+import { playgroundAddress, scriptError } from '../../src/lib/snippetEditor.ts'
 
 const sources = [
   { language: 'html', code: '<p>Seen.</p>' },
@@ -46,4 +46,26 @@ test('a playground without a title sends nothing to the server', () => {
 
   assert.equal(address.search, '')
   assert.equal(address.pathname, '/')
+})
+
+test('a script that parses has no error', () => {
+  assert.equal(scriptError(''), undefined)
+  assert.equal(scriptError('let count = 0\ncount += 1'), undefined)
+  // As in a module, `await` stands at the top
+  assert.equal(scriptError('const value = await Promise.resolve(1)'), undefined)
+})
+
+test('a script that does not parse gives the reason', () => {
+  assert.equal(typeof scriptError('let = ;'), 'string')
+  assert.equal(typeof scriptError('function unfinished() {'), 'string')
+})
+
+test('a script is parsed without being run', () => {
+  assert.equal(scriptError('throw new Error("run")'), undefined)
+})
+
+test('a script that imports or exports is taken as it is', () => {
+  // Not the body of a function: only running it would say whether it parses
+  assert.equal(scriptError('import { a } from "./a.js"\nlet = ;'), undefined)
+  assert.equal(scriptError('export const a = 1'), undefined)
 })

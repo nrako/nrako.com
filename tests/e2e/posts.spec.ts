@@ -453,6 +453,63 @@ test.describe('Snippet pages', () => {
     expect(errors).toEqual([])
   })
 
+  test('a script that does not parse leaves the demo working, and is marked', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+
+    const script = page.getByLabel('JavaScript')
+    const pane = page.locator('.snippet-pane', { has: script })
+    const pressed = page.locator('#fixture-pressed')
+    const written = await script.inputValue()
+
+    // A line that is not finished
+    await script.fill(`${written}\nlet = ;`)
+
+    await expect(pane).toHaveAttribute('data-error', '')
+    await expect(script).toHaveAttribute('aria-invalid', 'true')
+    await expect(script).toHaveAttribute('title', /\S/)
+    // The demo keeps the script as it last parsed
+    await page.getByRole('button', { name: 'Press' }).click()
+    await expect(pressed).toHaveText('1')
+
+    // The rest is still drawn again while the script waits to be finished
+    await page
+      .getByLabel('HTML')
+      .fill(
+        '<button id="fixture-press">Push</button>\n<output id="fixture-pressed">0</output>',
+      )
+    await page.getByRole('button', { name: 'Push' }).click()
+    await expect(pressed).toHaveText('1')
+    await expect(pane).toHaveAttribute('data-error', '')
+
+    await script.fill(written.replace('+ 1', '+ 5'))
+
+    await expect(script).toHaveAttribute('aria-invalid', 'false')
+    await expect(async () => {
+      await page.getByRole('button', { name: 'Push' }).click()
+      expect(Number(await pressed.textContent()) % 5).toBe(0)
+      expect(Number(await pressed.textContent())).toBeGreaterThan(0)
+    }).toPass()
+  })
+
+  test('a script that fails as it runs is marked with the reason', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post/snippets/ex-script?source')
+
+    const script = page.getByLabel('JavaScript')
+    await expect(script).toHaveAttribute('aria-invalid', 'false')
+
+    await script.fill('throw new Error("on purpose")')
+
+    await expect(script).toHaveAttribute('aria-invalid', 'true')
+    await expect(script).toHaveAttribute('title', /on purpose/)
+    await expect(
+      page.locator('.snippet-pane', { has: script }),
+    ).toHaveAttribute('data-error', '')
+  })
+
   test('starting again gives the snippet as written', async ({ page }) => {
     await page.goto('/posts/fixture-post/snippets/ex-fixture?source')
 

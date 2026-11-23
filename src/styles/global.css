@@ -1114,6 +1114,23 @@ a:hover {
   font-size: var(--size-meta);
 }
 
+/*
+ * A script that fails (`data-error`, set by the editor): the name of its pane
+ * takes the accent and says so, and the reason is its title. Nothing more is
+ * shown of an error.
+ */
+.snippet-pane[data-error] label {
+  color: var(--accent);
+}
+
+.snippet-pane[data-error] label::after {
+  content: ' · error';
+}
+
+.snippet-pane[data-error] textarea {
+  border-color: var(--accent);
+}
+
 /* Drawn as a block of code is: same ground, same face */
 .snippet-pane textarea {
   flex: 1;

@@ -1,5 +1,10 @@
 import { getPlaygroundUrl } from 'livecodes'
-import { demoMarkup, demoParts, type SnippetSource } from './snippetDemo.ts'
+import {
+  demoMarkup,
+  demoParts,
+  SCRIPT_LANGUAGES,
+  type SnippetSource,
+} from './snippetDemo.ts'
 
 /** How long the keys rest, in milliseconds, before the demo is drawn again */
 const PAUSE = 250
@@ -14,6 +19,9 @@ const PAUSE = 250
  * gives the snippet as written, and is also the way to be rid of what an
  * edited script left running. To keep an edit, the page links to LiveCodes
  * with the sources as they stand.
+ *
+ * A script that does not parse leaves the demo as it last worked, and one that
+ * fails is said to on its pane: no more is shown of an error than that.
  */
 export function mountSnippetEditor() {
   if (!document.documentElement.hasAttribute('data-snippet-source')) return
@@ -40,8 +48,47 @@ export function mountSnippetEditor() {
     }
   }
 
+  const isScript = (source: SnippetSource) =>
+    SCRIPT_LANGUAGES.includes(source.language)
+  const scriptFields = fields.filter((field) =>
+    SCRIPT_LANGUAGES.includes(field.dataset.language ?? ''),
+  )
+
+  // Says on the script's panes that the script fails, and why: the name of
+  // the pane takes the accent, and the reason is its title
+  const report = (error?: string) => {
+    for (const field of scriptFields) {
+      const pane = field.closest<HTMLElement>('.snippet-pane')
+      const marked = [pane?.querySelector('label'), field]
+
+      pane?.toggleAttribute('data-error', error !== undefined)
+      field.setAttribute('aria-invalid', String(error !== undefined))
+      for (const element of marked) {
+        if (error === undefined) element?.removeAttribute('title')
+        else element?.setAttribute('title', error)
+      }
+    }
+  }
+
+  // A script that fails as it runs is reported too
+  window.addEventListener('error', (event) => report(event.message))
+
+  // The script as it last parsed. A line is not a script until it is finished:
+  // while what is typed does not parse, the demo keeps this one, and goes on
+  // working instead of dying at every keystroke.
+  let working = sources().filter(isScript)
+
   const draw = () => {
-    preview.innerHTML = demoMarkup(sources()) ?? ''
+    const typed = sources()
+    const error = scriptError(demoParts(typed).js)
+    report(error)
+    if (error === undefined) working = typed.filter(isScript)
+
+    preview.innerHTML =
+      demoMarkup([
+        ...typed.filter((source) => !isScript(source)),
+        ...working,
+      ]) ?? ''
 
     // A script set through `innerHTML` does not run: each gives way to a new
     // one, which does
@@ -70,7 +117,31 @@ export function mountSnippetEditor() {
     })
   }
 
+  report()
   linkElsewhere()
+}
+
+/** The constructor of async functions, which has no name of its own */
+const AsyncFunction = Object.getPrototypeOf(async () => undefined)
+  .constructor as FunctionConstructor
+
+/**
+ * Why a script does not parse, or `undefined` when it does.
+ *
+ * It is parsed as the body of an async function, which is not run and takes
+ * a top-level `await` as a module does. A script that imports or exports can
+ * only be parsed by being run: it is taken as it is, and reported if it fails.
+ */
+export function scriptError(js: string): string | undefined {
+  if (/^\s*(import|export)\b/m.test(js)) return undefined
+
+  try {
+    new AsyncFunction(js)
+  } catch (error) {
+    if (error instanceof SyntaxError) return error.message
+    throw error
+  }
+  return undefined
 }
 
 /**
