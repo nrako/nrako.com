@@ -8,11 +8,23 @@ import {
 } from 'myst-common'
 import { visit } from 'unist-util-visit'
 
+/** The languages of the markup a snippet's demo is made of */
+const MARKUP_LANGUAGES = ['html', 'svg']
+
 /** The languages of a script that a snippet runs */
 const SCRIPT_LANGUAGES = ['js', 'javascript']
 
 /** The languages of a snippet that make its demo; the others are only shown */
-const DEMO_LANGUAGES = ['html', 'css', ...SCRIPT_LANGUAGES]
+const DEMO_LANGUAGES = [...MARKUP_LANGUAGES, 'css', ...SCRIPT_LANGUAGES]
+
+/** How a source is named above it; another language is named as typed */
+const LANGUAGE_NAMES: Record<string, string> = {
+  html: 'HTML',
+  svg: 'SVG',
+  css: 'CSS',
+  js: 'JavaScript',
+  javascript: 'JavaScript',
+}
 
 /**
  * The `{snippet}` directive: a small piece of HTML, CSS and JavaScript that a
@@ -31,9 +43,11 @@ const DEMO_LANGUAGES = ['html', 'css', ...SCRIPT_LANGUAGES]
  *     ```
  *     :::
  *
- * The demo is set in the page itself, not in a frame: its text is the post's
- * text, which a reader can select, search and link to. Its CSS is wrapped in
- * an `@scope` block, whose root is the demo, so that it styles nothing else.
+ * The demo's markup is its `html` blocks, and its `svg` blocks, which are
+ * drawings set inline. The demo is set in the page itself, not in a frame: its
+ * text is the post's text, which a reader can select, search and link to. Its
+ * CSS is wrapped in an `@scope` block, whose root is the demo, so that it
+ * styles nothing else.
  *
  * A `js` block runs as a module script, after the demo's HTML: what it
  * declares is its own, so two snippets can name a variable alike. Nothing
@@ -53,7 +67,7 @@ export const snippetDirective: DirectiveSpec = {
   body: {
     type: 'myst',
     required: true,
-    doc: 'One `html` block, with the `css` that styles it and the `js` that runs in it',
+    doc: 'The `html` or `svg` of the demo, the `css` that styles it and the `js` that runs in it',
   },
   run(data, vfile) {
     const body = (data.body ?? []) as GenericNode[]
@@ -63,7 +77,7 @@ export const snippetDirective: DirectiveSpec = {
     const join = (blocks: GenericNode[]) =>
       blocks.map((block) => block.value).join('\n')
 
-    const html = join(sourcesOf('html'))
+    const html = join(sourcesOf(...MARKUP_LANGUAGES))
     const css = join(sourcesOf('css'))
     const js = join(sourcesOf(...SCRIPT_LANGUAGES))
 
@@ -84,22 +98,48 @@ export const snippetDirective: DirectiveSpec = {
     if (demo) {
       children.push({ type: 'html', value: demo })
     } else {
-      fileError(vfile, 'A snippet has no `html` block, so nothing to show', {
-        node: data.node,
-      })
+      fileError(
+        vfile,
+        'A snippet has no `html` or `svg` block, so nothing to show',
+        { node: data.node },
+      )
     }
 
     for (const source of sources) {
       if (DEMO_LANGUAGES.includes(source.lang)) continue
       fileWarn(
         vfile,
-        `A snippet shows its \`${source.lang}\` block but does not run it: only \`html\`, \`css\` and \`js\` make the demo`,
+        `A snippet shows its \`${source.lang}\` block but does not run it: only \`html\`, \`svg\`, \`css\` and \`js\` make the demo`,
         { node: source },
       )
     }
 
-    // The sources, and anything else written in the snippet, as typed
-    children.push(...body)
+    // Each source as typed, under the name of its language, and anything else
+    // written in the snippet where it was
+    children.push(
+      ...body.map((node) =>
+        node.type === 'code'
+          ? {
+              type: 'snippetSource',
+              data: { hName: 'div', hProperties: { class: 'snippet-source' } },
+              children: [
+                {
+                  type: 'paragraph',
+                  data: { hProperties: { class: 'snippet-language' } },
+                  children: [
+                    {
+                      type: 'text',
+                      value: LANGUAGE_NAMES[node.lang] ?? node.lang ?? 'Text',
+                    },
+                  ],
+                },
+                // The highlighter has no SVG of its own: it is XML
+                node.lang === 'svg' ? { ...node, lang: 'xml' } : node,
+              ],
+            }
+          : node,
+      ),
+    )
 
     return [
       {

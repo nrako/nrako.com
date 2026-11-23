@@ -1,7 +1,7 @@
 ---
 # Sample content for design work. Never published.
 title: Demos to try in the page
-subtitle: Words that hide, a box that centres, a counter that counts
+subtitle: Words that hide, a box that centres, a ring, a counter that counts
 description: Snippets at work, from the smallest demo of hidden text to one that needs a script.
 date: 2026-11-20
 ---
@@ -185,6 +185,48 @@ rule for `.box` colours no other box on the page.
   border-radius: 8px;
   background: #e2e8f0;
   color: #0f172a;
+}
+```
+:::
+
+## A drawing
+
+An `svg` block is a drawing set in the page as HTML is, so the snippet's CSS
+styles its shapes, and the text it holds is text of the page.
+
+:::{snippet} A ring, three quarters drawn
+:label: svg-ring
+
+```svg
+<svg viewBox="0 0 120 120" width="160" role="img" aria-label="A ring">
+  <circle class="track" cx="60" cy="60" r="50" />
+  <circle class="arc" cx="60" cy="60" r="50" pathLength="100" />
+  <text x="60" y="67" text-anchor="middle">75%</text>
+</svg>
+```
+
+```css
+circle {
+  fill: none;
+  stroke-width: 10;
+}
+
+.track {
+  stroke: currentColor;
+  opacity: 0.15;
+}
+
+.arc {
+  stroke: #dc2626;
+  stroke-dasharray: 75 100;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+text {
+  fill: currentColor;
+  font-size: 20px;
 }
 ```
 :::

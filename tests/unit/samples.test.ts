@@ -56,6 +56,7 @@ test('the sample of snippets at work has a page for each of its demos', async ()
       'hidden-in-a-record',
       'text-in-a-field',
       'flex-center',
+      'svg-ring',
       'counter',
     ],
   )

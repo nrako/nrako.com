@@ -53,6 +53,71 @@ test('a snippet shows its sources after its demo, highlighted', async () => {
   assert.ok(page.includes('&#x3C;'))
 })
 
+test('a snippet names the language of each source above it', async () => {
+  const { html: page } = await processor(
+    snippet(
+      'A caption',
+      html,
+      css,
+      `${fence}js\nlet a = 1\n${fence}`,
+      `${fence}javascript\nlet b = 1\n${fence}`,
+      `${fence}ts\nconst c: number = 1\n${fence}`,
+    ),
+    options,
+  )
+
+  assert.deepEqual(
+    [
+      ...page.matchAll(
+        /<div class="snippet-source"><p class="snippet-language">([^<]+)<\/p><pre class="shiki/g,
+      ),
+    ].map((match) => match[1]),
+    ['HTML', 'CSS', 'JavaScript', 'JavaScript', 'ts'],
+  )
+})
+
+test('a snippet sets an `svg` block in its demo, as it does HTML', async () => {
+  const drawing =
+    '<svg viewBox="0 0 10 10" width="40"><circle class="dot" cx="5" cy="5" r="4" /></svg>'
+  const { html: page, messages } = await processor(
+    snippet(
+      'A drawing',
+      `${fence}svg\n${drawing}\n${fence}`,
+      `${fence}css\n.dot { fill: red; }\n${fence}`,
+    ),
+    options,
+  )
+
+  // Inline, with its attributes as typed: `viewBox` keeps its capital
+  assert.ok(
+    page.includes(
+      '<div class="snippet-demo not-prose"><style>@scope {\n.dot { fill: red; }\n}</style><svg viewBox="0 0 10 10" width="40"><circle class="dot" cx="5" cy="5" r="4"></circle></svg></div>',
+    ),
+  )
+  // Named as SVG and highlighted, which the highlighter does as XML
+  assert.ok(
+    page.includes('<p class="snippet-language">SVG</p><pre class="shiki '),
+  )
+  assert.deepEqual(messages, {})
+})
+
+test('a snippet sets its HTML and its drawings in the order written', async () => {
+  const { html: page } = await processor(
+    snippet(
+      'Both',
+      `${fence}svg\n<svg width="1"></svg>\n${fence}`,
+      `${fence}html\n<p>After the drawing.</p>\n${fence}`,
+    ),
+    options,
+  )
+
+  assert.ok(
+    page.includes(
+      '<div class="snippet-demo not-prose"><svg width="1"></svg>\n<p>After the drawing.</p></div>',
+    ),
+  )
+})
+
 test('a snippet is a figure numbered as an example', async () => {
   const { html: page } = await processor(
     `${snippet('First', html)}\n\n${snippet('', html)}`,
@@ -110,7 +175,7 @@ test('a snippet without HTML is an error, and still shows its sources', async ()
   assert.ok(!page.includes('snippet-demo'))
   assert.equal([...page.matchAll(/<pre class="shiki/g)].length, 1)
   assert.equal(messages.errors?.length, 1)
-  assert.match(messages.errors![0].message, /no `html` block/)
+  assert.match(messages.errors![0].message, /no `html` or `svg` block/)
 })
 
 test('a snippet runs its script as a module, after its HTML', async () => {
@@ -172,7 +237,7 @@ test('a snippet keeps what else is written in it', async () => {
     options,
   )
 
-  assert.match(page, /<\/pre><p>A note about it\.<\/p><\/figure>/)
+  assert.match(page, /<\/pre><\/div><p>A note about it\.<\/p><\/figure>/)
 })
 
 test('a snippet with a label has a page of its own, which it links to', async () => {

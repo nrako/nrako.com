@@ -236,8 +236,12 @@ test.describe('Snippets', () => {
 
     await expect(snippet.locator('iframe')).toHaveCount(0)
     await expect(snippet.locator('.snippet-demo')).toHaveText('Seen, unseen.')
-    // The demo, then its two sources
+    // The demo, then its two sources, each under the name of its language
     await expect(snippet.locator('pre.shiki')).toHaveCount(2)
+    await expect(snippet.locator('.snippet-language')).toHaveText([
+      'HTML',
+      'CSS',
+    ])
   })
 
   test('a snippet is numbered, and a reference leads to it', async ({
