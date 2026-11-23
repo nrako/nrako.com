@@ -57,7 +57,7 @@ pnpm run deploy               # Build + wrangler deploy
 - `index.astro` — Homepage (static): the site name, one sentence about the author with its animated introduction, and the listing of the listed posts
 - `posts/index.astro` — Post listing (static), linked as "Posts" in the header. It lists the same posts as the homepage and says so when nothing is listed
 - `posts/[slug].astro` — Single post (static, prerendered)
-- `posts/[slug]/[sha].astro` — Post at an older commit (static, one page per version)
+- `posts/[slug]/[sha].astro` — Post at one of its commits, the latest included: its permalink (static, one page per version)
 - `posts/[slug]/snippets/[label].astro` — A snippet's demo alone (static, one page per snippet that has a label)
 - `404.astro` — Not-found page (static)
 - `feed/[type].ts` — RSS/Atom/JSON feed endpoints (static), of the listed posts
@@ -85,6 +85,7 @@ pnpm run deploy               # Build + wrangler deploy
 - `snippetHighlight.ts` — The highlighter of those fields, fetched apart by the editor
 - `codeThemes.ts` — The themes code is highlighted in, for the server and for the browser
 - `githubVersioning.ts` — Post version history and old versions from the GitHub API
+- `permalinks.ts` — The addresses of a post and of its versions, and the links its pages declare about themselves
 - `bluesky.ts` — Bluesky API integration
 
 **Integrations** (`src/integrations/`): `server-env.ts` — copies `GITHUB_TOKEN` from `.env` onto `process.env` for the prerendered pages.
@@ -118,7 +119,8 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Unlisted posts: `listed: false` in a post's frontmatter keeps it out of the homepage, `/posts` and the feeds, and nothing else: its page, the pages of its snippets and its version pages are built as any post's, so it is reached by its address or by a link. The rule is `getListedPosts` (`blogData.ts`) and only there: a page that lists posts calls it, one that builds pages calls `getPosts`. With every post unlisted, the listings read as with no post. `listed` is the site's own key: `processor.ts` takes it out of the frontmatter before MyST's validation, which would drop it with a warning. A value that is neither `true` nor `false` fails the build.
 - Post versioning: the commit history and every older version are fetched from the GitHub API at build time and prerendered. A new commit to a post shows up after the next build and deploy.
 - Versioning needs `GITHUB_TOKEN` at build time (`.env` locally, `secrets.GITHUB_TOKEN` in CI). Without it the build succeeds with no version history and no version pages. A listed version that cannot be fetched fails the build.
-- The latest version's page (`/posts/<slug>/<latest sha>`) is a meta-refresh redirect to the post; the version list links the latest entry to the post directly.
+- Every committed version has its page, the latest one included, never a redirect: a text fragment (`#:~:text=`) does not survive one. The version list links each entry to its page. The page says which version it is and, for the latest, that it is the latest. A `draft` entry, when the post's file differs from its last commit, has no page.
+- A post's pages declare their links in the head (`postLinks` in `permalinks.ts`, `components/PostLinks.astro`), as absolute URLs on `site` (`astro.config.ts`): `rel="canonical"` (RFC 6596) is the post's page, on itself and on each version; `rel="cite-as"` (RFC 8574) is the permalink of the version the page shows: itself on a version, the latest on the post's page. The post's page cites no version when it has no history or shows a draft. A version is `noindex`: searches lead to the post. The snippet pages and the feeds declare none of this.
 - Citations: a post lists BibTeX files under `bibliography` in its frontmatter, as paths from the posts directory, and cites their works by key: `@key`, `[@key, p. 3; @other]`, `[-@key]` or the `{cite}` roles (`citations.ts`). Each citation links to its entry in the "References" section, which lists the cited works in the APA style, sorted by name, after the footnotes; a `{bibliography}` directive places the list elsewhere. `citation-js-utils`, from the MyST project, parses and formats.
 - An @ only cites in a post that lists a bibliography; elsewhere it is text, which costs the post a second parse (`processor.ts`). A key the bibliography does not hold stays in the text as `@key` with a warning, shown in dev like the frontmatter's. A bibliography that is missing, outside the posts directory or not BibTeX fails the build.
 - An older version of a post reads its bibliography from GitHub at the same commit. A commit that only changes the `.bib` file adds no version to the post.
