@@ -18,10 +18,13 @@ before(async () => {
     {
       highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
       address: '/posts/what-a-post-can-set',
-      // The page the sample quotes, as it was when the sample was written
-      fetchPage: async () =>
+      // The pages the samples quote, as they were when they were written
+      fetchPage: async (address) =>
         readFileSync(
-          join(import.meta.dirname, '../fixtures/pages/example.com.html'),
+          join(
+            import.meta.dirname,
+            `../fixtures/pages/${new URL(address).hostname}.html`,
+          ),
           'utf-8',
         ),
       loadFile(path) {
@@ -133,6 +136,8 @@ const pieces: Record<string, RegExp> = {
     /<blockquote cite="(https:\/\/example\.com\/#:~:text=This%20domain%20is%20for%20use[^"]*permission\.)">\s*<p>This domain is for use in documentation examples without needing permission\.<\/p>\s*<\/blockquote><figcaption><p>The Example Domain, <a href="\1"[^>]*>example\.com<\/a>/,
   'a quote read from its page':
     /<blockquote cite="https:\/\/example\.com\/#:~:text=This%20is%20not,monitoring%20purposes\.">\s*<p>This is not a service; avoid relying on it for testing and monitoring purposes\.<\/p>/,
+  'a quote that keeps the list of its page':
+    /<p>Use context only if one of the following is true:<\/p>\s*<ul>\s*<li>The UA determines the quoted text is ambiguous<\/li>\s*<li>The quoted text contains 3 or fewer words<\/li>\s*<\/ul>\s*<\/blockquote><figcaption><p>URL Fragment Text Directives, <a [^>]*>wicg\.github\.io<\/a>/,
   'a quote of several passages':
     /<p>This domain … documentation examples … This is not a service … testing and monitoring purposes<\/p>/,
   'a quote whose page has other words':

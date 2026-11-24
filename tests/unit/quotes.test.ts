@@ -130,6 +130,39 @@ test('a quotation the page has otherwise is shown as the page has it, and says s
   })
 })
 
+test('words the page has at several places are quoted from the first, with a warning', async () => {
+  const { html, messages } = await render(quote(`${page}#:~:text=here`))
+
+  assert.ok(html.includes('<p>here</p>'))
+  assert.ok(!html.includes('quote-notice'))
+  assert.deepEqual(messages, {
+    warnings: [
+      {
+        property: 'quote',
+        message: `The page of "${page}#:~:text=here" has what the address names "here" at 2 places: the first is quoted. Words before or after it tell them apart (#:~:text=before-,the%20passage,-after)`,
+      },
+    ],
+  })
+
+  // From a start to an end, each start that has an end after it is a place
+  const ranged = await render(quote(`${page}#:~:text=The%20quoted,text`), {
+    [page]: laidOut,
+  })
+  assert.match(
+    ranged.messages.warnings?.[0].message ?? '',
+    /names from "The quoted" to "text" at 2 places/,
+  )
+})
+
+test('words told apart by what is before or after them get no warning', async () => {
+  for (const fragment of ['text=starts-,here', 'text=here,-.']) {
+    const { html, messages } = await render(quote(`${page}#:~:${fragment}`))
+
+    assert.ok(html.includes('<p>here</p>'), fragment)
+    assert.deepEqual(messages, {}, fragment)
+  }
+})
+
 const gone = `${page}#:~:text=A%20passage%20taken%20out`
 
 test('a quote the page no longer has shows what the post wrote, and says so', async () => {
@@ -212,14 +245,15 @@ test('where no page is read, a quote is not checked', async () => {
   assert.match(messages.warnings?.[0].message ?? '', /no page is read here$/)
 })
 
-const several = `${page}#:~:text=a%20page&text=The%20passage,ends%20here.`
+// Two passages with words of the page between them
+const several = `${page}#:~:text=a%20page&text=starts%20here,ends%20here.`
 
-test('a quote of several passages sets an ellipsis between them', async () => {
+test('a quote of several passages sets an ellipsis where the page has other words', async () => {
   const { html, messages } = await render(quote(several))
 
   assert.ok(
     html.includes(
-      '<p>A page … The passage starts here, it’s “quoted”.</p>\n<p>And ends here.</p>',
+      '<p>A page</p>\n<p>… starts here, it’s “quoted”.</p>\n<p>And ends here.</p>',
     ),
   )
   assert.equal(
@@ -231,9 +265,9 @@ test('a quote of several passages sets an ellipsis between them', async () => {
 
 test('several passages written with or without what stands between them say nothing', async () => {
   for (const written of [
-    'A page … The passage starts here, it’s “quoted”. And ends here.',
-    'A page [...] The passage starts here, it’s “quoted”. And ends here.',
-    'A page The passage starts here, it’s “quoted”. And ends here.',
+    'A page … starts here, it’s “quoted”. And ends here.',
+    'A page [...] starts here, it’s “quoted”. And ends here.',
+    'A page starts here, it’s “quoted”. And ends here.',
   ]) {
     const { messages } = await render(quote(several, written))
     assert.deepEqual(messages, {}, written)
@@ -242,15 +276,12 @@ test('several passages written with or without what stands between them say noth
 
 test('of several passages, those the post wrote otherwise are marked', async () => {
   const { html, messages } = await render(
-    quote(
-      several,
-      'A page … The passage begins here, it’s “quoted”. And ends here.',
-    ),
+    quote(several, 'A page … begins here, it’s “quoted”. And ends here.'),
   )
 
   assert.ok(
     html.includes(
-      '<p>A page … <ins class="quote-changed" title="Quoted in this post as: “The passage begins here, it’s “quoted”. And ends here.”">The passage starts here, it’s “quoted”.</ins></p>\n<p><ins class="quote-changed" title="Quoted in this post as: “The passage begins here, it’s “quoted”. And ends here.”">And ends here.</ins></p>',
+      '<p>A page</p>\n<p>… <ins class="quote-changed" title="Quoted in this post as: “begins here, it’s “quoted”. And ends here.”">starts here, it’s “quoted”.</ins></p>\n<p><ins class="quote-changed" title="Quoted in this post as: “begins here, it’s “quoted”. And ends here.”">And ends here.</ins></p>',
     ),
   )
   assert.equal(messages.warnings?.length, 1)
@@ -258,10 +289,64 @@ test('of several passages, those the post wrote otherwise are marked', async () 
 
 test('several passages written otherwise and as one are all marked', async () => {
   const { html } = await render(
-    quote(several, 'A leaf, the passage starts here and ends here.'),
+    quote(several, 'A leaf, it starts there and ends here.'),
   )
 
   assert.equal(html.match(/<ins class="quote-changed"/g)?.length, 3)
+})
+
+test('passages are set in the order of the page, whatever the order of the address', async () => {
+  const { html, messages } = await render(
+    quote(`${page}#:~:text=And%20ends%20here.&text=a%20page`),
+  )
+
+  // Two blocks quoted whole, with words of the page between them
+  assert.ok(html.includes('<p>A page</p>\n<p>…</p>\n<p>And ends here.</p>'))
+  assert.deepEqual(messages, {})
+})
+
+test('two parts of paragraphs are set in one line, with an ellipsis between them', async () => {
+  const { html } = await render(
+    quote(`${page}#:~:text=The%20passage&text=quoted`),
+  )
+
+  assert.ok(html.includes('<p>The passage … quoted</p>'))
+})
+
+test('a block quoted whole is on a line of its own, the ellipsis with the part that is cut', async () => {
+  // A part, then a block
+  const before = await render(
+    quote(`${page}#:~:text=starts%20here&text=And%20ends%20here.`),
+  )
+  assert.ok(before.html.includes('<p>starts here …</p>\n<p>And ends here.</p>'))
+
+  // A block, then a part
+  const after = await render(
+    quote(`${page}#:~:text=A%20page&text=starts%20here`),
+  )
+  assert.ok(after.html.includes('<p>A page</p>\n<p>… starts here</p>'))
+})
+
+test('passages that touch on the page are one, with no ellipsis between them', async () => {
+  const { html } = await render(
+    quote(`${page}#:~:text=a%20page&text=The%20passage,ends%20here.`),
+  )
+
+  assert.ok(
+    html.includes(
+      '<p>A page</p>\n<p>The passage starts here, it’s “quoted”.</p>\n<p>And ends here.</p>',
+    ),
+  )
+  assert.ok(!html.includes('…'))
+})
+
+test('a passage that is inside another is not quoted twice', async () => {
+  const { html } = await render(
+    quote(`${page}#:~:text=The%20passage,ends%20here.&text=starts%20here`),
+  )
+
+  assert.equal(html.match(/starts here/g)?.length, 1)
+  assert.ok(!html.includes('…'))
 })
 
 test('one of several passages that left the page is enough for the quote to say so', async () => {
@@ -275,6 +360,114 @@ test('one of several passages that left the page is enough for the quote to say 
   assert.match(
     messages.warnings?.[0].message ?? '',
     /no longer has what the address names$/,
+  )
+})
+
+// A page with lists and code
+
+const laidOut = webPage(
+  [
+    '<p>Use context only if one of the following is true:</p>',
+    '<ul><li>The quoted text is ambiguous<li>The quoted text is short</ul>',
+    '<ol start="3"><li>Third step</li><li>Fourth step<ul><li>A detail</li></ul>and its end</li></ol>',
+    '<pre>const one = 1\n  const two = 2\n</pre>',
+  ].join(''),
+)
+
+/** What a quote of that page sets in its quotation */
+async function quoted(fragment: string, ...paragraphs: string[]) {
+  const { html, messages } = await render(
+    quote(`${page}#:~:${fragment}`, ...paragraphs),
+    { [page]: laidOut },
+  )
+  return {
+    messages,
+    quotation: html
+      .match(/<blockquote[^>]*>\n([^]*)\n<\/blockquote>/)?.[1]
+      .replace(/ style="[^"]*"/g, ''),
+  }
+}
+
+test('a quote keeps the list of the page it quotes', async () => {
+  const { quotation, messages } = await quoted('text=Use%20context,is%20short')
+
+  assert.equal(
+    quotation,
+    [
+      '<p>Use context only if one of the following is true:</p>',
+      '<ul>',
+      '<li>The quoted text is ambiguous</li>',
+      '<li>The quoted text is short</li>',
+      '</ul>',
+    ].join('\n'),
+  )
+  assert.deepEqual(messages, {})
+})
+
+test('an item quoted in part is a paragraph, not an item', async () => {
+  const { quotation } = await quoted(
+    'text=text%20is%20ambiguous,The%20quoted%20text%20is',
+  )
+
+  assert.equal(quotation, '<p>text is ambiguous</p>\n<p>The quoted text is</p>')
+})
+
+test('a numbered list starts at the number of its first item quoted, with the lists in it', async () => {
+  const { quotation } = await quoted('text=Fourth%20step,its%20end')
+
+  assert.equal(
+    quotation,
+    [
+      '<ol start="4">',
+      '<li>Fourth step',
+      '<ul>',
+      '<li>A detail</li>',
+      '</ul>',
+      'and its end</li>',
+      '</ol>',
+    ].join('\n'),
+  )
+})
+
+test('code is quoted with its lines', async () => {
+  const { quotation } = await quoted('text=const%20one,two%20%3D%202')
+
+  assert.match(quotation ?? '', /^<pre[^>]*><code>/)
+  assert.equal(
+    quotation?.replace(/<[^>]*>/g, ''),
+    'const one = 1\n  const two = 2\n',
+  )
+})
+
+test('an item and code are on lines of their own, the ellipsis with the part that is cut or alone', async () => {
+  const { quotation } = await quoted(
+    'text=Use%20context%20only&text=Third%20step&text=const%20one,two%20%3D%202',
+  )
+
+  assert.ok(
+    quotation?.startsWith(
+      '<p>Use context only …</p>\n<ol start="3">\n<li>Third step</li>\n</ol>\n<p>…</p>\n<pre',
+    ),
+  )
+})
+
+test('a list written in the post as the page has it says nothing, and one written otherwise is marked', async () => {
+  const same = await quoted(
+    'text=Use%20context,is%20short',
+    'Use context only if one of the following is true:',
+    '- The quoted text is ambiguous\n- The quoted text is short',
+  )
+  assert.deepEqual(same.messages, {})
+
+  const other = await quoted(
+    'text=Use%20context,is%20short',
+    'Use context only if one of the following is true:',
+    '- The quoted text is ambiguous\n- The quoted text is long',
+  )
+  assert.equal(other.messages.warnings?.length, 1)
+  assert.equal(
+    other.quotation?.match(/<li><ins class="quote-changed"/g)?.length,
+    2,
   )
 })
 

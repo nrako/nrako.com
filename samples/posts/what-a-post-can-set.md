@@ -226,6 +226,13 @@ They are set with an ellipsis between them:
 :::{linked-quote} https://example.com/#:~:text=This%20domain&text=documentation%20examples&text=This%20is%20not%20a%20service&text=testing%20and%20monitoring%20purposes
 :::
 
+A quotation keeps the lists of the page and its code, when it quotes an item
+or a block of code whole: that is what Markdown can say of a page's layout.
+
+:::{linked-quote} https://wicg.github.io/scroll-to-text-fragment/#:~:text=Use%20context%20only%20if,or%20fewer%20words
+-- URL Fragment Text Directives
+:::
+
 ### When the page changes
 
 A page can change after it is quoted. When it has other words than the post

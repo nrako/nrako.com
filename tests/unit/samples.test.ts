@@ -14,10 +14,13 @@ const slugs = readdirSync(directory)
 async function render(slug: string) {
   return processor(readFileSync(join(directory, `${slug}.md`), 'utf-8'), {
     highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
-    // The page the samples quote, as it was when they were written
-    fetchPage: async () =>
+    // The pages the samples quote, as they were when they were written
+    fetchPage: async (address) =>
       readFileSync(
-        join(import.meta.dirname, '../fixtures/pages/example.com.html'),
+        join(
+          import.meta.dirname,
+          `../fixtures/pages/${new URL(address).hostname}.html`,
+        ),
         'utf-8',
       ),
     loadFile(path) {
