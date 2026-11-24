@@ -66,6 +66,7 @@ test('an unlisted post is a post, and is not a listed one', async () => {
     'fixture-unlisted-post',
     'fixture-post',
     'fixture-short-post',
+    'fixture-reactions-post',
   ])
   assert.deepEqual(slugs(await getListedPosts(fixtures)), [
     'fixture-post',

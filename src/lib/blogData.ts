@@ -2,6 +2,7 @@ import type { PageFrontmatter } from 'myst-frontmatter'
 import type { Messages, PostFrontmatter } from './processor.ts'
 import type { CommitInfo } from './githubVersioning.ts'
 import type { PostSnippet } from './snippets.ts'
+import type { TableOfContentsEntry } from './tableOfContents.ts'
 import { extname, join } from 'node:path'
 import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
 import processor from './processor.ts'
@@ -65,6 +66,8 @@ export interface Post {
   messages: Messages
   /** The snippets of the post that have a page of their own */
   snippets: PostSnippet[]
+  /** The sections of the post, in order */
+  tableOfContents: TableOfContentsEntry[]
   readingTimeMinutes: number
   versions?: CommitInfo[]
 }
@@ -143,14 +146,15 @@ export async function getPost(
   if (!existsSync(filePath)) return null
 
   const text = readFileSync(filePath, 'utf-8')
-  const { frontmatter, html, messages, snippets } = await processor(text, {
-    ...options,
-    address: `/posts/${slug}`,
-    loadFile(path) {
-      const file = join(options.contentDir, path)
-      return existsSync(file) ? readFileSync(file, 'utf-8') : undefined
-    },
-  })
+  const { frontmatter, html, messages, snippets, tableOfContents } =
+    await processor(text, {
+      ...options,
+      address: `/posts/${slug}`,
+      loadFile(path) {
+        const file = join(options.contentDir, path)
+        return existsSync(file) ? readFileSync(file, 'utf-8') : undefined
+      },
+    })
 
   const metadata: Post = {
     slug,
@@ -158,6 +162,7 @@ export async function getPost(
     content: html,
     messages,
     snippets,
+    tableOfContents,
     readingTimeMinutes: calculateReadingTime(html),
   }
 

@@ -3,6 +3,7 @@ import katexStyles from 'katex/dist/katex.min.css?url'
 import Layout from '@/layouts/Layout.astro'
 import DialogMessages from '@/components/DialogMessages.astro'
 import PostHeader from '@/components/PostHeader.astro'
+import TableOfContents from '@/components/TableOfContents.astro'
 import BlueSkyInteractions from '@/components/preact/bluesky-interactions'
 import { getPost, getPosts, defaultOptions as options } from '@/lib/blogData'
 
@@ -43,20 +44,30 @@ if (displayMessages) {
     class="post prose mx-auto max-w-(--column)"
   >
     <PostHeader post={post} />
-    <div
-      class="post-content"
-      set:html={post.content}
-    />
-    {
-      post.frontmatter.site?.bskyUri && (
-        <>
-          <hr />
-          <BlueSkyInteractions
-            client:load
-            postUri={post.frontmatter.site.bskyUri}
-          />
-        </>
-      )
-    }
+    <div class="post-body">
+      <div
+        class="post-content"
+        set:html={post.content}
+      />
+      {
+        post.frontmatter.site?.bskyUri && (
+          <>
+            <hr />
+            {/* The table of contents links to the reactions by this `id` */}
+            <section id="reactions">
+              <BlueSkyInteractions
+                client:load
+                postUri={post.frontmatter.site.bskyUri}
+              />
+            </section>
+          </>
+        )
+      }
+      <TableOfContents
+        title={post.frontmatter.title}
+        entries={post.tableOfContents}
+        reactions={Boolean(post.frontmatter.site?.bskyUri)}
+      />
+    </div>
   </article>
 </Layout>

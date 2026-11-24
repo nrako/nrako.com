@@ -44,6 +44,10 @@ import {
   reportMessages,
 } from './crossReferences.ts'
 import { snippetDirective, snippetsTransform } from './snippets.ts'
+import {
+  rehypeTableOfContents,
+  type TableOfContentsEntry,
+} from './tableOfContents.ts'
 
 export type ParseOptions = Pick<
   BlogOptions,
@@ -196,6 +200,7 @@ async function parse(text: string, options: ParseOptions) {
   ).trim()
 
   const highlighter = await getHighlighter(options.highlighter.themes)
+  const tableOfContents: TableOfContentsEntry[] = []
 
   const r = await unified()
     .use(rehypeParse, { fragment: true })
@@ -206,6 +211,9 @@ async function parse(text: string, options: ParseOptions) {
     .use(rehypeReferences, references)
     .use(rehypeExternalLinks, { rel: ['noopener'] })
     .use(rehypeKatex)
+    // After the references, which add a section, and after KaTeX, which
+    // says what of a formula is read
+    .use(rehypeTableOfContents, tableOfContents)
     .use(rehypeAutolinkHeadings, {
       content() {
         return [h('span.anchorsign', { ariaHidden: 'true' })]
@@ -216,7 +224,7 @@ async function parse(text: string, options: ParseOptions) {
 
   const html = r.value as string
 
-  return { frontmatter, html, messages, snippets }
+  return { frontmatter, html, messages, snippets, tableOfContents }
 }
 
 export default async function processor(

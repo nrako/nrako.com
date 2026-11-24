@@ -3,6 +3,7 @@ import katexStyles from 'katex/dist/katex.min.css?url'
 import Layout from '@/layouts/Layout.astro'
 import DialogMessages from '@/components/DialogMessages.astro'
 import PostHeader from '@/components/PostHeader.astro'
+import TableOfContents from '@/components/TableOfContents.astro'
 import { defaultOptions as options, getPosts } from '@/lib/blogData'
 import { getPostAtVersion, type CommitInfo } from '@/lib/githubVersioning'
 
@@ -80,9 +81,15 @@ if (displayMessages) {
         version.
       </dialog>
     </PostHeader>
-    <div
-      class="post-content"
-      set:html={post.content}
-    />
+    <div class="post-body">
+      <div
+        class="post-content"
+        set:html={post.content}
+      />
+      <TableOfContents
+        title={post.frontmatter.title}
+        entries={post.tableOfContents}
+      />
+    </div>
   </article>
 </Layout>

@@ -21,6 +21,10 @@
     background: var(--ground);
     color: var(--ink);
     font-weight: var(--weight-normal);
+    /* The page covers the screen (`viewport-fit=cover`): its content keeps
+       clear of a notch at either side, the ground runs under it */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
 
@@ -838,6 +842,215 @@ a:hover {
 .post-content :is(h1, h2, h3, h4, h5, h6):hover .anchorsign {
   opacity: 1;
   color: inherit;
+}
+
+/*
+ * A post's table of contents (`TableOfContents.astro`): the last element of
+ * `.post-body`, which holds the post's text and its reactions. It follows the
+ * reader down both and stops where they end.
+ *
+ * Without a margin to stand in, it is a bar at the foot of the window: the
+ * section being read, and the list above it once the bar is pressed. The bar
+ * is the column's, on the ground drawn across the window, and stands clear of
+ * a phone's home indicator.
+ */
+.post-body {
+  position: relative;
+}
+
+.post-contents {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  /* Where it comes to rest, as far under the reactions as under the text */
+  margin-top: 4rem;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--rule);
+  background: var(--ground);
+  box-shadow: 0 0 0 100vmax var(--ground);
+  clip-path: inset(0 -100vmax);
+  font-family: var(--type-text);
+  font-size: var(--size-meta);
+  line-height: 1.4;
+}
+
+/* The list opens over the bar, which stays under the thumb */
+.post-contents details {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.post-contents summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-block: 0.75rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.post-contents summary::-webkit-details-marker {
+  display: none;
+}
+
+.post-contents-label {
+  color: var(--muted);
+}
+
+.post-contents-current {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* An arrowhead: the way the list opens, then the way it closes */
+.post-contents summary::after {
+  content: '';
+  align-self: center;
+  width: 0.5em;
+  height: 0.5em;
+  margin-inline: 0.25em;
+  border: solid currentColor;
+  border-width: 1.5px 1.5px 0 0;
+  transform: translateY(25%) rotate(-45deg);
+}
+
+.post-contents details[open] summary::after {
+  transform: translateY(-25%) rotate(135deg);
+}
+
+.post-contents ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-contents details > ol {
+  max-height: 60dvh;
+  padding-block: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.post-contents ol ol {
+  padding-left: 1em;
+}
+
+.post-contents a {
+  display: block;
+  padding-block: 0.3em;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.post-contents a:hover {
+  color: var(--accent);
+}
+
+/* The section being read, in the ink */
+.post-contents a[aria-current] {
+  color: var(--ink);
+}
+
+/* The title and the reactions are not sections of the post: a rule sets each
+   apart */
+.post-contents-top {
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* The title leads to the top of the page, which an icon says once the reader
+   has left it. The icon stands beside the title, however many lines it takes */
+.post-contents-top a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+
+/* A long entry keeps to two lines */
+.post-contents a span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.post-contents-top svg {
+  position: relative;
+  top: 0.125em;
+  flex: none;
+  transition: opacity 0.3s;
+}
+
+.post-contents-top a[aria-current] svg {
+  opacity: 0;
+}
+
+.post-contents-reactions {
+  margin-top: 0.5em;
+  padding-top: 0.5em;
+  border-top: 1px solid var(--rule);
+}
+
+/*
+ * With a margin wide enough, the list stands in it, beside the text: the
+ * element is a rail as tall as `.post-body`, down which the list follows the
+ * reader. The list is shown whether or not the bar was opened, and the bar is
+ * gone. A browser that cannot show a closed list keeps the bar to open it.
+ *
+ * The widest column (the largest text size) leaves the list some ten
+ * characters less than its full width at this breakpoint.
+ */
+@media (min-width: 80rem) {
+  .post-contents {
+    position: absolute;
+    inset-block: 0;
+    left: calc(100% + 2rem);
+    z-index: auto;
+    width: min(14rem, calc((100vw - var(--column)) / 2 - 3rem));
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    clip-path: none;
+  }
+
+  .post-contents details {
+    display: block;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100dvh - 4rem);
+    overflow-y: auto;
+  }
+
+  .post-contents details > ol {
+    max-height: none;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+  }
+
+  @supports selector(::details-content) {
+    .post-contents summary {
+      display: none;
+    }
+
+    .post-contents details::details-content {
+      content-visibility: visible;
+    }
+  }
+}
+
+@media print {
+  .post-contents {
+    display: none;
+  }
 }
 
 /* Admonitions/Callouts */
