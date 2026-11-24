@@ -104,7 +104,7 @@ test('a {bibliography} directive places the references', async () => {
     options,
   )
 
-  const heading = html.indexOf('Sources</h2>')
+  const heading = html.indexOf('<h2 id="sources">Sources')
   const list = html.indexOf('<ol class="reference-list">')
   const after = html.indexOf('<p>After.</p>')
   assert.ok(heading > -1 && heading < list && list < after)

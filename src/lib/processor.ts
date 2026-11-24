@@ -215,6 +215,7 @@ async function parse(text: string, options: ParseOptions) {
     // says what of a formula is read
     .use(rehypeTableOfContents, tableOfContents)
     .use(rehypeAutolinkHeadings, {
+      behavior: 'append',
       content() {
         return [h('span.anchorsign', { ariaHidden: 'true' })]
       },

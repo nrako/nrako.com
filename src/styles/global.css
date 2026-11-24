@@ -819,29 +819,62 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
-/* Anchor links */
+/* Anchor links: a # that links to its heading, set after the heading's text.
+   It shows under the pointer and while its heading is the page's target. */
+.post-content a:has(> .anchorsign) {
+  text-decoration: none;
+}
+
 .post-content .anchorsign {
   color: var(--muted);
-  position: relative;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
 .post-content .anchorsign::before {
   content: '#';
-  position: absolute;
-  left: -1.1rem;
-  top: 0;
   transition:
     opacity 0.3s,
     color 0.3s;
-  font-size: 1rem;
-  line-height: 1rem;
+}
+
+.post-content :is(h1, h2, h3, h4, h5, h6):is(:hover, :target) .anchorsign {
+  opacity: 1;
 }
 
 .post-content :is(h1, h2, h3, h4, h5, h6):hover .anchorsign {
-  opacity: 1;
   color: inherit;
+}
+
+/* With a pointer, the # sits in the margin, before the heading's first line */
+@media (hover: hover) {
+  .post-content :is(h1, h2, h3, h4, h5, h6) {
+    position: relative;
+  }
+
+  .post-content .anchorsign::before {
+    position: absolute;
+    left: -1.1rem;
+    top: 0;
+    font-size: 1rem;
+    line-height: 1rem;
+  }
+}
+
+/* On a touch screen the margin is at the edge of the screen, where a swipe
+   goes back. The # follows the text instead, and is only there for the
+   heading that is the target: the table of contents is how a reader gets
+   there, and the # is then theirs to share. Its padding makes it a target
+   a finger can press. */
+@media (hover: none) {
+  .post-content .anchorsign::before {
+    margin-left: 0.3em;
+    padding: 0.4em 0.3em;
+  }
+
+  .post-content :is(h1, h2, h3, h4, h5, h6):not(:target) .anchorsign {
+    visibility: hidden;
+  }
 }
 
 /*
