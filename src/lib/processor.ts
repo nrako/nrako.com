@@ -43,6 +43,12 @@ import {
   crossReferencesTransform,
   reportMessages,
 } from './crossReferences.ts'
+import {
+  quoteDirective,
+  quotesTransform,
+  resolveQuotes,
+  type FetchPage,
+} from './quotes.ts'
 import { snippetDirective, snippetsTransform } from './snippets.ts'
 import {
   rehypeTableOfContents,
@@ -57,6 +63,8 @@ export type ParseOptions = Pick<
   loadFile?: LoadFile
   /** The address of the post, which the pages of its snippets are under */
   address?: string
+  /** Reads a page of the web: the one a quote is read from */
+  fetchPage?: FetchPage
 }
 
 /**
@@ -117,7 +125,7 @@ function parseMyst(text: string, citations: boolean) {
   const mdast = mystParse(text, {
     markdownit: { linkify: true },
     extensions: { citations },
-    directives: [snippetDirective],
+    directives: [snippetDirective, quoteDirective],
     vfile: file as any,
   })
   const { frontmatter } = getFrontmatter(new VFile() as any, mdast, {
@@ -156,6 +164,7 @@ async function parse(text: string, options: ParseOptions) {
   }
   const { mdast } = parsed
   reportMessages(parsed.file, messages)
+  await resolveQuotes(mdast, messages, options.fetchPage)
   const citationRenderers = await loadBibliography(
     bibliography,
     options.loadFile,
@@ -184,6 +193,7 @@ async function parse(text: string, options: ParseOptions) {
   reportMessages(file, messages)
   crossReferencesTransform(mdastPre)
   const snippets = snippetsTransform(mdastPre, options.address)
+  quotesTransform(mdastPre)
 
   const references = citationsTransform(mdastPre, citationRenderers, messages)
 

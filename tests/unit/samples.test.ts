@@ -14,6 +14,12 @@ const slugs = readdirSync(directory)
 async function render(slug: string) {
   return processor(readFileSync(join(directory, `${slug}.md`), 'utf-8'), {
     highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
+    // The page the samples quote, as it was when they were written
+    fetchPage: async () =>
+      readFileSync(
+        join(import.meta.dirname, '../fixtures/pages/example.com.html'),
+        'utf-8',
+      ),
     loadFile(path) {
       const file = join(directory, path)
       return existsSync(file) ? readFileSync(file, 'utf-8') : undefined

@@ -199,6 +199,65 @@ The details are not the details. They make the design.
 -- Charles Eames
 :::
 
+## Linked quotes
+
+A linked quote is of a page on the web, and its link leads to the words
+quoted, not only to the page. Its address is the one a browser gives with
+"Copy link to highlight": it ends with a text fragment (`#:~:text=…`), which
+names the passage, and which a browser scrolls to and highlights.
+
+:::{linked-quote} https://example.com/#:~:text=This%20domain%20is%20for%20use%20in%20documentation%20examples%20without%20needing%20permission.
+This domain is for use in documentation examples without needing permission.
+
+-- The Example Domain
+:::
+
+What is shown is read from the page each time the site is built. The
+quotation written in the post is there to be read in its source and to be
+compared with the page, so it can be left out. This address names a passage
+by its first words and its last, and the page gives what is between them:
+
+:::{linked-quote} https://example.com/#:~:text=This%20is%20not,monitoring%20purposes.
+:::
+
+An address can name several passages, which a browser highlights together.
+They are set with an ellipsis between them:
+
+:::{linked-quote} https://example.com/#:~:text=This%20domain&text=documentation%20examples&text=This%20is%20not%20a%20service&text=testing%20and%20monitoring%20purposes
+:::
+
+### When the page changes
+
+A page can change after it is quoted. When it has other words than the post
+wrote, the page's words are shown, and the passage that differs says under
+the pointer what the post quoted:
+
+:::{linked-quote} https://example.com/#:~:text=without%20needing%20permission
+without asking for permission
+:::
+
+Of several passages, only those that differ are marked:
+
+:::{linked-quote} https://example.com/#:~:text=documentation%20examples&text=This%20is%20not%20a%20service
+documentation samples … This is not a service
+:::
+
+When the page no longer has what the address names, the quotation is the one
+the post wrote:
+
+:::{linked-quote} https://example.com/#:~:text=a%20passage%20that%20was%20taken%20out
+A passage that was taken out of the page since.
+:::
+
+When the post wrote none, what is left of the quotation is what its address
+holds: the passage itself, or its first words and its last.
+
+:::{linked-quote} https://example.com/#:~:text=another%20passage,taken%20out
+:::
+
+A page that could not be read when the site was built is not a page that
+changed: the quote then says that it was not checked.
+
 ## Callouts
 
 A callout sets a block apart. Each kind has its title, as `{note}`, `{tip}`,

@@ -1,6 +1,7 @@
 import type { BlogOptions, Post } from './blogData.ts'
 import { calculateReadingTime } from './blogData.ts'
 import processor from './processor.ts'
+import { fetchPage } from './quotes.ts'
 import process from 'node:process'
 import { Buffer } from 'node:buffer'
 
@@ -184,6 +185,9 @@ export async function getPostAtVersion(
       async loadFile(path) {
         return (await getFileAtVersion(path, sha, options)) ?? undefined
       },
+      // What a quote quotes is read from its page as it is now, at any
+      // version of the post
+      fetchPage,
     })
 
   return {

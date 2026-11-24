@@ -6,6 +6,7 @@ import type { TableOfContentsEntry } from './tableOfContents.ts'
 import { extname, join } from 'node:path'
 import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
 import processor from './processor.ts'
+import { fetchPage } from './quotes.ts'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { parseHTML } from 'linkedom'
 import { getCommitHistory, isDraftVersion } from './githubVersioning.ts'
@@ -154,6 +155,8 @@ export async function getPost(
         const file = join(options.contentDir, path)
         return existsSync(file) ? readFileSync(file, 'utf-8') : undefined
       },
+      // What a quote quotes is read from its page
+      fetchPage,
     })
 
   const metadata: Post = {
