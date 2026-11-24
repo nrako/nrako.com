@@ -668,6 +668,31 @@ a:hover {
 }
 
 /*
+ * A passage of a linked quote that the page has otherwise than the post
+ * wrote it: it says under the pointer what the post quoted. Its underline is
+ * a wave, which neither kind of link has.
+ */
+.prose ins.quote-changed {
+  text-decoration: underline wavy var(--muted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+/*
+ * What a linked quote says of itself: after its link, and under a quotation
+ * that is set from its address. These are the site's words, not the page's.
+ */
+.prose .quote-notice,
+.prose .quote-missing {
+  color: var(--muted);
+}
+
+.prose .quote-missing {
+  font-style: italic;
+}
+
+/*
  * Shiki code highlighting. The block is tinted from the ink, like inline
  * code, rather than drawn in the theme's own white or black: it follows the
  * reading background, and the token colours are measured against it.
@@ -1618,9 +1643,13 @@ a:hover {
   color: var(--ink);
 }
 
-/* Parse errors and warnings, shown on a post in dev */
+/*
+ * Parse errors and warnings, shown on a post in dev, over the post: its body
+ * is positioned, for its table of contents, and would be drawn over them.
+ */
 
 .post-messages {
+  z-index: 20;
   margin-left: auto;
   margin-right: auto;
   background: var(--surface);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { before, test } from 'node:test'
-import processor from '../../src/lib/processor.ts'
+import processor, { type Messages } from '../../src/lib/processor.ts'
 
 // samples/posts/what-a-post-can-set.md shows every piece of markup the site
 // renders. These tests hold it to that: each piece it uses comes out as the
@@ -10,7 +10,7 @@ import processor from '../../src/lib/processor.ts'
 const directory = join(import.meta.dirname, '../../samples/posts')
 
 let html = ''
-let messages = {}
+let messages: Messages = {}
 
 before(async () => {
   const rendered = await processor(
@@ -18,6 +18,12 @@ before(async () => {
     {
       highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
       address: '/posts/what-a-post-can-set',
+      // The page the sample quotes, as it was when the sample was written
+      fetchPage: async () =>
+        readFileSync(
+          join(import.meta.dirname, '../fixtures/pages/example.com.html'),
+          'utf-8',
+        ),
       loadFile(path) {
         const file = join(directory, path)
         return existsSync(file) ? readFileSync(file, 'utf-8') : undefined
@@ -29,7 +35,30 @@ before(async () => {
 })
 
 test('nothing in the sample is left unrendered', () => {
-  assert.deepEqual(messages, {})
+  // The only warnings are those of the quotes that show what becomes of a
+  // quote whose page has other words, or no longer has it
+  const quoted = (fragment: string) =>
+    `https://example.com/#:~:text=${fragment}`
+  assert.deepEqual(messages, {
+    warnings: [
+      {
+        property: 'quote',
+        message: `The page of "${quoted('without%20needing%20permission')}" has other words than the post: "without needing permission", where the post quotes "without asking for permission"`,
+      },
+      {
+        property: 'quote',
+        message: `The page of "${quoted('documentation%20examples&text=This%20is%20not%20a%20service')}" has other words than the post: "documentation examples This is not a service", where the post quotes "documentation samples … This is not a service"`,
+      },
+      {
+        property: 'quote',
+        message: `The page of "${quoted('a%20passage%20that%20was%20taken%20out')}" no longer has what the address names`,
+      },
+      {
+        property: 'quote',
+        message: `The page of "${quoted('another%20passage,taken%20out')}" no longer has what the address names`,
+      },
+    ],
+  })
   // A role or a directive the site has no rendering for
   assert.ok(!html.includes('unhandled'))
   // A link without a text, an element without content
@@ -100,6 +129,20 @@ const pieces: Record<string, RegExp> = {
   'a definition list': /<dl><dt>Role<\/dt><dd>/,
   'an attributed quotation':
     /<\/blockquote><figcaption><p>Harold Abelson and Gerald Jay Sussman<\/p>/,
+  'a quote of what its address names, with the link to it':
+    /<blockquote cite="(https:\/\/example\.com\/#:~:text=This%20domain%20is%20for%20use[^"]*permission\.)">\s*<p>This domain is for use in documentation examples without needing permission\.<\/p>\s*<\/blockquote><figcaption><p>The Example Domain, <a href="\1"[^>]*>example\.com<\/a>/,
+  'a quote read from its page':
+    /<blockquote cite="https:\/\/example\.com\/#:~:text=This%20is%20not,monitoring%20purposes\.">\s*<p>This is not a service; avoid relying on it for testing and monitoring purposes\.<\/p>/,
+  'a quote of several passages':
+    /<p>This domain … documentation examples … This is not a service … testing and monitoring purposes<\/p>/,
+  'a quote whose page has other words':
+    /<p><ins class="quote-changed" title="Quoted in this post as: “without asking for permission”">without needing permission<\/ins><\/p>/,
+  'a quote of several passages, one of them written otherwise':
+    /<p><ins class="quote-changed" title="Quoted in this post as: “documentation samples”">documentation examples<\/ins> … This is not a service<\/p>/,
+  'a quote whose page no longer has it':
+    /<p>A passage that was taken out of the page since\.<\/p>\s*<\/blockquote><figcaption><p><a [^>]*>example\.com<\/a><span class="quote-notice"> \(no longer found on the page\)<\/span>/,
+  'a quote set from its address':
+    /<p>another passage … taken out<\/p>\s*<p class="quote-missing">No longer on the page: these are the words its address holds\.<\/p>/,
   'an epigraph': /<figure class="numbered epigraph"><blockquote>/,
   "a callout with its kind's title, once":
     /<aside class="admonition note"><p class="admonition-title">Note<\/p><p>The body/,

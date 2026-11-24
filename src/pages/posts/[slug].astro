@@ -4,8 +4,10 @@ import Layout from '@/layouts/Layout.astro'
 import DialogMessages from '@/components/DialogMessages.astro'
 import PostHeader from '@/components/PostHeader.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
+import PostLinks from '@/components/PostLinks.astro'
 import BlueSkyInteractions from '@/components/preact/bluesky-interactions'
 import { getPost, getPosts, defaultOptions as options } from '@/lib/blogData'
+import { postLinks } from '@/lib/permalinks'
 
 export async function getStaticPaths() {
   const posts = await getPosts(options)
@@ -21,6 +23,8 @@ if (!post) {
   return Astro.redirect('/404')
 }
 
+const links = postLinks({ site: Astro.site!, slug, versions: post.versions })
+
 const displayMessages = import.meta.env.DEV
 
 // Log messages in development
@@ -31,6 +35,7 @@ if (displayMessages) {
 ---
 
 <Layout title={`${post.frontmatter.title} - ${options.title}`}>
+  <PostLinks links={links} slot="head" />
   {
     /* Served from the site, and only to a post that has math to set */
     post.content.includes('class="katex') && (

@@ -133,6 +133,42 @@ test.describe('Individual post', () => {
     // Should have reading time
     await expect(page.getByText(/min read|Less than a minute/)).toBeVisible()
   })
+
+  test("declares itself canonical, on the site's origin", async ({ page }) => {
+    const path = new URL(page.url()).pathname
+
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `https://nrako.com${path}`,
+    )
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
+  })
+})
+
+test.describe('Links a post declares', () => {
+  test.beforeEach(() => {
+    skipWithoutFixturePosts()
+  })
+
+  // Fixture posts have no version history: it is looked up under posts/
+  test('a post without history is canonical and cites no version', async ({
+    page,
+  }) => {
+    await page.goto('/posts/fixture-post')
+
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://nrako.com/posts/fixture-post',
+    )
+    await expect(page.locator('link[rel="cite-as"]')).toHaveCount(0)
+  })
+
+  test('a snippet page declares neither', async ({ page }) => {
+    await page.goto('/posts/fixture-unlisted-post/snippets/ex-unlisted')
+
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
+    await expect(page.locator('link[rel="cite-as"]')).toHaveCount(0)
+  })
 })
 
 test.describe('Post versions', () => {
@@ -150,19 +186,66 @@ test.describe('Post versions', () => {
       'no version history (GITHUB_TOKEN not set?)',
     )
 
-    // The first entry is the latest version and links to the post itself
-    await expect(versionLinks.first()).toHaveAttribute(
-      'href',
-      /^\/posts\/[^/]+$/,
-    )
-
     const oldestHref = await versionLinks.last().getAttribute('href')
     expect(oldestHref).toMatch(/^\/posts\/[^/]+\/[0-9a-f]{7}$/)
+    const postPath = oldestHref!.replace(/\/[^/]+$/, '')
 
     await page.goto(oldestHref!)
 
     await expect(page.getByText('You are looking at version')).toBeVisible()
     await expect(page.locator('.post-content')).toBeVisible()
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `https://nrako.com${postPath}`,
+    )
+    await expect(page.locator('link[rel="cite-as"]')).toHaveAttribute(
+      'href',
+      `https://nrako.com${oldestHref}`,
+    )
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      'content',
+      'noindex',
+    )
+  })
+
+  test('the latest version is a page, which the post cites', async ({
+    page,
+  }) => {
+    await page.goto('/posts')
+    await skipWithoutPosts(page)
+
+    await page.getByRole('article').first().click()
+    await expect(page.locator('.post-content')).toBeVisible()
+    const postPath = new URL(page.url()).pathname
+
+    const versionLinks = page.locator('#versions-popover a')
+    test.skip(
+      (await versionLinks.count()) < 2,
+      'no version history (GITHUB_TOKEN not set?)',
+    )
+
+    // The newest entry links to its permalink, as the others do
+    const latestHref = await versionLinks.first().getAttribute('href')
+    expect(latestHref).toMatch(/^\/posts\/[^/]+\/[0-9a-f]{7}$/)
+    await expect(page.locator('link[rel="cite-as"]')).toHaveAttribute(
+      'href',
+      `https://nrako.com${latestHref}`,
+    )
+
+    const response = await page.goto(latestHref!)
+
+    expect(response?.status()).toBe(200)
+    await expect(page).toHaveURL(new RegExp(`${latestHref}$`))
+    await expect(page.getByText('the latest version')).toBeVisible()
+    await expect(page.locator('.post-content')).toBeVisible()
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `https://nrako.com${postPath}`,
+    )
+    await expect(page.locator('link[rel="cite-as"]')).toHaveAttribute(
+      'href',
+      `https://nrako.com${latestHref}`,
+    )
   })
 })
 

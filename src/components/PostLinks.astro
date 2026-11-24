@@ -1,0 +1,13 @@
+---
+import type { PostLinks } from '@/lib/permalinks'
+
+// What a page of a post declares about itself, in its head (`lib/permalinks.ts`)
+interface Props {
+  links: PostLinks
+}
+
+const { links } = Astro.props
+---
+
+<link rel="canonical" href={links.canonical} />
+{links.citeAs && <link rel="cite-as" href={links.citeAs} />}

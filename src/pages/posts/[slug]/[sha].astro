@@ -4,8 +4,10 @@ import Layout from '@/layouts/Layout.astro'
 import DialogMessages from '@/components/DialogMessages.astro'
 import PostHeader from '@/components/PostHeader.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
+import PostLinks from '@/components/PostLinks.astro'
 import { defaultOptions as options, getPosts } from '@/lib/blogData'
 import { getPostAtVersion, type CommitInfo } from '@/lib/githubVersioning'
+import { latestVersion, postLinks, postPath } from '@/lib/permalinks'
 
 interface Props {
   versions: CommitInfo[]
@@ -29,10 +31,10 @@ export async function getStaticPaths() {
 const { slug, sha } = Astro.params
 const { versions } = Astro.props
 
-// The latest version is the post itself
-if (sha === versions[0]?.shortSha) {
-  return Astro.redirect(`/posts/${slug}`)
-}
+// The latest version is a page like the others, not a redirect to the post:
+// a text fragment (`#:~:text=`) does not survive a redirect.
+const isLatest = sha === latestVersion(versions)?.shortSha
+const links = postLinks({ site: Astro.site!, slug, versions, shortSha: sha })
 
 const post = await getPostAtVersion(slug, sha, options)
 
@@ -54,6 +56,9 @@ if (displayMessages) {
 ---
 
 <Layout title={`${post.frontmatter.title} (${sha}) - ${options.title}`}>
+  <PostLinks links={links} slot="head" />
+  {/* Searches lead to the post: a version is reached by its permalink */}
+  <meta name="robots" content="noindex" slot="head" />
   {
     /* Served from the site, and only to a post that has math to set */
     post.content.includes('class="katex') && (
@@ -77,8 +82,19 @@ if (displayMessages) {
           href={`https://github.com/${options.versioning?.repoOwner}/${options.versioning?.repoName}/commit/${sha}`}
         >
           {sha}
-        </a>. Click <a href={`/posts/${post.slug}`}>here</a> to go back to the latest
-        version.
+        </a>{
+          isLatest ? (
+            <>
+              , the latest version. Click <a href={postPath(post.slug)}>here</a>{' '}
+              to go to the post.
+            </>
+          ) : (
+            <>
+              . Click <a href={postPath(post.slug)}>here</a> to go back to the
+              latest version.
+            </>
+          )
+        }
       </dialog>
     </PostHeader>
     <div class="post-body">

@@ -1,6 +1,7 @@
 ---
 import type { CommitInfo } from '@/lib/githubVersioning'
 import { defaultOptions as options } from '@/lib/blogData'
+import { versionPath } from '@/lib/permalinks'
 import Time from './Time.astro'
 
 interface Props {
@@ -39,11 +40,7 @@ const lastEditedDate = latestVersion?.date
                 <strong>Draft</strong>
               ) : (
                 <a
-                  href={
-                    version === latestVersion
-                      ? `/posts/${slug}`
-                      : `/posts/${slug}/${version.shortSha}`
-                  }
+                  href={versionPath(slug, version.shortSha)}
                   title={`View version ${version.shortSha}`}
                 >
                   <strong>{version.shortSha}</strong>
