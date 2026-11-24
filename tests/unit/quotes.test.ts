@@ -130,6 +130,39 @@ test('a quotation the page has otherwise is shown as the page has it, and says s
   })
 })
 
+test('words the page has at several places are quoted from the first, with a warning', async () => {
+  const { html, messages } = await render(quote(`${page}#:~:text=here`))
+
+  assert.ok(html.includes('<p>here</p>'))
+  assert.ok(!html.includes('quote-notice'))
+  assert.deepEqual(messages, {
+    warnings: [
+      {
+        property: 'quote',
+        message: `The page of "${page}#:~:text=here" has what the address names "here" at 2 places: the first is quoted. Words before or after it tell them apart (#:~:text=before-,the%20passage,-after)`,
+      },
+    ],
+  })
+
+  // From a start to an end, each start that has an end after it is a place
+  const ranged = await render(quote(`${page}#:~:text=The%20quoted,text`), {
+    [page]: laidOut,
+  })
+  assert.match(
+    ranged.messages.warnings?.[0].message ?? '',
+    /names from "The quoted" to "text" at 2 places/,
+  )
+})
+
+test('words told apart by what is before or after them get no warning', async () => {
+  for (const fragment of ['text=starts-,here', 'text=here,-.']) {
+    const { html, messages } = await render(quote(`${page}#:~:${fragment}`))
+
+    assert.ok(html.includes('<p>here</p>'), fragment)
+    assert.deepEqual(messages, {}, fragment)
+  }
+})
+
 const gone = `${page}#:~:text=A%20passage%20taken%20out`
 
 test('a quote the page no longer has shows what the post wrote, and says so', async () => {

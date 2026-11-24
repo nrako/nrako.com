@@ -437,6 +437,10 @@ function heldByAddress(directives: TextDirective[]): Block[][] {
  * next, when the page changes or cannot be read; writing the quotation is
  * what keeps it.
  *
+ * Words that the page has at several places are quoted from the first, as a
+ * browser highlights them, and the post gets a warning: the place meant may
+ * be another, which a prefix or a suffix in the address tells apart.
+ *
  * A page can say it is a version of another (`rel="canonical"`). What is
  * found on the version and not on the page it is a version of is still
  * quoted from the version, and the quote says that the page has moved on.
@@ -500,6 +504,20 @@ export async function resolveQuotes(
       warn(`The page of "${address}" no longer has what the address names`)
       without('gone')
       continue
+    }
+
+    // Words the page has more than once are quoted from their first place,
+    // which is the one a browser highlights, and may not be the one meant
+    for (const directive of directives) {
+      const places = findPassages(read, directive).length
+      if (places > 1) {
+        const named = directive.end
+          ? `from "${directive.start}" to "${directive.end}"`
+          : `"${directive.start}"`
+        warn(
+          `The page of "${address}" has what the address names ${named} at ${places} places: the first is quoted. Words before or after it tell them apart (#:~:text=before-,the%20passage,-after)`,
+        )
+      }
     }
 
     const otherwise = written ? writtenOtherwise(written, passages) : []
