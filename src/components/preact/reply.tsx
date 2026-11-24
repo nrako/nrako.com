@@ -51,7 +51,7 @@ export default function Reply({
               .split('/')
               .pop()}`}
           />
-          <p className="mt-1 text-gray-600 dark:text-gray-300">
+          <p className="mt-1 wrap-break-word text-gray-600 dark:text-gray-300">
             {AppBskyFeedPost.isRecord(post.record) ? post.record.text : ''}
           </p>
           {post.embed && <PostEmbed embed={post.embed} postUri={post.uri} />}
