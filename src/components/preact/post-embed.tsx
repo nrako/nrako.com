@@ -61,7 +61,7 @@ function EmbedBskyPost({ embed }: { embed: AppBskyEmbedRecord.View }) {
         />
       </div>
       {hasText(record.value) && (
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
+        <p className="mt-2 wrap-break-word text-gray-600 dark:text-gray-300">
           {record.value.text}
         </p>
       )}

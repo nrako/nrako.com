@@ -176,14 +176,15 @@ export async function getPostAtVersion(
   if (!content) return null
 
   // The files the post refers to are read at the same version as the post
-  const { frontmatter, html, messages, snippets } = await processor(content, {
-    ...options,
-    // The pages of its snippets are those of the post as it is now
-    address: `/posts/${slug}`,
-    async loadFile(path) {
-      return (await getFileAtVersion(path, sha, options)) ?? undefined
-    },
-  })
+  const { frontmatter, html, messages, snippets, tableOfContents } =
+    await processor(content, {
+      ...options,
+      // The pages of its snippets are those of the post as it is now
+      address: `/posts/${slug}`,
+      async loadFile(path) {
+        return (await getFileAtVersion(path, sha, options)) ?? undefined
+      },
+    })
 
   return {
     slug,
@@ -191,6 +192,7 @@ export async function getPostAtVersion(
     content: html,
     messages,
     snippets,
+    tableOfContents,
     readingTimeMinutes: calculateReadingTime(html),
   }
 }

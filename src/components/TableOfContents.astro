@@ -1,0 +1,152 @@
+---
+import TbArrowBarToUp from '@/components/icons/TbArrowBarToUp'
+import {
+  nestTableOfContents,
+  type TableOfContentsEntry,
+} from '@/lib/tableOfContents'
+
+interface Props {
+  /** The post's title: the first entry, which leads to the top of the page */
+  title?: string
+  entries: TableOfContentsEntry[]
+  /** The post has reactions under it: the list ends with a link to them */
+  reactions?: boolean
+}
+
+const { title = 'Top of page', entries, reactions = false } = Astro.props
+
+// One section is the post itself: nothing to choose from
+const MIN_ENTRIES = 2
+
+const sections = nestTableOfContents(entries)
+---
+
+{
+  /*
+   * One list for both places it is shown (`.post-contents` in `global.css`):
+   * in the margin beside the post where the window has one, else as a bar at
+   * the foot of the window, which opens the list. It is the last element of
+   * `.post-body`, whose end it cannot go past.
+   */
+  entries.length >= MIN_ENTRIES && (
+    <nav class="post-contents not-prose" aria-label="Contents">
+      <details>
+        <summary>
+          <span class="post-contents-label">Contents</span>
+          <span class="post-contents-current" />
+        </summary>
+        <ol>
+          {/* `#` alone is the top of the page: nothing has to carry an `id` */}
+          <li class="post-contents-top">
+            <a href="#">
+              <span>{title}</span>
+              <TbArrowBarToUp />
+            </a>
+          </li>
+          {sections.map((section) => (
+            <li>
+              <a href={`#${section.id}`}>
+                <span>{section.text}</span>
+              </a>
+              {section.children.length > 0 && (
+                <ol>
+                  {section.children.map((child) => (
+                    <li>
+                      <a href={`#${child.id}`}>
+                        <span>{child.text}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </li>
+          ))}
+          {reactions && (
+            <li class="post-contents-reactions">
+              <a href="#reactions">
+                <span>Reactions</span>
+              </a>
+            </li>
+          )}
+        </ol>
+      </details>
+    </nav>
+  )
+}
+
+<script>
+  const nav = document.querySelector<HTMLElement>('.post-contents')
+  const details = nav?.querySelector('details')
+  const current = nav?.querySelector('.post-contents-current')
+
+  if (nav && details && current) {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]
+    const targets = links.map((link) =>
+      document.getElementById(decodeURIComponent(link.hash.slice(1))),
+    )
+    let active = -1
+
+    // The section being read is the one whose heading is in the upper third
+    // of the window, the first if several are: a link to a short section
+    // brings its heading to the top, with the next one under it. With none
+    // there, it is the section whose heading was last passed; at the foot of
+    // the page, the last of the list. Before the first section it is the
+    // post itself, the first entry.
+    const update = () => {
+      const band = window.innerHeight / 3
+      const root = document.documentElement
+      let next = 0
+      if (window.innerHeight + window.scrollY >= root.scrollHeight - 2) {
+        next = links.length - 1
+      } else {
+        for (const [index, target] of targets.entries()) {
+          if (!target) continue
+          const top = target.getBoundingClientRect().top
+          if (top > band) break
+          next = index
+          if (top >= -1) break
+        }
+      }
+      if (next === active) return
+
+      links[active]?.removeAttribute('aria-current')
+      links[next]?.setAttribute('aria-current', 'location')
+      current.textContent = links[next]?.textContent?.trim() ?? ''
+      active = next
+    }
+
+    let scheduled = false
+    const schedule = () => {
+      if (scheduled) return
+      scheduled = true
+      requestAnimationFrame(() => {
+        scheduled = false
+        update()
+      })
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    update()
+
+    // The bar's list closes once it has served: a section chosen, a press
+    // outside it, or Escape
+    nav.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) {
+        details.open = false
+      }
+    })
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Node && !nav.contains(event.target)) {
+        details.open = false
+      }
+    })
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !details.open) return
+      details.open = false
+      if (nav.contains(document.activeElement)) {
+        details.querySelector('summary')?.focus()
+      }
+    })
+  }
+</script>
