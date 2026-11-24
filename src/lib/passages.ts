@@ -143,6 +143,28 @@ function hidden(node: HastNode): boolean {
   )
 }
 
+/**
+ * A block of a page: a line of its text, and what of the page's layout a
+ * quotation keeps, which is what Markdown can say of it.
+ */
+export interface Block {
+  /** The text of the block, its spaces collapsed */
+  text: string
+  /** The block is quoted in part: a passage starts or ends inside it */
+  cut?: true
+  /**
+   * The item of a list the block is in: its list is numbered or not, at a
+   * depth (1 for a list that is in no other), and the item has a number in
+   * it. A block that is not the first of its item continues it.
+   */
+  item?: { ordered: boolean; depth: number; number: number; continued?: true }
+  /**
+   * The text of a preformatted block, with its lines as the page has them.
+   * Of a part of a block, it is the part, on one line.
+   */
+  code?: string
+}
+
 /** What a page says of itself and the text a browser would search in it */
 export interface Page {
   /**
@@ -152,6 +174,8 @@ export interface Page {
    * stylesheet hides is in it, and what a script writes is not.
    */
   text: string
+  /** The blocks of the page, each a line of its text */
+  blocks: Block[]
   /** `rel="canonical"`: the page this one is a copy or a version of */
   canonical?: string
   /** `rel="cite-as"`: the address to cite the page by */
@@ -161,13 +185,30 @@ export interface Page {
 /** Reads a page from its HTML and its address, which its links are read from */
 export function readPage(html: string, address: string): Page {
   const tree = unified().use(rehypeParse).parse(html) as HastNode
-  const blocks: string[] = []
-  const page: Page = { text: '' }
+  const page: Page = { text: '', blocks: [] }
   let line = ''
+
+  // Where the walk is: the lists it is in, the item of the innermost, and
+  // whether the text is preformatted
+  const lists: { ordered: boolean; next: number }[] = []
+  let item:
+    | { ordered: boolean; depth: number; number: number; lines: number }
+    | undefined
+  let preformatted = 0
 
   const flush = () => {
     const text = line.replace(/\s+/g, ' ').trim()
-    if (text) blocks.push(text)
+    if (text) {
+      const block: Block = { text }
+      if (item) {
+        const { ordered, depth, number } = item
+        block.item = { ordered, depth, number }
+        if (item.lines > 0) block.item.continued = true
+        item.lines += 1
+      }
+      if (preformatted > 0) block.code = line.replace(/^\n+|\s+$/g, '')
+      page.blocks.push(block)
+    }
     line = ''
   }
 
@@ -185,26 +226,56 @@ export function readPage(html: string, address: string): Page {
       line += node.value ?? ''
       return
     }
-    if (node.type === 'element') {
-      if (node.tagName === 'link') link(node)
-      if (node.tagName !== 'head' && UNSEARCHED.has(node.tagName ?? '')) return
+    const tag = node.type === 'element' ? (node.tagName ?? '') : ''
+    if (tag) {
+      if (tag === 'link') link(node)
+      if (tag !== 'head' && UNSEARCHED.has(tag)) return
       if (hidden(node)) return
-      if (node.tagName === 'br') line += ' '
+      if (tag === 'br') line += ' '
     }
 
     // The head is only read for its links
-    const block = node.type === 'element' && BLOCKS.has(node.tagName ?? '')
+    const block = BLOCKS.has(tag)
     if (block) flush()
+
+    const list = tag === 'ul' || tag === 'ol'
+    const outer = item
+    if (list) {
+      const start = Number(node.properties?.start)
+      lists.push({
+        ordered: tag === 'ol',
+        next: Number.isInteger(start) ? start : 1,
+      })
+    }
+    if (tag === 'li' && lists.length > 0) {
+      const within = lists[lists.length - 1]
+      const value = Number(node.properties?.value)
+      if (Number.isInteger(value) && value > 0) within.next = value
+      item = {
+        ordered: within.ordered,
+        depth: lists.length,
+        number: within.next,
+        lines: 0,
+      }
+      within.next += 1
+    }
+    if (tag === 'pre') preformatted += 1
+
     for (const child of node.children ?? []) {
-      if (node.tagName === 'head' && child.tagName !== 'link') continue
+      if (tag === 'head' && child.tagName !== 'link') continue
       walk(child)
     }
+
+    // What is left of the block is its own, before the walk leaves it
     if (block) flush()
+    if (tag === 'pre') preformatted -= 1
+    if (tag === 'li') item = outer
+    if (list) lists.pop()
   }
 
   walk(tree)
   flush()
-  page.text = blocks.join('\n')
+  page.text = page.blocks.map((block) => block.text).join('\n')
   return page
 }
 
@@ -236,19 +307,58 @@ function caseless(text: string): string {
 }
 
 /**
- * The passages of a page's text that a text directive finds, each with one
- * line per block. A browser highlights the first.
+ * The blocks of a page from one index of its text to another: those the
+ * passage runs through, the first and the last cut where it starts and ends.
+ *
+ * A block that is cut is no longer the item of a list: a bullet says "this is
+ * an item", which a part of one is not. What continues an item is only of the
+ * item with what starts it.
+ */
+function blocksBetween(page: Page, from: number, to: number): Block[] {
+  const blocks: Block[] = []
+  // The item quoted from its start at each depth, by its number
+  const started = new Map<number, number>()
+  let start = 0
+  for (const { item, code, ...block } of page.blocks) {
+    const end = start + block.text.length
+    if (end > from && start < to) {
+      const whole = start >= from && end <= to
+      const text = page.text.slice(Math.max(start, from), Math.min(end, to))
+      const itsItem =
+        whole &&
+        item &&
+        (!item.continued || started.get(item.depth) === item.number)
+      if (itsItem && !item.continued) started.set(item.depth, item.number)
+      blocks.push({
+        ...block,
+        text,
+        ...(whole ? {} : { cut: true as const }),
+        ...(itsItem ? { item } : {}),
+        ...(code !== undefined ? { code: whole ? code : text } : {}),
+      })
+    }
+    // The line of the block, and the line break after it
+    start = end + 1
+  }
+  return blocks
+}
+
+/**
+ * Where a text directive finds a passage in a page's text: from an index to
+ * another, the first place first.
  *
  * This follows the browsers' matching in what the markup can tell: whole
  * words, without case, a term within one block, a passage from its start to
  * the first end after it, a prefix and a suffix around it. Accents are
  * compared as written.
  */
-export function findPassages(text: string, directive: TextDirective): string[] {
-  const searched = caseless(text)
+function* rangesOf(
+  page: Page,
+  directive: TextDirective,
+): Generator<{ from: number; to: number }> {
+  const searched = caseless(page.text)
   const start = caseless(directive.start)
-  const passages: string[] = []
-  if (!start) return passages
+  if (!start) return
 
   for (const from of occurrences(searched, start, 0)) {
     let to = from + start.length
@@ -260,7 +370,7 @@ export function findPassages(text: string, directive: TextDirective): string[] {
         to,
       ).next()
       // No end after this start, so none after a later one
-      if (end === undefined) break
+      if (end === undefined) return
       to = end + directive.end.length
     }
 
@@ -277,8 +387,50 @@ export function findPassages(text: string, directive: TextDirective): string[] {
       continue
     }
 
-    passages.push(text.slice(from, to))
+    yield { from, to }
   }
+}
 
-  return passages
+/**
+ * The passages of a page that a text directive finds, each as the blocks it
+ * runs through. A browser highlights the first.
+ */
+export function findPassages(page: Page, directive: TextDirective): Block[][] {
+  return [...rangesOf(page, directive)].map(({ from, to }) =>
+    blocksBetween(page, from, to),
+  )
+}
+
+/**
+ * What a browser highlights of a page for the text directives of an address:
+ * the first passage each finds, as the page has them. They are in the order
+ * of the page, whatever the order of the address, and those that overlap or
+ * touch are one passage: between two passages, the page then always has
+ * words that are not quoted.
+ *
+ * `undefined` when a directive finds nothing.
+ */
+export function highlighted(
+  page: Page,
+  directives: TextDirective[],
+): Block[][] | undefined {
+  const ranges: { from: number; to: number }[] = []
+  for (const directive of directives) {
+    const { value: range } = rangesOf(page, directive).next()
+    if (!range) return undefined
+    ranges.push(range)
+  }
+  ranges.sort((a, b) => a.from - b.from || a.to - b.to)
+
+  const passages: { from: number; to: number }[] = []
+  for (const range of ranges) {
+    const last = passages[passages.length - 1]
+    // Nothing but a space or the edge of a block between them, or less
+    if (last && !/\S/.test(page.text.slice(last.to, range.from))) {
+      last.to = Math.max(last.to, range.to)
+    } else {
+      passages.push({ ...range })
+    }
+  }
+  return passages.map(({ from, to }) => blocksBetween(page, from, to))
 }

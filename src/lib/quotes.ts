@@ -8,8 +8,11 @@ import { mystParse } from 'myst-parser'
 import { visit } from 'unist-util-visit'
 import {
   findPassages,
+  highlighted,
   readPage,
   textDirectives,
+  type Block,
+  type Page,
   type TextDirective,
 } from './passages.ts'
 import type { Messages } from './processor.ts'
@@ -80,6 +83,11 @@ function paragraph(value: string, className?: string): GenericNode {
   }
 }
 
+/** The words of a passage, without its layout */
+function passageText(blocks: Block[]): string {
+  return blocks.map((block) => block.text).join(' ')
+}
+
 /** The ellipsis that stands between two passages, in brackets or not */
 const BETWEEN_PASSAGES = /\[\s*(?:…|\.{3})\s*\]|(?<!\S)(?:…|\.{3})(?!\S)/
 
@@ -94,9 +102,9 @@ const BETWEEN_PASSAGES = /\[\s*(?:…|\.{3})\s*\]|(?<!\S)(?:…|\.{3})(?!\S)/
  */
 function writtenOtherwise(
   written: string,
-  passages: string[][],
+  passages: Block[][],
 ): (string | undefined)[] {
-  const read = passages.map((blocks) => blocks.join(' '))
+  const read = passages.map(passageText)
   if (comparable(written) === comparable(read.join(' '))) {
     return read.map(() => undefined)
   }
@@ -112,19 +120,83 @@ function writtenOtherwise(
 }
 
 /**
- * Passages as the paragraphs of a quotation: one per block, and an ellipsis
- * between two passages, which sets the end of one and the start of the next
- * in one paragraph, as a quotation that leaves words out is written.
+ * A part of a paragraph: words of a line, which another part can follow in
+ * the line. A block quoted whole, the item of a list and code are not.
+ */
+function inLine(block: Block): boolean {
+  return Boolean(block.cut) && !block.item && block.code === undefined
+}
+
+/**
+ * The items of a list, one after the other, as the lists they are in: a list
+ * in an item for those that are deeper, another list where the kind changes.
+ * A numbered list starts at the number of its first item quoted.
+ */
+function listNodes(
+  entries: { block: Block; node: GenericNode }[],
+): GenericNode[] {
+  const lists: GenericNode[] = []
+  const open: { depth: number; list: GenericNode; item: GenericNode }[] = []
+
+  for (const { block, node } of entries) {
+    const { ordered, depth, number, continued } = block.item!
+    while (open.length > 0 && open[open.length - 1].depth > depth) open.pop()
+
+    let within = open[open.length - 1]
+    if (continued && within?.depth === depth) {
+      within.item.children!.push(node)
+      continue
+    }
+    // Another kind of list at the same depth takes the place of this one
+    if (within?.depth === depth && within.list.ordered !== ordered) {
+      open.pop()
+      within = open[open.length - 1]
+    }
+
+    const item: GenericNode = {
+      type: 'listItem',
+      spread: false,
+      children: [node],
+    }
+    if (within?.depth === depth) {
+      within.list.children!.push(item)
+      within.item = item
+      continue
+    }
+    const list: GenericNode = {
+      type: 'list',
+      ordered,
+      start: ordered ? number : undefined,
+      spread: false,
+      children: [item],
+    }
+    ;(within ? within.item.children! : lists).push(list)
+    open.push({ depth, list, item })
+  }
+  return lists
+}
+
+/**
+ * Passages as a quotation: a paragraph for each of their blocks, a list for
+ * those that are the items of one, and a block of code for what the page has
+ * preformatted. This is what of a page's layout Markdown can say, and what a
+ * quotation written in a post could have.
+ *
+ * An ellipsis stands between two passages. Two parts of paragraphs are set
+ * in one line with it between them, as a quotation that leaves words out is
+ * written. A block quoted whole, an item or code is on a line of its own,
+ * as the page has it: the ellipsis then ends the part before it or starts
+ * the part after it, and stands alone between two such blocks.
  *
  * A passage the post wrote otherwise (`otherwise`) is marked as text that
  * was put in the place of another (`ins`), and says under the pointer what
  * the post quoted there.
  */
 function passageNodes(
-  passages: string[][],
+  passages: Block[][],
   otherwise: (string | undefined)[] = [],
 ): GenericNode[] {
-  const blocks: GenericNode[][] = []
+  const entries: { block: Block; children: GenericNode[] }[] = []
   for (const [index, passage] of passages.entries()) {
     const was = otherwise[index]
     const text = (value: string): GenericNode =>
@@ -142,18 +214,51 @@ function passageNodes(
             children: [{ type: 'text', value }],
           }
 
-    const [first, ...rest] = passage
-    if (blocks.length > 0) {
-      blocks[blocks.length - 1].push(
-        { type: 'text', value: ' … ' },
-        text(first),
-      )
-    } else {
-      blocks.push([text(first)])
+    for (const [at, block] of passage.entries()) {
+      const children = [text(block.text)]
+      const last = entries[entries.length - 1]
+      if (index > 0 && at === 0 && last) {
+        // The ellipsis goes with what is cut: a block quoted whole is left
+        // as the page has it, on a line of its own
+        if (inLine(last.block) && inLine(block)) {
+          last.children.push({ type: 'text', value: ' … ' }, ...children)
+          continue
+        }
+        if (inLine(last.block)) {
+          last.children.push({ type: 'text', value: ' …' })
+        } else if (inLine(block)) {
+          children.unshift({ type: 'text', value: '… ' })
+        } else {
+          entries.push({
+            block: { text: '…' },
+            children: [{ type: 'text', value: '…' }],
+          })
+        }
+      }
+      entries.push({ block, children })
     }
-    blocks.push(...rest.map((block) => [text(block)]))
   }
-  return blocks.map((children) => ({ type: 'paragraph', children }))
+
+  const nodes: GenericNode[] = []
+  let items: { block: Block; node: GenericNode }[] = []
+  const endList = () => {
+    nodes.push(...listNodes(items))
+    items = []
+  }
+  for (const { block, children } of entries) {
+    const node: GenericNode =
+      block.code === undefined
+        ? { type: 'paragraph', children }
+        : { type: 'code', value: block.code }
+    if (block.item) {
+      items.push({ block, node })
+    } else {
+      endList()
+      nodes.push(node)
+    }
+  }
+  endList()
+  return nodes
 }
 
 /**
@@ -301,9 +406,15 @@ const FROM_ADDRESS: Record<'gone' | 'unchecked', string> = {
  * first words and its last, with an ellipsis for what the page had between
  * them.
  */
-function heldByAddress(directives: TextDirective[]): string[][] {
+function heldByAddress(directives: TextDirective[]): Block[][] {
   return directives.map((directive) => [
-    directive.end ? `${directive.start} … ${directive.end}` : directive.start,
+    {
+      text: directive.end
+        ? `${directive.start} … ${directive.end}`
+        : directive.start,
+      // Words of a line: nothing says they are a block of the page
+      cut: true,
+    },
   ])
 }
 
@@ -371,11 +482,10 @@ export async function resolveQuotes(
     }
 
     const page = address.split('#')[0]
-    let text: string
-    let canonical: string | undefined
+    let read: Page
     try {
       if (!fetchPage) throw new Error('no page is read here')
-      ;({ text, canonical } = readPage(await fetchPage(page), page))
+      read = readPage(await fetchPage(page), page)
     } catch (error) {
       warn(
         `The quote from "${address}" could not be read from its page: ${reason(error)}`,
@@ -384,13 +494,9 @@ export async function resolveQuotes(
       continue
     }
 
-    const found: (string | undefined)[] = directives.map(
-      (directive) => findPassages(text, directive)[0],
-    )
-    const passages = found.flatMap((passage) =>
-      passage === undefined ? [] : [passage.split('\n')],
-    )
-    if (passages.length < directives.length) {
+    // What a browser highlights: the passages in the order of the page
+    const passages = highlighted(read, directives)
+    if (!passages) {
       warn(`The page of "${address}" no longer has what the address names`)
       without('gone')
       continue
@@ -400,19 +506,20 @@ export async function resolveQuotes(
     quotation.children = [...passageNodes(passages, otherwise), ...attribution]
     if (otherwise.some((was) => was !== undefined)) {
       warn(
-        `The page of "${address}" has other words than the post: "${passages.flat().join(' ')}", where the post quotes "${written}"`,
+        `The page of "${address}" has other words than the post: "${passages.map(passageText).join(' ')}", where the post quotes "${written}"`,
       )
       node.notice = 'changed' satisfies Notice
     }
 
     // Does the page this one is a version of still have it?
+    const { canonical } = read
     if (!fetchPage || !canonical) continue
     if (new URL(canonical).href === new URL(page).href) continue
     try {
       const current = readPage(await fetchPage(canonical), canonical)
       if (
         directives.some(
-          (directive) => findPassages(current.text, directive).length === 0,
+          (directive) => findPassages(current, directive).length === 0,
         )
       ) {
         warn(
