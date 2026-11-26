@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import type { CommitInfo } from '../../src/lib/githubVersioning.ts'
+import type { CommitInfo } from '../../src/lib/gitVersioning.ts'
 import {
   latestVersion,
   postLinks,
@@ -32,7 +32,7 @@ const draft: CommitInfo = {
   verified: false,
 }
 
-// Newest first, as the GitHub API lists them
+// Newest first, as git lists them
 const versions = [commit('ccccccc'), commit('bbbbbbb'), commit('aaaaaaa')]
 
 test("the post's page is canonical and cites its latest version", () => {

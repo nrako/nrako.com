@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        # The versions of the posts are read from the whole history of
+        # origin/main; the build fails on a shallow clone.
+        with:
+          fetch-depth: 0
 
       # Installs the Node.js and pnpm versions pinned in mise.toml.
       - name: Setup tools
@@ -37,5 +41,3 @@ jobs:
 
       - name: Build
         run: pnpm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

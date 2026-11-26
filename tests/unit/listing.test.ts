@@ -16,7 +16,7 @@ const processorOptions = {
   highlighter: { themes: { light: 'github-light', dark: 'github-dark' } },
 }
 
-// Without versioning, no post is looked up on GitHub
+// Without versioning, no post's history is read from git
 const fixtures = {
   ...defaultOptions,
   contentDir: fileURLToPath(new URL('../fixtures/posts', import.meta.url)),
