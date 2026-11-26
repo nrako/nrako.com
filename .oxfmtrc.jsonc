@@ -9,6 +9,16 @@
   // adds inside an inline element would be rendered as a space.
   "astro": { "compressHTML": "html" },
   "sortPackageJson": false,
+  "sortImports": true,
+  "sortTailwindcss": { "stylesheet": "./src/styles/global.css" },
+  "overrides": [
+    {
+      // The order of its imports is the order of the site's styles: the
+      // components' own come before the global stylesheet.
+      "files": ["src/layouts/Layout.astro"],
+      "options": { "sortImports": false },
+    },
+  ],
   "ignorePatterns": [
     "node_modules/",
     "dist/",
