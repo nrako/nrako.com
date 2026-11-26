@@ -137,6 +137,20 @@ test('the history of a post is the commits of origin/main that change it', async
   assert.ok(history.every(({ date }) => !Number.isNaN(Date.parse(date))))
 })
 
+test("an author is named as the repository's .mailmap names them", async () => {
+  const repo = repository()
+  writeFileSync(join(repo.cwd, '.mailmap'), 'nrako <someone@example.com>\n')
+  repo.commit('feat: a post', { 'a-post.md': post('First') })
+  repo.push()
+
+  const history = await getCommitHistory('a-post', repo.options)
+
+  assert.deepEqual(
+    history.map(({ author }) => author),
+    ['nrako'],
+  )
+})
+
 test('a post deleted and added again keeps its versions, not its deletion', async () => {
   const repo = repository()
   const first = repo.commit('feat: a post', { 'a-post.md': post('First') })

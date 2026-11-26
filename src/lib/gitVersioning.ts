@@ -14,6 +14,7 @@ export interface CommitInfo {
   shortSha: string
   message: string
   date: string
+  /** The commit's author, by the name `.mailmap` gives them */
   author: string
   /** Whether git checked the commit's signature as good (`%G?` is `G`) */
   verified: boolean
@@ -104,7 +105,7 @@ export async function getCommitHistory(
     'log',
     '-z',
     '--diff-filter=d',
-    '--format=%H%x1f%cI%x1f%an%x1f%G?%x1f%B',
+    '--format=%H%x1f%cI%x1f%aN%x1f%G?%x1f%B',
     tip,
     '--',
     postPath(`${slug}.md`, options),
