@@ -18,7 +18,7 @@ export default function ReactionBar({
       href={postUri}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex gap-4 opacity-90 hover:opacity-100 transition-opacity"
+      className="flex gap-4 opacity-90 transition-opacity hover:opacity-100"
       title="Interact with this post on Bluesky"
     >
       <ReactionCount count={likes} label="like" />

@@ -1,16 +1,18 @@
-import type { PageFrontmatter } from 'myst-frontmatter'
-import type { Messages, PostFrontmatter } from './processor.ts'
-import type { CommitInfo } from './githubVersioning.ts'
-import type { PostSnippet } from './snippets.ts'
-import type { TableOfContentsEntry } from './tableOfContents.ts'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { extname, join } from 'node:path'
+import process from 'node:process'
+
+import { parseHTML } from 'linkedom'
+import type { PageFrontmatter } from 'myst-frontmatter'
+
 import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
+import type { CommitInfo } from './githubVersioning.ts'
+import { getCommitHistory, isDraftVersion } from './githubVersioning.ts'
+import type { Messages, PostFrontmatter } from './processor.ts'
 import processor from './processor.ts'
 import { fetchPage } from './quotes.ts'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { parseHTML } from 'linkedom'
-import { getCommitHistory, isDraftVersion } from './githubVersioning.ts'
-import process from 'node:process'
+import type { PostSnippet } from './snippets.ts'
+import type { TableOfContentsEntry } from './tableOfContents.ts'
 
 // 200 word-per-minute is on the lower range of the average reading speed 200-300 wpm
 const WPM = 200

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
+
 import '@fontsource/caveat-brush/latin-400.css'
 import './about-animation.css'
 import {

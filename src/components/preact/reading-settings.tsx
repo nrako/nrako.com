@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
+
 import TextSize from '@/components/icons/TextSize'
 import {
   applyReadingSetting,
@@ -134,7 +135,7 @@ export default function ReadingSettings() {
             ? 'Typeface, size, weight and background of the text'
             : 'Not available when JavaScript is disabled'
         }
-        class="[&:not(:disabled):hover]:text-red-600 disabled:text-gray-500 cursor-pointer disabled:cursor-default"
+        class="cursor-pointer disabled:cursor-default disabled:text-gray-500 [&:not(:disabled):hover]:text-red-600"
       >
         <TextSize />
       </button>

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { decompress } from 'livecodes'
+
 import { skipWithoutFixturePosts } from './fixtures'
 
 // The tests about posts only apply once a post is published. Call this after

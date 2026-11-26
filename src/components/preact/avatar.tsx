@@ -10,10 +10,10 @@ export default function Avatar({ src, name }: Props) {
     <img
       src={src}
       alt={`${name}'s avatar`}
-      className="w-8 h-8 flex-none rounded-full"
+      className="h-8 w-8 flex-none rounded-full"
     />
   ) : (
-    <div className="rounded-full w-8 h-8 flex-none bg-blue-100 flex items-center justify-center text-blue-600">
+    <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-blue-100 text-blue-600">
       {name?.charAt(0).toUpperCase() || <TbBrandBluesky />}
     </div>
   )

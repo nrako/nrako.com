@@ -1,6 +1,6 @@
 import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
 import astro from 'eslint-plugin-astro'
+import tseslint from 'typescript-eslint'
 
 // ESLint lints `.astro` files only: Oxlint reads their `<script>` blocks and
 // nothing else of them. Every other source belongs to Oxlint

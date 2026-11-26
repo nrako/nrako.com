@@ -1,7 +1,7 @@
 ---
-import Layout from '@/layouts/Layout.astro'
-import Time from '@/components/Time.astro'
 import AboutAnimation from '@/components/preact/about-animation'
+import Time from '@/components/Time.astro'
+import Layout from '@/layouts/Layout.astro'
 import { getListedPosts, defaultOptions as options } from '@/lib/blogData'
 
 const posts = await getListedPosts(options)

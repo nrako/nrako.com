@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+
 import type { CommitInfo } from '../../src/lib/githubVersioning.ts'
 import {
   latestVersion,

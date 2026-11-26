@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+
 import { skipWithoutFixturePosts } from './fixtures'
 
 // A phone held upright

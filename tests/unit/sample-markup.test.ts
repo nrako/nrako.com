@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { before, test } from 'node:test'
+
 import processor, { type Messages } from '../../src/lib/processor.ts'
 
 // samples/posts/what-a-post-can-set.md shows every piece of markup the site

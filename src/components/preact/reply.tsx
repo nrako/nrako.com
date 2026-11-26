@@ -1,11 +1,13 @@
 import type { AppBskyFeedDefs } from '@atproto/api'
 import { AppBskyFeedPost } from '@atproto/api'
+
+import TbArrowUpRight from '@/components/icons/TbArrowUpRight'
+import TbBrandBluesky from '@/components/icons/TbBrandBluesky'
+
 import Avatar from './avatar.tsx'
 import BskyAuthor from './bsky-author.tsx'
 import PostEmbed from './post-embed.tsx'
 import ReactionBar from './reaction-bar.tsx'
-import TbArrowUpRight from '@/components/icons/TbArrowUpRight'
-import TbBrandBluesky from '@/components/icons/TbBrandBluesky'
 
 export default function Reply({
   thread,
@@ -31,7 +33,7 @@ export default function Reply({
   return (
     <div className="relative">
       <div className="flex space-x-3">
-        <div className="flex-shrink-0 relative w-8">
+        <div className="relative w-8 flex-shrink-0">
           <a
             href={`https://bsky.app/profile/${post.author.handle}`}
             target="_blank"
@@ -40,10 +42,10 @@ export default function Reply({
             <Avatar src={post.author.avatar} name={post.author.displayName} />
           </a>
           {showThread && (
-            <div className="absolute left-1/2 top-8 -bottom-4 w-0.5 bg-gradient-to-b from-gray-200 to-transparent dark:from-gray-700" />
+            <div className="absolute top-8 -bottom-4 left-1/2 w-0.5 bg-gradient-to-b from-gray-200 to-transparent dark:from-gray-700" />
           )}
         </div>
-        <div className="flex-grow min-w-0">
+        <div className="min-w-0 flex-grow">
           <BskyAuthor
             author={post.author}
             indexedAt={post.indexedAt}
@@ -69,7 +71,7 @@ export default function Reply({
       </div>
 
       {showThread && (
-        <div className="mt-4 space-y-4 ml-4 pl-[15px]">
+        <div className="mt-4 ml-4 space-y-4 pl-[15px]">
           {replies.map((reply) => (
             <Reply key={reply.post.uri} thread={reply} />
           ))}
@@ -80,7 +82,7 @@ export default function Reply({
                 .pop()}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-x-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              className="flex items-center gap-x-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
             >
               <TbBrandBluesky className="inline-block" />
               Continue thread on BlueSky

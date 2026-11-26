@@ -1,5 +1,6 @@
 import { Fragment } from 'preact'
 import { useLayoutEffect, useRef } from 'preact/hooks'
+
 import {
   POPUP_ROWS,
   type CanvasScene,

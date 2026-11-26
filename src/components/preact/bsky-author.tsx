@@ -29,7 +29,7 @@ export default function BskyAuthor({ author, indexedAt, postUri }: Props) {
           href={postUri}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-none text-gray-500 dark:text-gray-400 hover:underline text-sm"
+          className="flex-none text-sm text-gray-500 hover:underline dark:text-gray-400"
           title={formatDateTime(new Date(indexedAt))}
         >
           {getTimeAgo(new Date(indexedAt))}

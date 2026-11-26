@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { Feed, type Item as FeedItem } from 'feed'
+
 import { defaultOptions as options, getListedPosts } from '@/lib/blogData'
 
 const feedPathPrefix = '/feed'

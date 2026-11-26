@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+
 import { usesFixturePosts } from './fixtures'
 
 // Where the header and the footer sit against the content column between

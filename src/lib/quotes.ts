@@ -6,6 +6,7 @@ import {
 } from 'myst-common'
 import { mystParse } from 'myst-parser'
 import { visit } from 'unist-util-visit'
+
 import {
   findPassages,
   highlighted,
