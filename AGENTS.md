@@ -46,7 +46,7 @@ pnpm run format:check         # Oxfmt (check)
 pnpm run test:unit            # Unit tests of the post markup (node:test)
 pnpm run test:e2e             # Build, then Playwright e2e against the preview
 pnpm run test:e2e:fixtures    # Same, with the site built from tests/fixtures/posts
-pnpm run deploy               # Build + wrangler deploy
+pnpm run deploy               # Build (DEPLOY=1: no draft) + wrangler deploy
 ```
 
 ## Architecture
@@ -121,6 +121,7 @@ Prerendered pages need Node because they read posts with `node:fs` and their his
 - Unlisted posts: `listed: false` in a post's frontmatter keeps it out of the homepage, `/posts` and the feeds, and nothing else: its page, the pages of its snippets and its version pages are built as any post's, so it is reached by its address or by a link. The rule is `getListedPosts` (`blogData.ts`) and only there: a page that lists posts calls it, one that builds pages calls `getPosts`. With every post unlisted, the listings read as with no post. `listed` is the site's own key: `processor.ts` takes it out of the frontmatter before MyST's validation, which would drop it with a warning. A value that is neither `true` nor `false` fails the build.
 - Post versioning: the commit history and every older version are read at build time from the git repository the site is built from (`gitVersioning.ts`, running `git` in the working directory, a worktree included) and prerendered. No token and no network. A new commit to a post shows up after it is pushed and the site built and deployed again.
 - The history is that of `refs/remotes/origin/main` (`versioning.ref` in `blogData.ts`), not of `HEAD`: a permalink names a commit that stays, and an unpushed commit may not. A post committed but not pushed reads as a `draft` against its last pushed commit. That ref is only as recent as the last fetch or push from the machine that builds.
+- A draft is never deployed: `pnpm run deploy` builds with `DEPLOY=1` (`versioning.published`), and that build fails while a file of `posts/` is not as `origin/main` has it (changed, staged, committed but not pushed, deleted, or new and not ignored; `assertPublished`, called by `getPosts`), listing those files. Any other build, dev, CI and the e2e tests included, shows the draft.
 - The versions of a post are the commits of that ref that change `posts/<slug>.md` (`git log --diff-filter=d`), newest first. A commit that deletes the file is not one: a post unpublished and added again keeps the versions it had before. A shallow clone fails the build (its history stops at its depth and would drop versions without a word), as does a missing ref: CI checks out with `fetch-depth: 0`. A listed version that cannot be read fails the build.
 - A version's author is the commit's, by the name `.mailmap` gives them (`%aN`): the repository's `.mailmap` names every commit of the site's author `nrako`, whatever name their git configuration held at the time.
 - A version is `verified` when git checks its signature as good (`%G?` is `G`). That depends on the keys the building machine trusts (`gpg.ssh.allowedSignersFile`, the GPG keyring): a commit whose signature it cannot check reads as unverified.

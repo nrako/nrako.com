@@ -31,6 +31,11 @@ export interface VersioningOptions {
   ref: string
   /** The posts' directory, from the root of the repository */
   postsPath: string
+  /**
+   * Whether every file of the posts' directory has to be as `ref` has it: a
+   * build to deploy, which must not publish a draft
+   */
+  published?: boolean
   /** The repository on GitHub, which a version's page links its commit to */
   repoOwner: string
   repoName: string
@@ -126,6 +131,55 @@ export async function getCommitHistory(
         verified: signature === 'G',
       }
     })
+}
+
+/**
+ * The files of the posts' directory that are not as `options.ref` has them,
+ * by their path from the root of the repository: changed, staged, committed
+ * but not pushed, deleted, or new and not ignored.
+ */
+export async function unpublishedFiles(
+  options: VersioningOptions,
+): Promise<string[]> {
+  const tip = await historyTip(options)
+  const directory = postPath('', options)
+  const changed = await git(options, [
+    'diff',
+    '--name-only',
+    '-z',
+    tip,
+    '--',
+    directory,
+  ])
+  const untracked = await git(options, [
+    'ls-files',
+    '--others',
+    '--exclude-standard',
+    '--full-name',
+    '-z',
+    '--',
+    directory,
+  ])
+  return [...changed.split('\0'), ...untracked.split('\0')]
+    .filter((path) => path !== '')
+    .sort()
+}
+
+/**
+ * Fails when a build to deploy (`options.published`) would publish a post
+ * that is not committed and pushed: a draft has no permalink, and what it
+ * says is in no commit.
+ */
+export async function assertPublished(
+  options: VersioningOptions,
+): Promise<void> {
+  if (!options.published) return
+  const files = await unpublishedFiles(options)
+  if (files.length > 0) {
+    throw new Error(
+      `Cannot deploy posts that are not as ${options.ref} has them; commit and push them first:\n${files.map((file) => `  ${file}`).join('\n')}`,
+    )
+  }
 }
 
 /**

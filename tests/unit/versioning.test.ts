@@ -13,10 +13,13 @@ import process from 'node:process'
 import { after, test } from 'node:test'
 
 import { type BlogOptions, defaultOptions } from '../../src/lib/blogData.ts'
+import { getPosts } from '../../src/lib/blogData.ts'
 import {
+  assertPublished,
   getCommitHistory,
   getPostAtVersion,
   isDraftVersion,
+  unpublishedFiles,
   type VersioningOptions,
 } from '../../src/lib/gitVersioning.ts'
 
@@ -380,4 +383,68 @@ test('a version whose commit has no such post is none', async () => {
     await getPostAtVersion('a-post', sha.slice(0, 7), repo.blogOptions),
     null,
   )
+})
+
+test('the posts not as origin/main has them are the unpublished ones', async () => {
+  const repo = repository()
+  repo.commit('feat: posts', {
+    'a-post.md': post('First'),
+    'a-post.bib': bibliography('A title'),
+    'staged.md': post('Staged'),
+    'deleted.md': post('Deleted'),
+  })
+  repo.push()
+  assert.deepEqual(await unpublishedFiles(repo.options), [])
+
+  // Committed, not pushed
+  repo.commit('fix: a word', { 'a-post.md': post('Second') })
+  // Changed, staged, deleted, new
+  writeFileSync(
+    join(repo.cwd, 'posts', 'a-post.bib'),
+    bibliography('Another title'),
+  )
+  writeFileSync(join(repo.cwd, 'posts', 'staged.md'), post('Staged again'))
+  repo.git('add', 'posts/staged.md')
+  rmSync(join(repo.cwd, 'posts', 'deleted.md'))
+  writeFileSync(join(repo.cwd, 'posts', 'new.md'), post('New'))
+  // Ignored: not a post
+  writeFileSync(join(repo.cwd, '.gitignore'), '.DS_Store\n')
+  writeFileSync(join(repo.cwd, 'posts', '.DS_Store'), '')
+
+  assert.deepEqual(await unpublishedFiles(repo.options), [
+    'posts/a-post.bib',
+    'posts/a-post.md',
+    'posts/deleted.md',
+    'posts/new.md',
+    'posts/staged.md',
+  ])
+})
+
+test('a build to deploy fails on a draft, a build otherwise shows it', async () => {
+  const repo = repository()
+  repo.commit('feat: a post', {
+    'a-post.md': post('First'),
+    'a-post.bib': bibliography('A title'),
+  })
+  repo.push()
+  writeFileSync(join(repo.cwd, 'posts', 'a-post.md'), post('Edited'))
+
+  const options = {
+    ...repo.blogOptions,
+    contentDir: join(repo.cwd, 'posts'),
+  }
+  const [shown] = await getPosts(options)
+  assert.equal(shown?.versions?.[0]?.sha, 'draft')
+
+  const deploy = {
+    ...options,
+    versioning: { ...repo.options, published: true },
+  }
+  await assert.rejects(getPosts(deploy), /commit and push[^]*posts\/a-post\.md/)
+  await assert.rejects(assertPublished(deploy.versioning))
+
+  repo.commit('fix: a word', {})
+  repo.push()
+  await assertPublished(deploy.versioning)
+  assert.equal((await getPosts(deploy)).length, 1)
 })

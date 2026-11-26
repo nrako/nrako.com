@@ -15,7 +15,7 @@
     "test:e2e": "playwright test",
     "test:e2e:fixtures": "POSTS_DIR=tests/fixtures/posts playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "deploy": "pnpm run build && wrangler deploy && wrangler deploy --config workers/www-redirect/wrangler.jsonc"
+    "deploy": "DEPLOY=1 pnpm run build && wrangler deploy && wrangler deploy --config workers/www-redirect/wrangler.jsonc"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.7",

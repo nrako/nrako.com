@@ -7,7 +7,11 @@ import type { PageFrontmatter } from 'myst-frontmatter'
 
 import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
 import type { CommitInfo, VersioningOptions } from './gitVersioning.ts'
-import { getCommitHistory, isDraftVersion } from './gitVersioning.ts'
+import {
+  assertPublished,
+  getCommitHistory,
+  isDraftVersion,
+} from './gitVersioning.ts'
 import type { Messages, PostFrontmatter } from './processor.ts'
 import processor from './processor.ts'
 import { fetchPage } from './quotes.ts'
@@ -87,6 +91,8 @@ export const defaultOptions: BlogOptions = {
     ref: 'refs/remotes/origin/main',
     // Under `posts/` whatever `POSTS_DIR` says: fixtures have no history
     postsPath: 'posts',
+    // `pnpm run deploy` builds with `DEPLOY=1`: no draft is published
+    published: process.env.DEPLOY === '1',
     repoOwner: 'nrako',
     repoName: 'nrako.com',
   },
@@ -99,6 +105,9 @@ export const defaultOptions: BlogOptions = {
 export async function getPosts(
   options: BlogOptions = defaultOptions,
 ): Promise<Post[]> {
+  // A build to deploy fails on a post that is not committed and pushed
+  if (options.versioning) await assertPublished(options.versioning)
+
   // Git does not track empty directories: with nothing published, the
   // content directory does not exist in a fresh clone.
   if (!existsSync(options.contentDir)) return []
