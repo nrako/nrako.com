@@ -8,9 +8,9 @@
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "oxlint --deny-warnings && eslint .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "test:unit": "node --test tests/unit/",
     "test:e2e": "playwright test",
     "test:e2e:fixtures": "POSTS_DIR=tests/fixtures/posts playwright test",
@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@astrojs/compiler-rs": "0.5.3",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/typography": "^0.5.16",
@@ -61,30 +62,14 @@
     "@types/node": "^26.6.6",
     "eslint": "^10.14.0",
     "eslint-plugin-astro": "^3.2.1",
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0",
     "playwright": "^1.60.0",
-    "prettier": "^3.10.1",
-    "prettier-plugin-astro": "^0.14.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^5",
     "typescript-eslint": "^8.72.2",
     "vite": "^8.3.8",
     "wrangler": "^4.161.0"
-  },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "all",
-    "plugins": [
-      "prettier-plugin-astro"
-    ],
-    "overrides": [
-      {
-        "files": "*.astro",
-        "options": {
-          "parser": "astro"
-        }
-      }
-    ]
   },
   "engines": {
     "node": ">=26"

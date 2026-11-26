@@ -4,3 +4,11 @@
 allowBuilds:
   esbuild: false
   workerd: false
+
+# Oxc tools ship weekly and the project tracks their latest release, so they
+# are exempt from the minimum release age.
+minimumReleaseAgeExclude:
+  - oxlint
+  - '@oxlint/*'
+  - oxfmt
+  - '@oxfmt/*'

@@ -11,8 +11,8 @@ Personal website for nrako built with **Astro v7**, Preact, and TailwindCSS v4. 
 - **Tool versions**: `mise.toml` pins Node.js and pnpm for local development and CI (`jdx/mise-action`). Change versions there only.
 - **Runtime**: Node.js 26 (LTS)
 - **Package manager**: pnpm 11 (`pnpm-lock.yaml` is committed)
-- **Formatter**: Prettier + `prettier-plugin-astro` (config in `package.json`)
-- **Linter**: ESLint flat config (`eslint.config.js`): `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`
+- **Formatter**: Oxfmt (`.oxfmtrc.jsonc`), pinned to an exact version. It formats `.astro` files with the `prettier-plugin-astro` it bundles, which needs `@astrojs/compiler-rs` installed
+- **Linter**: Oxlint (`oxlint.config.ts`), pinned to an exact version, for the TypeScript and JavaScript sources; ESLint flat config (`eslint.config.js`: `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`) for the `.astro` files only, of which Oxlint reads nothing but the `<script>` blocks
 - **Builder**: Astro v7 (Vite 8)
 - **Adapter**: `@astrojs/cloudflare` — generates the deploy configuration, and the Worker entry (`@astrojs/cloudflare/entrypoints/server`) when a route is rendered on demand
 - **Deploy**: `wrangler deploy` (Cloudflare Workers)
@@ -24,6 +24,7 @@ Use pnpm for every dependency change. Do not use `npm install`.
 Supply-chain trust is anchored at install time:
 
 - **No dependency lifecycle scripts.** pnpm only runs install scripts allowed in `pnpm-workspace.yaml` (`allowBuilds`). `esbuild` and `workerd` are explicitly denied there; their native binaries ship as prebuilt optional dependencies, so the scripts are not needed. To allow an audited script, set its entry to `true`.
+- **Minimum release age.** pnpm refuses a version published less than seven days ago (a setting of the machine, not of this repository). `oxfmt` and `oxlint` are exempt (`minimumReleaseAgeExclude` in `pnpm-workspace.yaml`): they ship weekly and the project tracks their latest release.
 - **`pnpm-lock.yaml` integrity hashes.** CI installs with `--frozen-lockfile`; a tampered tarball is rejected.
 
 There is no runtime sandbox: `dev` / `build` / `preview` / `test:e2e` / `deploy` run dependency code with the invoking user's full permissions. Treat the pinned dependency tree as trusted code and review lockfile changes accordingly.
@@ -39,9 +40,9 @@ pnpm run dev                  # Astro dev server (localhost:4321)
 pnpm run build                # Production build → dist/{client,server}
 pnpm run preview              # Preview the production build locally in workerd
 pnpm run check                # Astro type check
-pnpm run lint                 # ESLint
-pnpm run format               # Prettier (write)
-pnpm run format:check         # Prettier (check)
+pnpm run lint                 # Oxlint, then ESLint on the .astro files
+pnpm run format               # Oxfmt (write)
+pnpm run format:check         # Oxfmt (check)
 pnpm run test:unit            # Unit tests of the post markup (node:test)
 pnpm run test:e2e             # Build, then Playwright e2e against the preview
 pnpm run test:e2e:fixtures    # Same, with the site built from tests/fixtures/posts
@@ -153,8 +154,8 @@ Prerendered pages need Node because they read posts with `node:fs`. There is no 
 - Colours: the page is `--ink` on `--ground` (`global.css`), set per theme; popovers use `--surface`. The reader's background setting picks full contrast (white/black) or a softer pair (`#fbfaf7`/`#262626` light, `#1a1a1a`/`#d6d6d6` dark), each at least 7:1 and barely tinted: the screen sets its own warmth. Secondary text is `--muted`, and `--accent` (red) marks a hover, a focus or a link's target. Draw new text and rules in `currentColor` or these variables rather than black, white or a fixed colour. In prose, a link that stays on the page (a citation, a reference to a figure or a section, a note) is underlined with dots, one that leaves it with a line. An abbreviation is not a link and has no underline: it spells itself out under the pointer. A highlight (`<mark>`) is the ground tinted with the accent, its text still in the ink, at 9:1 or more on every ground.
 - Reading settings (`global.css`): the size multiplies the column and every `--size-*` but `--size-name` by `--reading-scale`; the header keeps its own size. The typeface only changes `.prose` (`--type-reading`): Source Serif 4 or Atkinson Hyperlegible Next, each with a `--type-reading-scale` that gives it Fustat's x-height and an Arial fallback measured like the others. Their fonts are declared on every page and only fetched once chosen.
 - TailwindCSS v4 via `@tailwindcss/vite` + `@import "tailwindcss"` in CSS (no config file)
-- Code style enforced by Prettier: no semicolons, single quotes, trailing commas, 80 char line width. `posts/` is excluded (`.prettierignore`) so formatting never rewrites published content.
-- `prettier-plugin-astro` stays on 0.14.x: 1.x reflows text inside inline elements (`<a>Atom</a>` becomes multi-line), which adds rendered whitespace under `compressHTML: true`. Revisit both settings together.
+- Code style enforced by Oxfmt: no semicolons, single quotes, trailing commas, 80 char line width. It formats every file it knows (TypeScript, Astro, CSS, JSON, Markdown, YAML) but those under `ignorePatterns` in `.oxfmtrc.jsonc`: `posts/` among them, so formatting never rewrites published content, which is MyST and not the Markdown a formatter expects. `sortPackageJson` is off: `package.json` keeps its order.
+- `astro.compressHTML` in `.oxfmtrc.jsonc` is `"html"`, as `compressHTML: true` is in `astro.config.ts`: it tells the formatter which whitespace the compiler keeps. Under its default (`"jsx"`) it breaks the text of an inline element onto lines of its own (`<a>Atom</a>` becomes multi-line), which this site renders as spaces. Change both settings together, and compare the built HTML before and after.
 - `compressHTML: true` keeps the Astro 6 whitespace handling; the Astro 7 default (`'jsx'`) strips spaces between adjacent inline elements.
 - `session: false` and `imageService: 'passthrough'`: the site uses neither sessions nor `astro:assets`, so no KV namespace or Images binding is provisioned on deploy.
 

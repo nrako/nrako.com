@@ -1,0 +1,28 @@
+// Formatting covers every file Oxfmt knows but those ignored below.
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  // Mirrors `compressHTML: true` in astro.config.ts: a line break the formatter
+  // adds inside an inline element would be rendered as a space.
+  "astro": { "compressHTML": "html" },
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    ".astro/",
+    ".wrangler/",
+    "playwright-report/",
+    "test-results/",
+    "pnpm-lock.yaml",
+    "public/",
+    ".claude/",
+    ".serena/",
+    // Posts are MyST Markdown: a Markdown formatter rewrites their directives.
+    "posts/",
+    // Kept as their sites serve them.
+    "tests/fixtures/pages/",
+  ],
+}
