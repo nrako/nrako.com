@@ -24,7 +24,7 @@ Use pnpm for every dependency change. Do not use `npm install`.
 Supply-chain trust is anchored at install time:
 
 - **No dependency lifecycle scripts.** pnpm only runs install scripts allowed in `pnpm-workspace.yaml` (`allowBuilds`). `esbuild` and `workerd` are explicitly denied there; their native binaries ship as prebuilt optional dependencies, so the scripts are not needed. To allow an audited script, set its entry to `true`.
-- **Minimum release age.** pnpm refuses a version published less than seven days ago (a setting of the machine, not of this repository). `oxfmt`, `oxlint` and `tsrs` are exempt (`minimumReleaseAgeExclude` in `pnpm-workspace.yaml`): they ship weekly and the project tracks their latest release.
+- **Minimum release age.** pnpm refuses a version published less than seven days ago (a setting of the machine, not of this repository). `oxfmt`, `oxlint` and `tsrs` are exempt (`minimumReleaseAgeExclude` in `pnpm-workspace.yaml`): they ship weekly and the project tracks their latest release. The exemption is temporary: it goes once `tsrs` is out of beta (the condition is in that file).
 - **`pnpm-lock.yaml` integrity hashes.** CI installs with `--frozen-lockfile`; a tampered tarball is rejected.
 
 There is no runtime sandbox: `dev` / `build` / `preview` / `test:e2e` / `deploy` run dependency code with the invoking user's full permissions. Treat the pinned dependency tree as trusted code and review lockfile changes accordingly.
