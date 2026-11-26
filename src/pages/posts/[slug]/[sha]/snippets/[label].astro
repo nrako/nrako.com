@@ -1,0 +1,69 @@
+---
+import SnippetPage from '@/components/SnippetPage.astro'
+import { getPosts, defaultOptions as options } from '@/lib/blogData'
+import { getPostAtVersion } from '@/lib/githubVersioning'
+import { snippetLinks, versionPath } from '@/lib/permalinks'
+import type { PostSnippet } from '@/lib/snippets'
+
+interface Props {
+  snippet: PostSnippet
+  post: { slug: string; title: string }
+  /** Whether the post as it is now has a snippet of this label */
+  inPost: boolean
+}
+
+// The pages of the snippets of every committed version of every post, built
+// from that version's sources. A version is fetched once for its page and
+// these (`getPostAtVersion`); a build without GITHUB_TOKEN has no versions,
+// and so none of these pages.
+export async function getStaticPaths() {
+  const posts = await getPosts(options)
+  const versions = posts.flatMap((post) =>
+    (post.versions ?? [])
+      .filter((version) => version.sha !== 'draft')
+      .map((version) => ({
+        slug: post.slug,
+        sha: version.shortSha,
+        labels: new Set(post.snippets.map((snippet) => snippet.label)),
+      })),
+  )
+
+  const paths = await Promise.all(
+    versions.map(async ({ slug, sha, labels }) => {
+      const post = await getPostAtVersion(slug, sha, options)
+      // Listed in the commit history: failing to load it fails the build
+      if (!post) {
+        throw new Error(
+          `Could not load version ${sha} of post "${slug}" from GitHub`,
+        )
+      }
+      return post.snippets.map((snippet) => ({
+        params: { slug, sha, label: snippet.label },
+        props: {
+          snippet,
+          post: { slug, title: post.frontmatter.title ?? slug },
+          inPost: labels.has(snippet.label),
+        },
+      }))
+    }),
+  )
+  return paths.flat()
+}
+
+const { sha } = Astro.params
+const { snippet, post, inPost } = Astro.props
+---
+
+<SnippetPage
+  snippet={snippet}
+  title={`${post.title} (${sha})`}
+  postAddress={versionPath(post.slug, sha)}
+  links={snippetLinks({
+    site: Astro.site!,
+    slug: post.slug,
+    versions: undefined,
+    shortSha: sha,
+    label: snippet.label,
+    inPost,
+  })}
+/>

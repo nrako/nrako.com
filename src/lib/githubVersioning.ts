@@ -3,6 +3,7 @@ import process from 'node:process'
 
 import type { BlogOptions, Post } from './blogData.ts'
 import { calculateReadingTime } from './blogData.ts'
+import { versionPath } from './permalinks.ts'
 import processor from './processor.ts'
 import { fetchPage } from './quotes.ts'
 
@@ -164,16 +165,35 @@ export async function isDraftVersion(
   return latestContent.trim() !== currentContent.trim()
 }
 
+/** The posts at a version, by `slug@sha`, each fetched once per build */
+const postsAtVersion = new Map<string, Promise<Post | null>>()
+
 /**
- * Fetches and processes a post at a specific version (SHA).
+ * Fetches and processes a post at a specific version (SHA). The version page
+ * and the pages of its snippets all ask for it: it is fetched and processed
+ * once, and the others get the same post.
  */
-export async function getPostAtVersion(
+export function getPostAtVersion(
   slug: string,
   sha: string,
   options: BlogOptions,
 ): Promise<Post | null> {
   if (!options.versioning) throw new Error('Versioning is not enabled')
 
+  const key = `${slug}@${sha}`
+  let post = postsAtVersion.get(key)
+  if (!post) {
+    post = loadPostAtVersion(slug, sha, options)
+    postsAtVersion.set(key, post)
+  }
+  return post
+}
+
+async function loadPostAtVersion(
+  slug: string,
+  sha: string,
+  options: BlogOptions,
+): Promise<Post | null> {
   const content = await getPostContentAtVersion(slug, sha, options)
   if (!content) return null
 
@@ -181,8 +201,8 @@ export async function getPostAtVersion(
   const { frontmatter, html, messages, snippets, tableOfContents } =
     await processor(content, {
       ...options,
-      // The pages of its snippets are those of the post as it is now
-      address: `/posts/${slug}`,
+      // The pages of its snippets are those of this version
+      address: versionPath(slug, sha),
       async loadFile(path) {
         return (await getFileAtVersion(path, sha, options)) ?? undefined
       },
