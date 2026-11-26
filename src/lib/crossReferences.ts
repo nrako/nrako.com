@@ -1,25 +1,20 @@
+import type { GenericNode } from 'myst-common'
 import { SKIP, visit } from 'unist-util-visit'
 import type { VFile } from 'vfile'
 
 import type { Messages } from './processor.ts'
 
-interface MdastNode {
-  type: string
-  children?: MdastNode[]
-  [key: string]: any
-}
-
 /**
  * The blocks a label can name besides those the renderer already gives an
  * `id` (headings, figures, tables, equations, code).
  */
-const LABELLED_BLOCKS = [
+const LABELLED_BLOCKS = new Set([
   'paragraph',
   'list',
   'blockquote',
   'admonition',
   'definitionList',
-]
+])
 
 /**
  * Finishes what MyST's resolution of references leaves for its renderer, which
@@ -31,47 +26,44 @@ const LABELLED_BLOCKS = [
  * - a labelled block or equation gets its label as `id`, so that a link to it
  *   lands.
  */
-export function crossReferencesTransform(tree: MdastNode) {
-  visit(
-    tree as any,
-    (node: MdastNode, index, parent: MdastNode | undefined) => {
-      if (node.type === 'crossReference' && !node.resolved) {
-        if (index === undefined || !parent?.children) return
-        const text = node.children?.length
-          ? node.children
-          : [{ type: 'text', value: String(node.label ?? node.identifier) }]
-        parent.children.splice(index, 1, ...text)
-        return [SKIP, index + text.length]
-      }
+export function crossReferencesTransform(tree: GenericNode) {
+  visit(tree, (node: GenericNode, index, parent: GenericNode | undefined) => {
+    if (node.type === 'crossReference' && !node.resolved) {
+      if (index === undefined || !parent?.children) return
+      const text = node.children?.length
+        ? node.children
+        : [{ type: 'text', value: String(node.label ?? node.identifier) }]
+      parent.children.splice(index, 1, ...text)
+      return [SKIP, index + text.length]
+    }
 
-      // The math renderer replaces the element that carries an equation's `id`
-      if (node.type === 'math' && node.identifier) {
-        if (index === undefined || !parent?.children) return
-        const { identifier } = node
-        delete node.identifier
-        parent.children[index] = {
-          type: 'equation',
-          data: {
-            hName: 'div',
-            hProperties: { id: identifier, class: 'equation' },
-          },
-          children: [node],
-        }
-        return [SKIP, index + 1]
+    // The math renderer replaces the element that carries an equation's `id`
+    if (node.type === 'math' && node.identifier) {
+      if (index === undefined || !parent?.children) return
+      const { identifier } = node
+      delete node.identifier
+      parent.children[index] = {
+        type: 'equation',
+        data: {
+          hName: 'div',
+          hProperties: { id: identifier, class: 'equation' },
+        },
+        children: [node],
       }
+      return [SKIP, index + 1]
+    }
 
-      if (node.type === 'link' && !node.children?.length) {
-        node.children = [{ type: 'text', value: String(node.url) }]
-      }
+    if (node.type === 'link' && !node.children?.length) {
+      node.children = [{ type: 'text', value: String(node.url) }]
+    }
 
-      if (LABELLED_BLOCKS.includes(node.type) && node.identifier) {
-        node.data = {
-          ...node.data,
-          hProperties: { ...node.data?.hProperties, id: node.identifier },
-        }
+    if (LABELLED_BLOCKS.has(node.type) && node.identifier) {
+      node.data = {
+        ...node.data,
+        hProperties: { ...node.data?.hProperties, id: node.identifier },
       }
-    },
-  )
+    }
+  })
 }
 
 /**
@@ -80,13 +72,21 @@ export function crossReferencesTransform(tree: MdastNode) {
  * fill. The space after it is in the markup, not in CSS, so that a feed
  * reader has it too.
  */
-export function captionNumber(h: any, node: MdastNode) {
+export function captionNumber(
+  h: (
+    node: GenericNode,
+    tagName: string,
+    properties: Record<string, unknown>,
+    children: unknown[],
+  ) => unknown,
+  node: GenericNode,
+) {
   return h(node, 'span', { class: 'caption-number' }, [
     { type: 'text', value: `${textOf(node)} ` },
   ])
 }
 
-function textOf(node: MdastNode): string {
+function textOf(node: GenericNode): string {
   return node.value ?? node.children?.map(textOf).join('') ?? ''
 }
 

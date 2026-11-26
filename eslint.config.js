@@ -19,6 +19,7 @@ export default [
       'public/',
     ],
   },
+  // oxlint-disable-next-line oxc/no-map-spread -- a handful of configs, once
   ...[js.configs.recommended, ...tseslint.configs.recommended].map(
     (config) => ({ ...config, files: astroFiles }),
   ),

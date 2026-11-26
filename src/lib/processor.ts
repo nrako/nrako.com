@@ -117,6 +117,20 @@ function getHighlighter(
   return highlighter
 }
 
+/*
+ * MyST's packages are typed against unified 10 and vfile 5, and the site runs
+ * unified 11 and vfile 6: the objects are the ones MyST expects, their types
+ * are not. These two are where that is said, and nowhere else.
+ */
+
+/** A file, as MyST's types want one */
+// oxlint-disable-next-line typescript/no-explicit-any
+const mystFile = (file: VFile): any => file
+
+/** A pipeline that takes MyST's plugins */
+// oxlint-disable-next-line typescript/no-explicit-any
+const mystPipeline = (): any => unified()
+
 /**
  * Parses a post into its tree and its raw frontmatter. `citations` turns on
  * the `@key` and `[@key]` citation syntax; the `{cite}` roles always parse.
@@ -127,9 +141,9 @@ function parseMyst(text: string, citations: boolean) {
     markdownit: { linkify: true },
     extensions: { citations },
     directives: [snippetDirective, quoteDirective],
-    vfile: file as any,
+    vfile: mystFile(file),
   })
-  const { frontmatter } = getFrontmatter(new VFile() as any, mdast, {
+  const { frontmatter } = getFrontmatter(mystFile(new VFile()), mdast, {
     propagateTargets: true,
   })
   return { mdast, frontmatter, file }
@@ -182,8 +196,11 @@ async function parse(text: string, options: ParseOptions) {
   // Also run some of the transforms, like the links
   const mdastPre = JSON.parse(JSON.stringify(mdast))
   const file = new VFile()
-  const state = new ReferenceState('', { frontmatter, vfile: file as any })
-  ;(unified() as any)
+  const state = new ReferenceState('', {
+    frontmatter,
+    vfile: mystFile(file),
+  })
+  mystPipeline()
     .use(basicTransformationsPlugin, {})
     .use(inlineMathSimplificationPlugin)
     .use(enumerateTargetsPlugin, { state })
@@ -202,7 +219,7 @@ async function parse(text: string, options: ParseOptions) {
   // The renderer of `mystToHtml`, without the transforms it runs first: they
   // number, title and resolve a second time what MyST's own have just done
   // above, which showed the title of a callout twice.
-  const toHtml = (unified() as any)
+  const toHtml = mystPipeline()
     .use(mystToHast, { allowDangerousHtml: true, handlers: { captionNumber } })
     .use(formatHtml)
     .use(rehypeStringify, { allowDangerousHtml: true })

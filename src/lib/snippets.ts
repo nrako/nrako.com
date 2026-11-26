@@ -252,7 +252,7 @@ export function snippetsTransform(
 ): PostSnippet[] {
   const snippets: PostSnippet[] = []
 
-  visit(tree as any, 'snippet', (node: GenericNode) => {
+  visit(tree, 'snippet', (node: GenericNode) => {
     node.data = {
       hName: 'figure',
       hProperties: { class: 'snippet', id: node.identifier },

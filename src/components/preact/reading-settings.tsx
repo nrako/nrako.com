@@ -102,7 +102,8 @@ export default function ReadingSettings() {
 
     const place = (event: Event) => {
       if ((event as ToggleEvent).newState !== 'open') return
-      const button = buttonRef.current!.getBoundingClientRect()
+      if (!buttonRef.current) return
+      const button = buttonRef.current.getBoundingClientRect()
       const root = document.documentElement
       popover.style.top = `${button.bottom + window.scrollY + 8}px`
       popover.style.right = `${root.clientWidth - button.right - window.scrollX}px`
