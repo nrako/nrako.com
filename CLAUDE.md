@@ -12,7 +12,7 @@ Personal website for nrako built with **Astro v7**, Preact, and TailwindCSS v4. 
 - **Runtime**: Node.js 26 (LTS)
 - **Package manager**: pnpm 11 (`pnpm-lock.yaml` is committed)
 - **Formatter**: Oxfmt (`.oxfmtrc.jsonc`), pinned to an exact version. It formats `.astro` files with the `prettier-plugin-astro` it bundles, which needs `@astrojs/compiler-rs` installed
-- **Linter**: Oxlint (`oxlint.config.ts`), pinned to an exact version, for the TypeScript and JavaScript sources; ESLint flat config (`eslint.config.js`: `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`) for the `.astro` files only, of which Oxlint reads nothing but the `<script>` blocks
+- **Linter**: Oxlint (`oxlint.config.ts`), pinned to an exact version, for the TypeScript and JavaScript sources, with the rules that need types (`options.typeAware`, through the `tsrs` backend, a beta that reads `tsconfig.json` as TypeScript 7 does); ESLint flat config (`eslint.config.js`: `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`) for the `.astro` files only, of which Oxlint reads nothing but the `<script>` blocks
 - **Builder**: Astro v7 (Vite 8)
 - **Adapter**: `@astrojs/cloudflare` — generates the deploy configuration, and the Worker entry (`@astrojs/cloudflare/entrypoints/server`) when a route is rendered on demand
 - **Deploy**: `wrangler deploy` (Cloudflare Workers)
@@ -24,7 +24,7 @@ Use pnpm for every dependency change. Do not use `npm install`.
 Supply-chain trust is anchored at install time:
 
 - **No dependency lifecycle scripts.** pnpm only runs install scripts allowed in `pnpm-workspace.yaml` (`allowBuilds`). `esbuild` and `workerd` are explicitly denied there; their native binaries ship as prebuilt optional dependencies, so the scripts are not needed. To allow an audited script, set its entry to `true`.
-- **Minimum release age.** pnpm refuses a version published less than seven days ago (a setting of the machine, not of this repository). `oxfmt` and `oxlint` are exempt (`minimumReleaseAgeExclude` in `pnpm-workspace.yaml`): they ship weekly and the project tracks their latest release.
+- **Minimum release age.** pnpm refuses a version published less than seven days ago (a setting of the machine, not of this repository). `oxfmt`, `oxlint` and `tsrs` are exempt (`minimumReleaseAgeExclude` in `pnpm-workspace.yaml`): they ship weekly and the project tracks their latest release.
 - **`pnpm-lock.yaml` integrity hashes.** CI installs with `--frozen-lockfile`; a tampered tarball is rejected.
 
 There is no runtime sandbox: `dev` / `build` / `preview` / `test:e2e` / `deploy` run dependency code with the invoking user's full permissions. Treat the pinned dependency tree as trusted code and review lockfile changes accordingly.

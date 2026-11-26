@@ -143,7 +143,7 @@ export function mountSnippetEditor() {
     const highlight = await snippetHighlighter()
     for (const field of fields) colour(field, highlight)
   }
-  if (document.readyState === 'complete') colourFields()
+  if (document.readyState === 'complete') void colourFields()
   else window.addEventListener('load', colourFields, { once: true })
 }
 

@@ -288,7 +288,7 @@ function Hand() {
 }
 
 /** A terminal spinner: braille frames shown one at a time */
-const SPINNER_FRAMES = [...'⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏']
+const SPINNER_FRAMES = Array.from('⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏')
 
 function Spinner() {
   return (

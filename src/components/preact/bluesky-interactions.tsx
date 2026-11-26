@@ -34,7 +34,7 @@ export default function BlueSkyInteractions({ postUri }: Props) {
       setLoading(false)
     }
 
-    fetchData()
+    void fetchData()
   }, [postUri])
 
   if (loading && !data) {

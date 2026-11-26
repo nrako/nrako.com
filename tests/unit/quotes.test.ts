@@ -19,7 +19,7 @@ function web(pages: Record<string, string>) {
   const asked: string[] = []
   return {
     asked,
-    async fetchPage(address: string) {
+    fetchPage: async (address: string) => {
       asked.push(address)
       if (!(address in pages)) throw new Error('it answered 404')
       return pages[address]
