@@ -46,7 +46,7 @@ function writtenText(markup: string): string {
   if (attributes(children[children.length - 1])) children.pop()
 
   const blocks: string[] = []
-  visit(tree as any, (node: GenericNode) => {
+  visit(tree, (node: GenericNode) => {
     if (['paragraph', 'heading', 'code', 'tableCell'].includes(node.type)) {
       blocks.push(toText(node))
     }
@@ -124,6 +124,8 @@ function writtenOtherwise(
  * A part of a paragraph: words of a line, which another part can follow in
  * the line. A block quoted whole, the item of a list and code are not.
  */
+type ListItem = NonNullable<Block['item']>
+
 function inLine(block: Block): boolean {
   return Boolean(block.cut) && !block.item && block.code === undefined
 }
@@ -134,45 +136,54 @@ function inLine(block: Block): boolean {
  * A numbered list starts at the number of its first item quoted.
  */
 function listNodes(
-  entries: { block: Block; node: GenericNode }[],
+  entries: { item: ListItem; node: GenericNode }[],
 ): GenericNode[] {
   const lists: GenericNode[] = []
-  const open: { depth: number; list: GenericNode; item: GenericNode }[] = []
+  // The lists that are open, the deepest last: what a list holds and what
+  // its last item holds
+  const open: {
+    depth: number
+    ordered: boolean
+    items: GenericNode[]
+    last: GenericNode[]
+  }[] = []
 
-  for (const { block, node } of entries) {
-    const { ordered, depth, number, continued } = block.item!
+  for (const { item: listed, node } of entries) {
+    const { ordered, depth, number, continued } = listed
     while (open.length > 0 && open[open.length - 1].depth > depth) open.pop()
 
     let within = open[open.length - 1]
     if (continued && within?.depth === depth) {
-      within.item.children!.push(node)
+      within.last.push(node)
       continue
     }
     // Another kind of list at the same depth takes the place of this one
-    if (within?.depth === depth && within.list.ordered !== ordered) {
+    if (within?.depth === depth && within.ordered !== ordered) {
       open.pop()
       within = open[open.length - 1]
     }
 
+    const last: GenericNode[] = [node]
     const item: GenericNode = {
       type: 'listItem',
       spread: false,
-      children: [node],
+      children: last,
     }
     if (within?.depth === depth) {
-      within.list.children!.push(item)
-      within.item = item
+      within.items.push(item)
+      within.last = last
       continue
     }
+    const items: GenericNode[] = [item]
     const list: GenericNode = {
       type: 'list',
       ordered,
       start: ordered ? number : undefined,
       spread: false,
-      children: [item],
+      children: items,
     }
-    ;(within ? within.item.children! : lists).push(list)
-    open.push({ depth, list, item })
+    ;(within ? within.last : lists).push(list)
+    open.push({ depth, ordered, items, last })
   }
   return lists
 }
@@ -241,7 +252,7 @@ function passageNodes(
   }
 
   const nodes: GenericNode[] = []
-  let items: { block: Block; node: GenericNode }[] = []
+  let items: { item: ListItem; node: GenericNode }[] = []
   const endList = () => {
     nodes.push(...listNodes(items))
     items = []
@@ -252,7 +263,7 @@ function passageNodes(
         ? { type: 'paragraph', children }
         : { type: 'code', value: block.code }
     if (block.item) {
-      items.push({ block, node })
+      items.push({ item: block.item, node })
     } else {
       endList()
       nodes.push(node)
@@ -452,7 +463,7 @@ export async function resolveQuotes(
   fetchPage?: FetchPage,
 ) {
   const awaited: GenericNode[] = []
-  visit(tree as any, 'container', (node: GenericNode) => {
+  visit(tree, 'container', (node: GenericNode) => {
     if (node.kind === 'quote' && node.awaited) awaited.push(node)
   })
 
@@ -577,7 +588,7 @@ const NOTICES: Record<Notice | 'superseded', string> = {
  * could not be read, or has moved on from the version quoted.
  */
 export function quotesTransform(tree: GenericNode) {
-  visit(tree as any, 'container', (node: GenericNode) => {
+  visit(tree, 'container', (node: GenericNode) => {
     if (node.kind !== 'quote' || typeof node.source !== 'string') return
 
     const link: GenericNode = {

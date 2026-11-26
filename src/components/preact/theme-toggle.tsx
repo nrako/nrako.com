@@ -17,11 +17,11 @@ export default function ThemeToggle() {
   // Apply any user preference theme to the document
   // Only modify classes if user has explicitly chosen a theme
   useEffect(() => {
-    if (!['dark', 'light'].includes(userTheme || '')) return
+    if (userTheme !== 'dark' && userTheme !== 'light') return
 
     document.documentElement.classList.remove('dark')
     document.documentElement.classList.remove('light')
-    document.documentElement.classList.add(userTheme!)
+    document.documentElement.classList.add(userTheme)
   }, [userTheme])
 
   // Enable the button when JavaScript is enabled

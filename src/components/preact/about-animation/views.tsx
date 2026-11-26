@@ -37,6 +37,8 @@ function Text({ segs, popup }: { segs: Seg[]; popup?: Popup | null }) {
   return (
     <>
       {segs.map((seg, index) => (
+        // A segment is its place in the line
+        // oxlint-disable-next-line react/no-array-index-key
         <Fragment key={index}>
           <span class={segClass(seg)}>{seg.text}</span>
           {seg.anchor && popup && (
@@ -93,6 +95,8 @@ function Completions({ popup }: { popup: Popup }) {
         <span class="aa-popup-list">
           {popup.items.map((item, index) => (
             <span
+              // An item is its place in the list
+              // oxlint-disable-next-line react/no-array-index-key
               key={index}
               class="aa-popup-item"
               data-selected={index === popup.selected ? '' : undefined}

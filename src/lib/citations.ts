@@ -3,7 +3,9 @@ import {
   InlineCite,
   type CitationRenderer,
 } from 'citation-js-utils'
+import type { Element, ElementContent, Root } from 'hast'
 import { h } from 'hastscript'
+import type { GenericNode } from 'myst-common'
 import rehypeParse from 'rehype-parse'
 import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
@@ -23,12 +25,6 @@ export interface Reference {
   key: string
   /** Sanitized HTML of the entry, in the APA style */
   html: string
-}
-
-interface MdastNode {
-  type: string
-  children?: MdastNode[]
-  [key: string]: any
 }
 
 /**
@@ -82,13 +78,13 @@ function referenceId(key: string): string {
  * warning.
  */
 export function citationsTransform(
-  tree: MdastNode,
+  tree: GenericNode,
   renderers: CitationRenderer,
   messages: Messages,
 ): Reference[] {
   const cited = new Set<string>()
 
-  function citation(cite: MdastNode): MdastNode {
+  function citation(cite: GenericNode): GenericNode {
     const key = String(cite.label)
     const renderer = renderers[key]
     if (!renderer) {
@@ -117,10 +113,10 @@ export function citationsTransform(
   }
 
   /** Several citations as one: "(a; b)" in parentheses, "a, b" in the text */
-  function citationGroup(group: MdastNode): MdastNode[] {
+  function citationGroup(group: GenericNode): GenericNode[] {
     const parenthetical = group.kind === 'parenthetical'
     const separator = parenthetical ? '; ' : ', '
-    const nodes: MdastNode[] = []
+    const nodes: GenericNode[] = []
 
     if (parenthetical) nodes.push({ type: 'text', value: '(' })
     for (const [index, child] of (group.children ?? []).entries()) {
@@ -131,7 +127,7 @@ export function citationsTransform(
     return nodes
   }
 
-  function replaceCitations(parent: MdastNode) {
+  function replaceCitations(parent: GenericNode) {
     parent.children = parent.children?.flatMap((node) => {
       if (node.type === 'citeGroup') return citationGroup(node)
       if (node.type === 'cite') return [citation(node)]
@@ -158,7 +154,7 @@ function plainText(html: string): string {
  * post when it has none. A post that cites nothing gets no list.
  */
 export function rehypeReferences(references: Reference[]) {
-  return (tree: any) => {
+  return (tree: Root) => {
     if (references.length === 0) return
 
     const list = h(
@@ -169,10 +165,12 @@ export function rehypeReferences(references: Reference[]) {
     )
 
     let placed = false
-    visit(tree, 'element', (node: any, index, parent: any) => {
+    visit(tree, 'element', (node, index, parent) => {
       if (placed || index === undefined || !parent) return
       if (node.tagName !== 'div') return
-      if (!node.properties?.className?.includes('bibliography')) return
+      const { className } = node.properties
+      if (!Array.isArray(className)) return
+      if (!className.includes('bibliography')) return
       parent.children[index] = list
       placed = true
     })
@@ -194,10 +192,10 @@ export function rehypeReferences(references: Reference[]) {
  */
 function entryNodes(html: string) {
   const fragment = unified().use(rehypeParse, { fragment: true }).parse(html)
-  visit(fragment, 'element', (node: any) => {
+  visit(fragment, 'element', (node: Element) => {
     if (node.tagName !== 'a') return
     delete node.properties.target
     delete node.properties.rel
   })
-  return fragment.children as any[]
+  return fragment.children as ElementContent[]
 }

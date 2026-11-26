@@ -3,6 +3,8 @@
  * HTML once everything that adds one (the references) has run.
  */
 
+import type { Nodes, Root } from 'hast'
+
 export interface TableOfContentsEntry {
   /** The `id` of the heading, which a link to the section targets */
   id: string
@@ -30,24 +32,27 @@ const DEMO_CLASS = 'snippet-demo'
  * heading without an `id` cannot be linked to and is left out.
  */
 export function rehypeTableOfContents(entries: TableOfContentsEntry[]) {
-  return (tree: any) => {
+  return (tree: Root) => {
     collect(tree, entries)
   }
 }
 
-function collect(node: any, entries: TableOfContentsEntry[]) {
+function collect(node: Nodes, entries: TableOfContentsEntry[]) {
   if (node.type === 'element') {
-    if (node.properties?.className?.includes(DEMO_CLASS)) return
+    const { className } = node.properties
+    if (Array.isArray(className) && className.includes(DEMO_CLASS)) return
 
     const depth = DEPTHS[node.tagName]
-    const id = node.properties?.id
+    const { id } = node.properties
     if (depth && typeof id === 'string' && id !== FOOTNOTES_ID) {
       const text = textOf(node).replace(/\s+/g, ' ').trim()
       if (text) entries.push({ id, text, depth })
       return
     }
   }
-  for (const child of node.children ?? []) collect(child, entries)
+  if ('children' in node) {
+    for (const child of node.children) collect(child, entries)
+  }
 }
 
 /**
@@ -55,12 +60,12 @@ function collect(node: any, entries: TableOfContentsEntry[]) {
  * reader (the anchor sign, the drawing of a formula) and without the TeX
  * source KaTeX keeps beside a formula.
  */
-function textOf(node: any): string {
+function textOf(node: Nodes): string {
   if (node.type === 'text') return node.value
   if (node.type !== 'element') return ''
   if (node.tagName === 'annotation') return ''
-  if (String(node.properties?.ariaHidden) === 'true') return ''
-  return (node.children ?? []).map(textOf).join('')
+  if (String(node.properties.ariaHidden) === 'true') return ''
+  return node.children.map(textOf).join('')
 }
 
 /**

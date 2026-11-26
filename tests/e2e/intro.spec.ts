@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
+type PhasesWindow = Window & { phases: (string | null)[] }
+
 const sentence = 'I decide what is worth building. Opinions below.'
 
 const intro = (page: Page) => page.locator('.about-animation')
@@ -105,7 +107,7 @@ test.describe('Introduction', () => {
     await page.evaluate(() => {
       const intro = document.querySelector('.about-animation')!
       const phases: (string | null)[] = []
-      ;(window as any).phases = phases
+      ;(window as PhasesWindow).phases = phases
       new MutationObserver(() => {
         phases.push(intro.getAttribute('data-phase'))
       }).observe(intro, { attributes: true, attributeFilter: ['data-phase'] })
@@ -116,7 +118,9 @@ test.describe('Introduction', () => {
     // The text is typed again from its first letter
     await expect(buffer).not.toContainText('Web')
     await expect(buffer).toContainText('I was a Web')
-    expect(await page.evaluate(() => (window as any).phases)).toEqual([])
+    expect(await page.evaluate(() => (window as PhasesWindow).phases)).toEqual(
+      [],
+    )
   })
 
   test('the link reads "About" and adds its words under the mouse', async ({
