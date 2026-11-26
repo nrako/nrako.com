@@ -14,38 +14,30 @@ const posts = await getListedPosts(options)
       <AboutAnimation client:load />
     </header>
 
-    {
-      posts.length > 0 && (
-        <section>
-          {/* "Opinions below." introduces the list: its title is not shown */}
-          <h2 class="sr-only">Posts</h2>
-          <div>
-            {posts.map((post) => (
-              <a class="post-entry" href={`/posts/${post.slug}`}>
-                <article>
-                  <header class="post-entry-head">
-                    <h3 class="post-entry-title">{post.frontmatter.title}</h3>
-                    {post.frontmatter.date && (
-                      <Time
-                        date={post.frontmatter.date}
-                        language={
-                          (post.frontmatter.parts?.language as
-                            string | undefined) || 'en'
-                        }
-                      />
-                    )}
-                  </header>
-                  {post.frontmatter.description && (
-                    <p class="post-entry-description">
-                      {post.frontmatter.description}
-                    </p>
-                  )}
-                </article>
-              </a>
-            ))}
-          </div>
-        </section>
-      )
-    }
+    {posts.length > 0 && <section>
+      {/* "Opinions below." introduces the list: its title is not shown */}
+      <h2 class="sr-only">Posts</h2>
+      <div>
+        {posts.map((post) => <a class="post-entry" href={`/posts/${post.slug}`}>
+          <article>
+            <header class="post-entry-head">
+              <h3 class="post-entry-title">{post.frontmatter.title}</h3>
+              {post.frontmatter.date && (
+                <Time
+                  date={post.frontmatter.date}
+                  language={
+                    (post.frontmatter.parts?.language as string | undefined) ||
+                    'en'
+                  }
+                />
+              )}
+            </header>
+            {post.frontmatter.description && <p class="post-entry-description">
+              {post.frontmatter.description}
+            </p>}
+          </article>
+        </a>)}
+      </div>
+    </section>}
   </div>
 </Layout>

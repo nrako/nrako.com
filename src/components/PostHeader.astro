@@ -18,25 +18,19 @@ const { frontmatter } = post
   <h1>{frontmatter.title}</h1>
   {frontmatter.subtitle && <p class="post-subtitle">{frontmatter.subtitle}</p>}
   <div class="post-meta" aria-label="Post Metadata">
-    {
-      options.showAuthors !== 'never' && frontmatter.authors && (
-        <Authors
-          authors={frontmatter.authors}
-          affiliations={frontmatter.affiliations}
-          showLinks
-        />
-      )
-    }
-    {
-      frontmatter.date && (
-        <Time date={frontmatter.date} language={options.language} />
-      )
-    }
-    {
-      post.versions && post.versions.length > 1 && (
-        <PostVersions slug={post.slug} versions={post.versions} />
-      )
-    }
+    {options.showAuthors !== 'never' && frontmatter.authors && (
+      <Authors
+        authors={frontmatter.authors}
+        affiliations={frontmatter.affiliations}
+        showLinks
+      />
+    )}
+    {frontmatter.date && (
+      <Time date={frontmatter.date} language={options.language} />
+    )}
+    {post.versions && post.versions.length > 1 && (
+      <PostVersions slug={post.slug} versions={post.versions} />
+    )}
     <ReadTime value={post.readingTimeMinutes} />
   </div>
   <slot />

@@ -28,50 +28,43 @@ const sections = nestTableOfContents(entries)
    * the foot of the window, which opens the list. It is the last element of
    * `.post-body`, whose end it cannot go past.
    */
-  entries.length >= MIN_ENTRIES && (
-    <nav class="post-contents not-prose" aria-label="Contents">
-      <details>
-        <summary>
-          <span class="post-contents-label">Contents</span>
-          <span class="post-contents-current" />
-        </summary>
-        <ol>
-          {/* `#` alone is the top of the page: nothing has to carry an `id` */}
-          <li class="post-contents-top">
-            <a href="#">
-              <span>{title}</span>
-              <TbArrowBarToUp />
-            </a>
-          </li>
-          {sections.map((section) => (
-            <li>
-              <a href={`#${section.id}`}>
-                <span>{section.text}</span>
+  entries.length >= MIN_ENTRIES && <nav
+    class="post-contents not-prose"
+    aria-label="Contents"
+  >
+    <details>
+      <summary>
+        <span class="post-contents-label">Contents</span>
+        <span class="post-contents-current" />
+      </summary>
+      <ol>
+        {/* `#` alone is the top of the page: nothing has to carry an `id` */}
+        <li class="post-contents-top">
+          <a href="#">
+            <span>{title}</span>
+            <TbArrowBarToUp />
+          </a>
+        </li>
+        {sections.map((section) => <li>
+          <a href={`#${section.id}`}>
+            <span>{section.text}</span>
+          </a>
+          {section.children.length > 0 && <ol>
+            {section.children.map((child) => <li>
+              <a href={`#${child.id}`}>
+                <span>{child.text}</span>
               </a>
-              {section.children.length > 0 && (
-                <ol>
-                  {section.children.map((child) => (
-                    <li>
-                      <a href={`#${child.id}`}>
-                        <span>{child.text}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </li>
-          ))}
-          {reactions && (
-            <li class="post-contents-reactions">
-              <a href="#reactions">
-                <span>Reactions</span>
-              </a>
-            </li>
-          )}
-        </ol>
-      </details>
-    </nav>
-  )
+            </li>)}
+          </ol>}
+        </li>)}
+        {reactions && <li class="post-contents-reactions">
+          <a href="#reactions">
+            <span>Reactions</span>
+          </a>
+        </li>}
+      </ol>
+    </details>
+  </nav>
 }
 
 <script>
