@@ -23,7 +23,7 @@ pnpm install
 ```
 
 Dependency install scripts do not run; see the security notes in
-[`CLAUDE.md`](./CLAUDE.md).
+[`AGENTS.md`](./AGENTS.md).
 
 ## Common tasks
 
@@ -40,7 +40,7 @@ pnpm run test:e2e:fixtures  # Same, with the site built from fixture posts
 pnpm run deploy          # Build + wrangler deploy
 ```
 
-See [`CLAUDE.md`](./CLAUDE.md) for architecture notes, runtime caveats and
+See [`AGENTS.md`](./AGENTS.md) for architecture notes, runtime caveats and
 deployment details.
 
 ## License
