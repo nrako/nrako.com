@@ -93,6 +93,7 @@ function Completions({ popup }: { popup: Popup }) {
         <span class="aa-popup-list">
           {popup.items.map((item, index) => (
             <span
+              key={index}
               class="aa-popup-item"
               data-selected={index === popup.selected ? '' : undefined}
             >
@@ -296,7 +297,7 @@ function Spinner() {
     <span class="aa-spinner">
       <span class="aa-spinner-frames">
         {SPINNER_FRAMES.map((frame) => (
-          <span>{frame}</span>
+          <span key={frame}>{frame}</span>
         ))}
       </span>
     </span>

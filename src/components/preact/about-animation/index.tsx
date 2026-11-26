@@ -59,7 +59,7 @@ export default function AboutAnimation() {
   const [speed, setSpeed] = useState(1)
   // Number of times the sequence was asked for; each request restarts it.
   const [run, setRun] = useState(0)
-  const stop = useRef<(() => void) | null>(null)
+  const stopRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     const play = () => setRun((run) => run + 1)
@@ -93,7 +93,7 @@ export default function AboutAnimation() {
     const { signal } = controller
     const runSpeed = readSpeed() * TEMPO
     setSpeed(runSpeed)
-    stop.current = () => controller.abort()
+    stopRef.current = () => controller.abort()
 
     // `phase` is what the page showed when the sequence was asked for. Asked
     // again while it plays, the stage is already there: it starts over at
@@ -125,6 +125,7 @@ export default function AboutAnimation() {
 
     return () => controller.abort()
     // Runs once per request: `phase` is only read as it was at that time
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [run])
 
   // The header link shows that the animation is playing
@@ -135,7 +136,7 @@ export default function AboutAnimation() {
   }, [phase])
 
   const skip = () => {
-    stop.current?.()
+    stopRef.current?.()
     setPhase('idle')
   }
 

@@ -3,7 +3,7 @@ import { defineConfig } from 'oxlint'
 // Lints the TypeScript and JavaScript sources. `.astro` files belong to ESLint
 // (`eslint.config.js`): Oxlint would only read their `<script>` blocks.
 export default defineConfig({
-  plugins: ['typescript'],
+  plugins: ['typescript', 'react', 'jsx-a11y', 'import', 'promise'],
   // Rules that need the types run through the `tsrs` backend.
   options: { typeAware: true },
   ignorePatterns: [

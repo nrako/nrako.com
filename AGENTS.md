@@ -12,7 +12,7 @@ Personal website for nrako built with **Astro v7**, Preact, and TailwindCSS v4. 
 - **Runtime**: Node.js 26 (LTS)
 - **Package manager**: pnpm 11 (`pnpm-lock.yaml` is committed)
 - **Formatter**: Oxfmt (`.oxfmtrc.jsonc`), pinned to an exact version. It formats `.astro` files with the `prettier-plugin-astro` it bundles, which needs `@astrojs/compiler-rs` installed
-- **Linter**: Oxlint (`oxlint.config.ts`), pinned to an exact version, for the TypeScript and JavaScript sources, with the rules that need types (`options.typeAware`, through the `tsrs` backend, a beta that reads `tsconfig.json` as TypeScript 7 does); ESLint flat config (`eslint.config.js`: `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`) for the `.astro` files only, of which Oxlint reads nothing but the `<script>` blocks
+- **Linter**: Oxlint (`oxlint.config.ts`), pinned to an exact version, for the TypeScript and JavaScript sources, with its `react`, `jsx-a11y`, `import` and `promise` plugins (the islands are Preact, which the React rules fit) and the rules that need types (`options.typeAware`, through the `tsrs` backend, a beta that reads `tsconfig.json` as TypeScript 7 does); ESLint flat config (`eslint.config.js`: `@eslint/js`, `typescript-eslint`, `eslint-plugin-astro`) for the `.astro` files only, of which Oxlint reads nothing but the `<script>` blocks
 - **Builder**: Astro v7 (Vite 8)
 - **Adapter**: `@astrojs/cloudflare` — generates the deploy configuration, and the Worker entry (`@astrojs/cloudflare/entrypoints/server`) when a route is rendered on demand
 - **Deploy**: `wrangler deploy` (Cloudflare Workers)
