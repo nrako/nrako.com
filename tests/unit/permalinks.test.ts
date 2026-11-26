@@ -5,6 +5,7 @@ import type { CommitInfo } from '../../src/lib/githubVersioning.ts'
 import {
   latestVersion,
   postLinks,
+  snippetLinks,
   versionPath,
 } from '../../src/lib/permalinks.ts'
 
@@ -90,4 +91,56 @@ test('the latest version is the newest commit, past a draft', () => {
 
 test('a version is at its short sha under the post', () => {
   assert.equal(versionPath(slug, 'aaaaaaa'), '/posts/a-post/aaaaaaa')
+})
+
+const label = 'ex-a'
+
+test("a snippet's page is canonical and cites it at the latest version", () => {
+  assert.deepEqual(
+    snippetLinks({ site, slug, versions, label, inPost: true }),
+    {
+      canonical: 'https://nrako.com/posts/a-post/snippets/ex-a',
+      citeAs: 'https://nrako.com/posts/a-post/ccccccc/snippets/ex-a',
+    },
+  )
+})
+
+test("a version's snippet has the post's as canonical and cites itself", () => {
+  assert.deepEqual(
+    snippetLinks({
+      site,
+      slug,
+      versions,
+      shortSha: 'aaaaaaa',
+      label,
+      inPost: true,
+    }),
+    {
+      canonical: 'https://nrako.com/posts/a-post/snippets/ex-a',
+      citeAs: 'https://nrako.com/posts/a-post/aaaaaaa/snippets/ex-a',
+    },
+  )
+})
+
+test('a snippet the post no longer has declares no canonical page', () => {
+  assert.deepEqual(
+    snippetLinks({
+      site,
+      slug,
+      versions,
+      shortSha: 'aaaaaaa',
+      label,
+      inPost: false,
+    }),
+    { citeAs: 'https://nrako.com/posts/a-post/aaaaaaa/snippets/ex-a' },
+  )
+})
+
+test('the snippet of a draft or of a post without history cites nothing', () => {
+  for (const shown of [undefined, [draft, ...versions]]) {
+    assert.deepEqual(
+      snippetLinks({ site, slug, versions: shown, label, inPost: true }),
+      { canonical: 'https://nrako.com/posts/a-post/snippets/ex-a' },
+    )
+  }
 })

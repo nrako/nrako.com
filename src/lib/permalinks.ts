@@ -1,4 +1,5 @@
 import type { CommitInfo } from './githubVersioning.ts'
+import { snippetAddress } from './snippets.ts'
 
 /** The page of a post, which shows it as it is now */
 export function postPath(slug: string): string {
@@ -64,4 +65,37 @@ export function postLinks({
   if (!shown || shown.sha === 'draft') return { canonical }
 
   return { canonical, citeAs: absolute(versionPath(slug, shown.shortSha)) }
+}
+
+/** The links a snippet's page declares, under those of its post's page */
+export interface SnippetLinks {
+  /** The snippet's page under the post's, when the post still has it */
+  canonical?: string
+  /** The snippet's page under the version its page shows */
+  citeAs?: string
+}
+
+/**
+ * The links a snippet's page declares about itself, as absolute URLs: those
+ * of the page of the post it is under (`postLinks`), with the snippet's
+ * address under each.
+ *
+ * A version's snippet whose label the post no longer has declares no
+ * canonical page: it would be one that does not exist.
+ */
+export function snippetLinks({
+  label,
+  inPost,
+  ...post
+}: Parameters<typeof postLinks>[0] & {
+  label: string
+  /** Whether the post as it is now has a snippet of that label */
+  inPost: boolean
+}): SnippetLinks {
+  const { canonical, citeAs } = postLinks(post)
+
+  return {
+    ...(inPost && { canonical: snippetAddress(canonical, label) }),
+    ...(citeAs && { citeAs: snippetAddress(citeAs, label) }),
+  }
 }

@@ -1,13 +1,14 @@
 ---
-import type { PostLinks } from '@/lib/permalinks'
+import type { PostLinks, SnippetLinks } from '@/lib/permalinks'
 
-// What a page of a post declares about itself, in its head (`lib/permalinks.ts`)
+// What a page of a post or of a snippet declares about itself, in its head
+// (`lib/permalinks.ts`)
 interface Props {
-  links: PostLinks
+  links: PostLinks | SnippetLinks
 }
 
 const { links } = Astro.props
 ---
 
-<link rel="canonical" href={links.canonical} />
+{links.canonical && <link rel="canonical" href={links.canonical} />}
 {links.citeAs && <link rel="cite-as" href={links.citeAs} />}

@@ -1,5 +1,7 @@
 ---
+import PostLinks from '@/components/PostLinks.astro'
 import Layout from '@/layouts/Layout.astro'
+import type { SnippetLinks } from '@/lib/permalinks'
 import { consoleMarkup } from '@/lib/snippetDemo'
 import { snippetAddress, type PostSnippet } from '@/lib/snippets'
 
@@ -12,9 +14,11 @@ interface Props {
    * snippet's page is under
    */
   postAddress: string
+  /** Its `canonical` and `cite-as`, under those of that page */
+  links: SnippetLinks
 }
 
-const { snippet, title, postAddress } = Astro.props
+const { snippet, title, postAddress, links } = Astro.props
 const address = snippetAddress(postAddress, snippet.label)
 
 // The icons of the page, drawn in the text's colour
@@ -33,6 +37,7 @@ const icon = {
 <Layout bare title={`${snippet.title} - ${title}`} description={snippet.title}>
   {/* A demo only means something with its post */}
   <meta name="robots" content="noindex" slot="head" />
+  <PostLinks links={links} slot="head" />
   <script is:inline slot="head">
     // `?source` asks for the sources. Known before render, as the theme is.
     if (new URLSearchParams(location.search).has('source')) {

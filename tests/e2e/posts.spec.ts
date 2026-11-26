@@ -164,10 +164,15 @@ test.describe('Links a post declares', () => {
     await expect(page.locator('link[rel="cite-as"]')).toHaveCount(0)
   })
 
-  test('a snippet page declares neither', async ({ page }) => {
+  test('a snippet page without history is canonical and cites no version', async ({
+    page,
+  }) => {
     await page.goto('/posts/fixture-unlisted-post/snippets/ex-unlisted')
 
-    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://nrako.com/posts/fixture-unlisted-post/snippets/ex-unlisted',
+    )
     await expect(page.locator('link[rel="cite-as"]')).toHaveCount(0)
   })
 })
