@@ -1,8 +1,10 @@
 import type { PageFrontmatter } from 'myst-frontmatter'
+
+import TbBrandX from '@/components/icons/TbBrandX'
+import TbMail from '@/components/icons/TbMail'
+
 import OrcidIcon from '../icons/orcid.tsx'
 import RorIcon from '../icons/ror.tsx'
-import TbMail from '@/components/icons/TbMail'
-import TbBrandX from '@/components/icons/TbBrandX'
 
 type Author = Required<PageFrontmatter>['authors'][0]
 type Affiliations = PageFrontmatter['affiliations']

@@ -1,9 +1,10 @@
+import { Buffer } from 'node:buffer'
+import process from 'node:process'
+
 import type { BlogOptions, Post } from './blogData.ts'
 import { calculateReadingTime } from './blogData.ts'
 import processor from './processor.ts'
 import { fetchPage } from './quotes.ts'
-import process from 'node:process'
-import { Buffer } from 'node:buffer'
 
 export interface CommitInfo {
   sha: string

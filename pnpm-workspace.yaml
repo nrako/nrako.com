@@ -4,3 +4,17 @@
 allowBuilds:
   esbuild: false
   workerd: false
+
+# Oxc tools ship weekly and the project tracks their latest release, so they
+# are exempt from the minimum release age.
+# TODO: remove this exemption once `tsrs` is out of beta. Until then it ships
+# every few days and is tied to the Oxlint release it was built for, so the
+# pair that is seven days old may not work together. To check: without these
+# lines, `pnpm update oxlint oxfmt tsrs` then `pnpm run lint` must pass.
+minimumReleaseAgeExclude:
+  - oxlint
+  - '@oxlint/*'
+  - tsrs
+  - '@tsrs/*'
+  - oxfmt
+  - '@oxfmt/*'

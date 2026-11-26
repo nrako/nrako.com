@@ -1,6 +1,9 @@
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import { transformerNotationDiff } from '@shikijs/transformers'
-import { VFile } from 'vfile'
+import { h } from 'hastscript'
+import { validatePageFrontmatter, type PageFrontmatter } from 'myst-frontmatter'
 import { mystParse } from 'myst-parser'
+import { formatHtml, mystToHast } from 'myst-to-html'
 import {
   basicTransformationsPlugin,
   DOITransformer,
@@ -14,24 +17,22 @@ import {
   RRIDTransformer,
   WikiTransformer,
 } from 'myst-transforms'
-import { unified } from 'unified'
-import { visit } from 'unist-util-visit'
-import { formatHtml, mystToHast } from 'myst-to-html'
-import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeExternalLinks from 'rehype-external-links'
+import rehypeKatex from 'rehype-katex'
+import rehypeParse from 'rehype-parse'
+import rehypeStringify from 'rehype-stringify'
 import {
   bundledLanguages,
   createHighlighter,
   createJavaScriptRegexEngine,
   type Highlighter,
 } from 'shiki'
-import rehypeStringify from 'rehype-stringify'
-import rehypeParse from 'rehype-parse'
-import rehypeExternalLinks from 'rehype-external-links'
-import rehypeKatex from 'rehype-katex'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import { h } from 'hastscript'
+import { unified } from 'unified'
+import { visit } from 'unist-util-visit'
+import { VFile } from 'vfile'
+
 import { defaultOptions, type BlogOptions } from './blogData.ts'
-import { validatePageFrontmatter, type PageFrontmatter } from 'myst-frontmatter'
 import {
   citationsTransform,
   loadBibliography,

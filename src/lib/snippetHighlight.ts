@@ -6,6 +6,7 @@ import javascript from 'shiki/langs/javascript.mjs'
 import xml from 'shiki/langs/xml.mjs'
 import dark from 'shiki/themes/github-dark-high-contrast.mjs'
 import light from 'shiki/themes/github-light-high-contrast.mjs'
+
 import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
 import { highlightedAs } from './snippetDemo.ts'
 

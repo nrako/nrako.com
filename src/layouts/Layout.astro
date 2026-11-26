@@ -33,11 +33,9 @@ const {
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    {
-      /* `viewport-fit=cover`: the page reaches the edges of a screen with a
+    {/* `viewport-fit=cover`: the page reaches the edges of a screen with a
          notch or a home indicator, and keeps clear of them itself (`body` and
-         `.post-contents` in `global.css`) */
-    }
+         `.post-contents` in `global.css`) */}
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
@@ -88,7 +86,7 @@ const {
   </head>
   <body class="font-sans">
     {!bare && <SiteHeader />}
-    <main class="container mx-auto min-h-screen px-4 md:px-12 mt-20">
+    <main class="container mx-auto mt-20 min-h-screen px-4 md:px-12">
       <slot />
     </main>
     {!bare && <SiteFooter />}

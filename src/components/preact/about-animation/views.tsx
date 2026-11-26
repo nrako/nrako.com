@@ -1,5 +1,6 @@
 import { Fragment } from 'preact'
 import { useLayoutEffect, useRef } from 'preact/hooks'
+
 import {
   POPUP_ROWS,
   type CanvasScene,
@@ -92,6 +93,7 @@ function Completions({ popup }: { popup: Popup }) {
         <span class="aa-popup-list">
           {popup.items.map((item, index) => (
             <span
+              key={index}
               class="aa-popup-item"
               data-selected={index === popup.selected ? '' : undefined}
             >
@@ -288,14 +290,14 @@ function Hand() {
 }
 
 /** A terminal spinner: braille frames shown one at a time */
-const SPINNER_FRAMES = [...'⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏']
+const SPINNER_FRAMES = Array.from('⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏')
 
 function Spinner() {
   return (
     <span class="aa-spinner">
       <span class="aa-spinner-frames">
         {SPINNER_FRAMES.map((frame) => (
-          <span>{frame}</span>
+          <span key={frame}>{frame}</span>
         ))}
       </span>
     </span>

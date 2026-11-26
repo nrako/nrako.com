@@ -1,8 +1,13 @@
 import js from '@eslint/js'
-import tseslint from 'typescript-eslint'
 import astro from 'eslint-plugin-astro'
+import tseslint from 'typescript-eslint'
 
-export default tseslint.config(
+// ESLint lints `.astro` files only: Oxlint reads their `<script>` blocks and
+// nothing else of them. Every other source belongs to Oxlint
+// (`oxlint.config.ts`), which leaves `.astro` files alone.
+const astroFiles = ['**/*.astro', '**/*.astro/*.js', '**/*.astro/*.ts']
+
+export default [
   {
     ignores: [
       'dist/',
@@ -14,19 +19,14 @@ export default tseslint.config(
       'public/',
     ],
   },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+  ...[js.configs.recommended, ...tseslint.configs.recommended].map(
+    (config) => ({ ...config, files: astroFiles }),
+  ),
   ...astro.configs.recommended,
   {
+    files: astroFiles,
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-  {
-    // Astro's generated type entry uses triple-slash references by design.
-    files: ['src/env.d.ts'],
-    rules: {
-      '@typescript-eslint/triple-slash-reference': 'off',
-    },
-  },
-)
+]

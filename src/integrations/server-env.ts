@@ -1,6 +1,7 @@
+import process from 'node:process'
+
 import type { AstroIntegration } from 'astro'
 import { loadEnv } from 'vite'
-import process from 'node:process'
 
 /**
  * Loads .env / .env.local / .env.[mode] / .env.[mode].local and copies

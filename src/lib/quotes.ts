@@ -6,6 +6,7 @@ import {
 } from 'myst-common'
 import { mystParse } from 'myst-parser'
 import { visit } from 'unist-util-visit'
+
 import {
   findPassages,
   highlighted,
@@ -296,7 +297,7 @@ export const quoteDirective: DirectiveSpec = {
     doc: 'The passage as the page has it, optional, and a last line `-- Someone` to attribute it',
   },
   run(data, vfile) {
-    const address = String(data.arg ?? '').trim()
+    const address = typeof data.arg === 'string' ? data.arg.trim() : ''
     const body = (data.body ?? []) as GenericNode[]
     const quotation = (source?: string, extra?: Record<string, unknown>) => [
       {

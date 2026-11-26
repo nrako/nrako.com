@@ -1,7 +1,8 @@
 ---
-import type { CommitInfo } from '@/lib/githubVersioning'
 import { defaultOptions as options } from '@/lib/blogData'
+import type { CommitInfo } from '@/lib/githubVersioning'
 import { versionPath } from '@/lib/permalinks'
+
 import Time from './Time.astro'
 
 interface Props {
@@ -32,32 +33,28 @@ const lastEditedDate = latestVersion?.date
   <div popover id="versions-popover">
     <h3>Version History</h3>
     <ul>
-      {
-        versions.map((version) => (
-          <li class="version-item">
-            <div class="flex gap-2">
-              {version.sha === 'draft' ? (
-                <strong>Draft</strong>
-              ) : (
-                <a
-                  href={versionPath(slug, version.shortSha)}
-                  title={`View version ${version.shortSha}`}
-                >
-                  <strong>{version.shortSha}</strong>
-                </a>
-              )}
-              <Time date={version.date} language={options.language} />
-              {version.author && (
-                <>
-                  <span>by {version.author}</span>
-                  {version.verified && <span>(Verified)</span>}
-                </>
-              )}
-            </div>
-            <p>{version.message.split('\n')[0]}</p>
-          </li>
-        ))
-      }
+      {versions.map((version) => <li class="version-item">
+        <div class="flex gap-2">
+          {version.sha === 'draft' ? (
+            <strong>Draft</strong>
+          ) : (
+            <a
+              href={versionPath(slug, version.shortSha)}
+              title={`View version ${version.shortSha}`}
+            >
+              <strong>{version.shortSha}</strong>
+            </a>
+          )}
+          <Time date={version.date} language={options.language} />
+          {version.author && (
+            <>
+              <span>by {version.author}</span>
+              {version.verified && <span>(Verified)</span>}
+            </>
+          )}
+        </div>
+        <p>{version.message.split('\n')[0]}</p>
+      </li>)}
     </ul>
   </div>
 </section>

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+
 import { decompress } from 'livecodes'
+
 import { playgroundAddress, scriptError } from '../../src/lib/snippetEditor.ts'
 
 const sources = [

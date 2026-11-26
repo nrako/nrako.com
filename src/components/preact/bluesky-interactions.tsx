@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'preact/hooks'
 import type { AppBskyFeedDefs } from '@atproto/api'
+import { useEffect, useState } from 'preact/hooks'
+
 import { getPostInteractions } from '@/lib/bluesky'
-import Reply from './reply.tsx'
 import { formatCount } from '@/lib/intl'
+
+import Reply from './reply.tsx'
 
 interface Props {
   postUri: string
@@ -34,7 +36,7 @@ export default function BlueSkyInteractions({ postUri }: Props) {
       setLoading(false)
     }
 
-    fetchData()
+    void fetchData()
   }, [postUri])
 
   if (loading && !data) {
@@ -57,7 +59,7 @@ export default function BlueSkyInteractions({ postUri }: Props) {
     ) ?? []
 
   return (
-    <div className="mt-8 space-y-6 not-prose">
+    <div className="not-prose mt-8 space-y-6">
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">Reactions</h2>
         <div className="flex gap-4 text-gray-500 dark:text-gray-400">

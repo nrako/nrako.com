@@ -5,11 +5,13 @@ import type {
   AppBskyEmbedRecordWithMedia,
   AppBskyEmbedVideo,
 } from '@atproto/api'
+
+import TbArrowUpRight from '@/components/icons/TbArrowUpRight'
+import TbBrandBluesky from '@/components/icons/TbBrandBluesky'
+
 import Avatar from './avatar.tsx'
 import BskyAuthor from './bsky-author.tsx'
 import ReactionBar from './reaction-bar.tsx'
-import TbArrowUpRight from '@/components/icons/TbArrowUpRight'
-import TbBrandBluesky from '@/components/icons/TbBrandBluesky'
 
 // Type guard to check if the record has a text property
 const hasText = (value: unknown): value is { text: string } =>
@@ -33,7 +35,7 @@ function EmbedContent({ postUri }: { postUri: string }) {
       href={`https://bsky.app/profile/${did}/post/${postId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-x-2 mt-2 p-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      className="mt-2 flex items-center gap-x-2 rounded-lg border border-gray-200 bg-gray-100 p-2 text-sm text-gray-600 transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
     >
       <TbBrandBluesky className="inline-block" />
       View content on Bluesky
@@ -46,8 +48,8 @@ function EmbedBskyPost({ embed }: { embed: AppBskyEmbedRecord.View }) {
   const record = embed.record as AppBskyEmbedRecord.ViewRecord
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mb-2">
-      <div className="flex items-center space-x-2 mb-2">
+    <div className="mb-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
+      <div className="mb-2 flex items-center space-x-2">
         <Avatar
           src={record.author.avatar}
           name={record.author.displayName ?? record.author.handle}
@@ -110,7 +112,7 @@ export default function PostEmbed({ embed, postUri }: Props) {
       embed.record.$type === 'app.bsky.embed.record#viewNotFound'
     ) {
       return (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 mb-2 text-gray-500 dark:text-gray-400 text-sm italic">
+        <div className="mb-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-500 italic dark:bg-gray-800 dark:text-gray-400">
           Post not found
         </div>
       )

@@ -1,7 +1,8 @@
-import { defineConfig } from 'astro/config'
-import preact from '@astrojs/preact'
 import cloudflare from '@astrojs/cloudflare'
+import preact from '@astrojs/preact'
 import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'astro/config'
+
 import serverEnv from './src/integrations/server-env.ts'
 
 // https://astro.build/config

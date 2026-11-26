@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+
 import { skipWithoutFixturePosts } from './fixtures'
 
 // A window with a margin beside the column, and one without

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+
 import { defaultOptions } from '../../src/lib/blogData.ts'
 import processor from '../../src/lib/processor.ts'
 import { snippetHighlighter } from '../../src/lib/snippetHighlight.ts'

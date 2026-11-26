@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+
 import processor from '../../src/lib/processor.ts'
 import { nestTableOfContents } from '../../src/lib/tableOfContents.ts'
 

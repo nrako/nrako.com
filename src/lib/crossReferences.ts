@@ -1,5 +1,6 @@
 import { SKIP, visit } from 'unist-util-visit'
 import type { VFile } from 'vfile'
+
 import type { Messages } from './processor.ts'
 
 interface MdastNode {

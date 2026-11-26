@@ -7,6 +7,7 @@ import {
   type GenericNode,
 } from 'myst-common'
 import { visit } from 'unist-util-visit'
+
 import {
   CONSOLE_LANGUAGE,
   consoleMarkup,

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+
 import processor from '../../src/lib/processor.ts'
 
 const options = {
@@ -19,7 +20,7 @@ function web(pages: Record<string, string>) {
   const asked: string[] = []
   return {
     asked,
-    async fetchPage(address: string) {
+    fetchPage: async (address: string) => {
       asked.push(address)
       if (!(address in pages)) throw new Error('it answered 404')
       return pages[address]

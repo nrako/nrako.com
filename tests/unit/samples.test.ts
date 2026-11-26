@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { test } from 'node:test'
+
 import processor from '../../src/lib/processor.ts'
 
 // The sample posts are built together when the site is served with them

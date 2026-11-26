@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
+
 import TbMoonStars from '@/components/icons/TbMoonStars'
 import TbSunHigh from '@/components/icons/TbSunHigh'
 import TbSunMoon from '@/components/icons/TbSunMoon'
@@ -57,7 +58,7 @@ export default function ThemeToggle() {
       disabled
       title="Not available when JavaScript is disabled"
       aria-label="Toggle Theme"
-      class="rounded-full [&:not(:disabled):hover]:text-red-600 disabled:text-gray-500 text-3xl cursor-pointer disabled:cursor-default"
+      class="cursor-pointer rounded-full text-3xl disabled:cursor-default disabled:text-gray-500 [&:not(:disabled):hover]:text-red-600"
     >
       <span class="group-hover:hidden">
         {!userTheme ? (

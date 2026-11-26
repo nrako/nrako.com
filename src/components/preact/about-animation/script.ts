@@ -130,9 +130,9 @@ export type Chapter = (typeof CHAPTERS)[number]
 
 export interface Clock {
   /** Resolves after `ms`, or rejects with an AbortError when the run stops */
-  wait(ms: number): Promise<void>
+  wait: (ms: number) => Promise<void>
   /** Tells the clock which part of the sequence begins */
-  chapter(name: Chapter): void
+  chapter: (name: Chapter) => void
 }
 
 /** Number of typefaces the title goes through in scene 2 (see the CSS) */

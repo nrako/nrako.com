@@ -1,7 +1,8 @@
 ---
 import type { PageFrontmatter } from 'myst-frontmatter'
-import Time from './Time.astro'
+
 import Authors from './Authors.astro'
+import Time from './Time.astro'
 
 interface Props {
   url: string
@@ -17,20 +18,16 @@ const { url, frontmatter, language = 'en', showAuthors = false } = Astro.props
   <article>
     <header class="post-entry-head">
       <h2 class="post-entry-title">{frontmatter.title}</h2>
-      {
-        showAuthors && frontmatter.authors && (
-          <Authors
-            authors={frontmatter.authors}
-            affiliations={frontmatter.affiliations}
-          />
-        )
-      }
+      {showAuthors && frontmatter.authors && (
+        <Authors
+          authors={frontmatter.authors}
+          affiliations={frontmatter.affiliations}
+        />
+      )}
       {frontmatter.date && <Time date={frontmatter.date} language={language} />}
     </header>
-    {
-      frontmatter.description && (
-        <p class="post-entry-description">{frontmatter.description}</p>
-      )
-    }
+    {frontmatter.description && <p class="post-entry-description">
+      {frontmatter.description}
+    </p>}
   </article>
 </a>
