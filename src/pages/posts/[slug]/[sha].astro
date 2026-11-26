@@ -72,30 +72,14 @@ if (displayMessages) {
     class="post prose mx-auto max-w-(--column)"
   >
     <PostHeader post={post}>
-      <dialog
-        role="alertdialog"
-        open
-        class="post-messages not-prose"
-      >
-        You are looking at version{' '}
-        <a
+      <p class="version-notice not-prose">
+        You are looking at version <a
           href={`https://github.com/${options.versioning?.repoOwner}/${options.versioning?.repoName}/commit/${sha}`}
-        >
-          {sha}
-        </a>{
-          isLatest ? (
-            <>
-              , the latest version. Click <a href={postPath(post.slug)}>here</a>{' '}
-              to go to the post.
-            </>
-          ) : (
-            <>
-              . Click <a href={postPath(post.slug)}>here</a> to go back to the
-              latest version.
-            </>
-          )
-        }
-      </dialog>
+          >{sha}</a
+        >{isLatest ? ', the latest version. ' : '. '}<a href={postPath(post.slug)}
+          >{isLatest ? 'Go to the post' : 'Go to the latest version'}</a
+        >.
+      </p>
     </PostHeader>
     <div class="post-body">
       <div
