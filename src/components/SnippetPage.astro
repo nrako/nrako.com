@@ -16,9 +16,15 @@ interface Props {
   postAddress: string
   /** Its `canonical` and `cite-as`, under those of that page */
   links: SnippetLinks
+  /**
+   * On a snippet of an earlier version of its post, the notice that says so,
+   * and the link to the latest version: the snippet's page under the post, or
+   * the post when it no longer has the snippet
+   */
+  earlier?: { notice: string; href: string; link: string }
 }
 
-const { snippet, title, postAddress, links } = Astro.props
+const { snippet, title, postAddress, links, earlier } = Astro.props
 const address = snippetAddress(postAddress, snippet.label)
 
 // The icons of the page, drawn in the text's colour
@@ -116,6 +122,26 @@ const icon = {
         <span>Continue in LiveCodes</span>
       </a>
     </nav>
+
+    {/*
+     * A snippet of an earlier version says so, under the tools, in words drawn
+     * by CSS (`data-notice`), which are not the page's text
+     */}
+    {earlier && <p class="snippet-earlier not-prose">
+      <svg {...icon}>
+        <path d="M12 8v4l2 2M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
+      </svg>
+      <span
+        data-notice={earlier.notice}
+        role="note"
+        aria-label={earlier.notice}
+      ></span>
+      <a
+        href={earlier.href}
+        data-notice={earlier.link}
+        aria-label={earlier.link}
+      ></a>
+    </p>}
 
     <div class="snippet-preview" set:html={snippet.demo} />
 

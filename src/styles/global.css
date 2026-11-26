@@ -1462,6 +1462,46 @@ a:hover {
   height: 1.25em;
 }
 
+/*
+ * On a snippet of an earlier version, the notice that it is one, under the
+ * tools. Its words are generated content: the page's text stays the demo's
+ * alone.
+ */
+.snippet-earlier {
+  margin: -0.25rem 0 1rem;
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+.snippet-earlier svg {
+  display: inline;
+  width: 1.25em;
+  height: 1.25em;
+  margin-right: 0.4rem;
+  vertical-align: -0.3em;
+}
+
+.snippet-earlier span {
+  margin-right: 0.3em;
+}
+
+.snippet-earlier span::after,
+.snippet-earlier a::after {
+  content: attr(data-notice);
+}
+
+.snippet-earlier a {
+  text-decoration: underline;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 0.2em;
+}
+
+.snippet-earlier a:hover,
+.snippet-earlier a:focus-visible {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
 .snippet-tools .snippet-hide-source,
 .snippet-tools .snippet-start-again,
 .snippet-tools .snippet-continue,
