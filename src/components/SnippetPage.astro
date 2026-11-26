@@ -1,0 +1,188 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { consoleMarkup } from '@/lib/snippetDemo'
+import { snippetAddress, type PostSnippet } from '@/lib/snippets'
+
+interface Props {
+  snippet: PostSnippet
+  /** The title of the page the snippet is written in */
+  title: string
+  /**
+   * The address of that page: the post's, or one of its versions', which the
+   * snippet's page is under
+   */
+  postAddress: string
+}
+
+const { snippet, title, postAddress } = Astro.props
+const address = snippetAddress(postAddress, snippet.label)
+
+// The icons of the page, drawn in the text's colour
+const icon = {
+  xmlns: 'http://www.w3.org/2000/svg',
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+  'aria-hidden': 'true',
+} as const
+---
+
+<Layout bare title={`${snippet.title} - ${title}`} description={snippet.title}>
+  {/* A demo only means something with its post */}
+  <meta name="robots" content="noindex" slot="head" />
+  <script is:inline slot="head">
+    // `?source` asks for the sources. Known before render, as the theme is.
+    if (new URLSearchParams(location.search).has('source')) {
+      document.documentElement.setAttribute('data-snippet-source', '')
+    }
+  </script>
+
+  {/*
+   * The demo and nothing else that reads as text: what a browser does with
+   * the text of a page depends on what else the page says. The links are
+   * icons for that reason, and the sources, which repeat the demo's words,
+   * are not in the document unless the address asks for them with `?source`.
+   */}
+  <div
+    class="snippet-page mx-auto prose max-w-(--column)"
+    style={`--snippet-panes: ${snippet.files.length}`}
+  >
+    <nav class="snippet-tools not-prose">
+      <a
+        href={`${postAddress}#${snippet.label}`}
+        aria-label={`Back to the post: ${title}`}
+        title={`Back to the post: ${title}`}
+      >
+        <svg {...icon}><path d="M5 12h14M5 12l6 6M5 12l6-6"></path></svg>
+      </a>
+      <a
+        class="snippet-show-source"
+        href={`${address}?source`}
+        aria-label="Show and edit the sources"
+        title="Show and edit the sources"
+      >
+        <svg {...icon}>
+          <path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"></path>
+        </svg>
+      </a>
+      <a
+        class="snippet-hide-source"
+        href={address}
+        aria-label="Hide the sources"
+        title="Hide the sources"
+      >
+        <svg {...icon}>
+          <path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"></path>
+        </svg>
+      </a>
+      {/* Loading the page again is the one way back to the snippet as written */}
+      <a
+        class="snippet-start-again"
+        href={`${address}?source`}
+        aria-label="Start again from the snippet as written"
+        title="Start again from the snippet as written"
+      >
+        <svg {...icon}>
+          <path d="M19.9 13a8 8 0 1 1-2-6.4M20 4v5h-5"></path>
+        </svg>
+      </a>
+      {/*
+       * An edit is not kept here. The editor gives this link the address of
+       * a LiveCodes playground holding the sources as they stand; it opens
+       * apart, so that leaving does not lose them.
+       */}
+      <a
+        class="snippet-continue"
+        href="https://livecodes.io"
+        target="_blank"
+        rel="noopener"
+        data-title={snippet.title}
+        aria-label="Continue in LiveCodes, in a new tab"
+        title="Continue in LiveCodes, in a new tab"
+      >
+        <svg {...icon}>
+          <path
+            d="M11 6H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-4M10 14 20 4M14 4h6v6"
+          ></path>
+        </svg>
+        <span>Continue in LiveCodes</span>
+      </a>
+    </nav>
+
+    <div class="snippet-preview" set:html={snippet.demo} />
+
+    {/*
+     * The sources wait in a <template>, whose content is not part of the
+     * document: no search, selection or link to a selection can reach it.
+     * `lib/snippetEditor.ts` sets them in the page, as fields to edit, when
+     * the address asks for them.
+     */}
+    <div class="snippet-editor not-prose"></div>
+    <template id="snippet-editor">
+      {snippet.files.map((file, index) => <div class="snippet-pane">
+        <label for={`snippet-file-${index}`}>{file.name}</label>
+        {/* The field, and over it its text drawn in colours by the editor */}
+        <div class="snippet-field">
+          <textarea
+            id={`snippet-file-${index}`}
+            data-language={file.language}
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            set:text={file.code}
+          />
+        </div>
+      </div>)}
+    </template>
+
+    {/*
+     * In its post, a snippet's console holds what the post says the script
+     * writes. Here it starts empty and takes what the script does write:
+     * this page has one snippet, so all that is written to the console is
+     * its own. It comes last: under the demo, and under the sources when
+     * they are shown, across all of them.
+     *
+     * The script is inline, and not a module, to run before the demo's
+     * script, which is one and waits for the document. In dev, the page is
+     * not alone to write: what Vite says of itself is left out.
+     */}
+    {snippet.console && <Fragment set:html={consoleMarkup()} />}
+    <script is:inline define:vars={{ dev: import.meta.env.DEV }}>
+      ;(() => {
+        const written = document.querySelector('.snippet-console pre')
+        if (!written) return
+
+        const say = (value) => {
+          if (typeof value === 'string') return value
+          if (value instanceof Error) return String(value)
+          try {
+            return JSON.stringify(value) ?? String(value)
+          } catch {
+            return String(value)
+          }
+        }
+
+        for (const level of ['log', 'info', 'warn', 'error', 'debug']) {
+          const write = console[level].bind(console)
+          console[level] = (...values) => {
+            write(...values)
+            if (dev && String(values[0]).startsWith('[vite]')) return
+            const line = document.createElement('span')
+            line.dataset.level = level
+            line.textContent = `${values.map(say).join(' ')}\n`
+            written.append(line)
+          }
+        }
+      })()
+    </script>
+  </div>
+
+  <script>
+    import { mountSnippetEditor } from '@/lib/snippetEditor'
+
+    mountSnippetEditor()
+  </script>
+</Layout>
