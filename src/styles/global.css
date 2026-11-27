@@ -787,6 +787,108 @@ a:hover {
   gap: 2rem;
 }
 
+/*
+ * A post's versions: a list that opens under its "edits" button, or in the
+ * middle of the window in a browser without anchor positioning.
+ */
+.post-versions-button {
+  anchor-name: --post-versions;
+  cursor: pointer;
+}
+
+.post-versions-button:hover {
+  color: var(--ink);
+}
+
+.post-versions-list {
+  inset: 0;
+  margin: auto;
+  width: max-content;
+  max-width: min(28rem, calc(100vw - 2rem));
+  max-height: min(24rem, calc(100vh - 2rem));
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.25);
+  font-family: var(--type-text);
+  font-size: var(--size-meta);
+  line-height: 1.5;
+}
+
+@supports (position-area: bottom) {
+  .post-versions-list {
+    position-anchor: --post-versions;
+    position-area: bottom span-right;
+    /* Too wide for the room right of the button: across the window */
+    position-try-fallbacks: --post-versions-across;
+    /* Aligned on the button, and kept clear of the window's right edge */
+    inset: 0 1rem 0 0;
+    margin: 0.5rem 0;
+  }
+
+  @position-try --post-versions-across {
+    position-area: bottom span-all;
+    inset: 0 1rem;
+  }
+}
+
+.post-versions-list h3 {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: inherit;
+  font-weight: var(--weight-normal);
+}
+
+.post-versions-list ol {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-versions-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75rem;
+  margin: 0;
+  color: var(--muted);
+}
+
+.post-versions-entry :is(a, strong) {
+  color: var(--ink);
+  font-family: var(--type-mono);
+  font-weight: var(--weight-semibold);
+}
+
+.post-versions-message {
+  margin: 0;
+}
+
+/* On a version's page, which version it is, under the post's details */
+.version-notice {
+  margin-top: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 2px solid var(--rule);
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+/* The links to the versions, in the list and in the notice */
+:is(.post-versions-entry, .version-notice) a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 2px;
+}
+
+:is(.post-versions-entry, .version-notice) a:is(:hover, :focus-visible) {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
 .post-content {
   margin-bottom: 4rem;
 }
@@ -1358,6 +1460,46 @@ a:hover {
 .snippet-tools svg {
   width: 1.25em;
   height: 1.25em;
+}
+
+/*
+ * On a snippet of an earlier version, the notice that it is one, under the
+ * tools. Its words are generated content: the page's text stays the demo's
+ * alone.
+ */
+.snippet-earlier {
+  margin: -0.25rem 0 1rem;
+  color: var(--muted);
+  font-size: var(--size-meta);
+}
+
+.snippet-earlier svg {
+  display: inline;
+  width: 1.25em;
+  height: 1.25em;
+  margin-right: 0.4rem;
+  vertical-align: -0.3em;
+}
+
+.snippet-earlier span {
+  margin-right: 0.3em;
+}
+
+.snippet-earlier span::after,
+.snippet-earlier a::after {
+  content: attr(data-notice);
+}
+
+.snippet-earlier a {
+  text-decoration: underline;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 0.2em;
+}
+
+.snippet-earlier a:hover,
+.snippet-earlier a:focus-visible {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 .snippet-tools .snippet-hide-source,

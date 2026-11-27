@@ -1,6 +1,6 @@
 ---
 import { defaultOptions as options } from '@/lib/blogData'
-import type { CommitInfo } from '@/lib/githubVersioning'
+import type { CommitInfo } from '@/lib/gitVersioning'
 import { versionPath } from '@/lib/permalinks'
 
 import Time from './Time.astro'
@@ -20,9 +20,10 @@ const lastEditedDate = latestVersion?.date
   : 'Unknown'
 ---
 
-<section class="not-prose">
+<section class="post-versions not-prose">
   <button
     type="button"
+    class="post-versions-button"
     id="versions-button"
     popovertarget="versions-popover"
     title={`Edited on ${lastEditedDate}`}
@@ -30,11 +31,11 @@ const lastEditedDate = latestVersion?.date
     {versions.length} edits
   </button>
 
-  <div popover id="versions-popover">
-    <h3>Version History</h3>
-    <ul>
-      {versions.map((version) => <li class="version-item">
-        <div class="flex gap-2">
+  <div popover id="versions-popover" class="post-versions-list">
+    <h3>Version history</h3>
+    <ol>
+      {versions.map((version) => <li>
+        <p class="post-versions-entry">
           {version.sha === 'draft' ? (
             <strong>Draft</strong>
           ) : (
@@ -42,19 +43,15 @@ const lastEditedDate = latestVersion?.date
               href={versionPath(slug, version.shortSha)}
               title={`View version ${version.shortSha}`}
             >
-              <strong>{version.shortSha}</strong>
+              {version.shortSha}
             </a>
           )}
           <Time date={version.date} language={options.language} />
-          {version.author && (
-            <>
-              <span>by {version.author}</span>
-              {version.verified && <span>(Verified)</span>}
-            </>
-          )}
-        </div>
-        <p>{version.message.split('\n')[0]}</p>
+          {version.author && <span>by {version.author}</span>}
+          {version.verified && <span>verified</span>}
+        </p>
+        <p class="post-versions-message">{version.message.split('\n')[0]}</p>
       </li>)}
-    </ul>
+    </ol>
   </div>
 </section>

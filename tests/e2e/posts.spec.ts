@@ -185,12 +185,9 @@ test.describe('Post versions', () => {
     await page.getByRole('article').first().click()
     await expect(page.locator('.post-content')).toBeVisible()
 
-    // Version history comes from the GitHub API and needs GITHUB_TOKEN.
+    // Version history is read from the commits of origin/main.
     const versionLinks = page.locator('#versions-popover a')
-    test.skip(
-      (await versionLinks.count()) < 2,
-      'no version history (GITHUB_TOKEN not set?)',
-    )
+    test.skip((await versionLinks.count()) < 2, 'no version history')
 
     const oldestHref = await versionLinks.last().getAttribute('href')
     expect(oldestHref).toMatch(/^\/posts\/[^/]+\/[0-9a-f]{7}$/)
@@ -225,10 +222,7 @@ test.describe('Post versions', () => {
     const postPath = new URL(page.url()).pathname
 
     const versionLinks = page.locator('#versions-popover a')
-    test.skip(
-      (await versionLinks.count()) < 2,
-      'no version history (GITHUB_TOKEN not set?)',
-    )
+    test.skip((await versionLinks.count()) < 2, 'no version history')
 
     // The newest entry links to its permalink, as the others do
     const latestHref = await versionLinks.first().getAttribute('href')

@@ -1,4 +1,4 @@
-import type { CommitInfo } from './githubVersioning.ts'
+import type { CommitInfo } from './gitVersioning.ts'
 import { snippetAddress } from './snippets.ts'
 
 /** The page of a post, which shows it as it is now */

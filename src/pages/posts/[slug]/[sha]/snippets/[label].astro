@@ -1,8 +1,14 @@
 ---
 import SnippetPage from '@/components/SnippetPage.astro'
 import { getPosts, defaultOptions as options } from '@/lib/blogData'
-import { getPostAtVersion } from '@/lib/githubVersioning'
-import { snippetLinks, versionPath } from '@/lib/permalinks'
+import { getPostAtVersion } from '@/lib/gitVersioning'
+import {
+  latestVersion,
+  postPath,
+  snippetLinks,
+  versionPath,
+} from '@/lib/permalinks'
+import { snippetAddress } from '@/lib/snippets'
 import type { PostSnippet } from '@/lib/snippets'
 
 interface Props {
@@ -10,12 +16,13 @@ interface Props {
   post: { slug: string; title: string }
   /** Whether the post as it is now has a snippet of this label */
   inPost: boolean
+  /** Whether the version is the post's latest */
+  isLatest: boolean
 }
 
 // The pages of the snippets of every committed version of every post, built
-// from that version's sources. A version is fetched once for its page and
-// these (`getPostAtVersion`); a build without GITHUB_TOKEN has no versions,
-// and so none of these pages.
+// from that version's sources. A version is read once for its page and
+// these (`getPostAtVersion`).
 export async function getStaticPaths() {
   const posts = await getPosts(options)
   const versions = posts.flatMap((post) =>
@@ -25,16 +32,17 @@ export async function getStaticPaths() {
         slug: post.slug,
         sha: version.shortSha,
         labels: new Set(post.snippets.map((snippet) => snippet.label)),
+        isLatest: version.shortSha === latestVersion(post.versions)?.shortSha,
       })),
   )
 
   const paths = await Promise.all(
-    versions.map(async ({ slug, sha, labels }) => {
+    versions.map(async ({ slug, sha, labels, isLatest }) => {
       const post = await getPostAtVersion(slug, sha, options)
       // Listed in the commit history: failing to load it fails the build
       if (!post) {
         throw new Error(
-          `Could not load version ${sha} of post "${slug}" from GitHub`,
+          `Could not load version ${sha} of post "${slug}" from git`,
         )
       }
       return post.snippets.map((snippet) => ({
@@ -43,6 +51,7 @@ export async function getStaticPaths() {
           snippet,
           post: { slug, title: post.frontmatter.title ?? slug },
           inPost: labels.has(snippet.label),
+          isLatest,
         },
       }))
     }),
@@ -51,13 +60,32 @@ export async function getStaticPaths() {
 }
 
 const { sha } = Astro.params
-const { snippet, post, inPost } = Astro.props
+const { snippet, post, inPost, isLatest } = Astro.props
+
+// An earlier version's snippet says so, and leads to the latest: the same
+// snippet's page when the post still has it, else the post. The snippet may
+// not have changed: what is known is that the post has.
+const earlier = isLatest
+  ? undefined
+  : {
+      notice: `This snippet is shown as in version ${sha} of the post, which has been edited since.`,
+      ...(inPost
+        ? {
+            href: snippetAddress(postPath(post.slug), snippet.label),
+            link: 'See it in the latest version',
+          }
+        : {
+            href: postPath(post.slug),
+            link: 'The latest version no longer has it: go to the post',
+          }),
+    }
 ---
 
 <SnippetPage
   snippet={snippet}
   title={`${post.title} (${sha})`}
   postAddress={versionPath(post.slug, sha)}
+  earlier={earlier}
   links={snippetLinks({
     site: Astro.site!,
     slug: post.slug,

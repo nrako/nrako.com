@@ -3,8 +3,6 @@ import preact from '@astrojs/preact'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 
-import serverEnv from './src/integrations/server-env.ts'
-
 // https://astro.build/config
 export default defineConfig({
   site: 'https://nrako.com',
@@ -40,8 +38,6 @@ export default defineConfig({
   integrations: [
     // Preact integration for interactive islands
     preact(),
-    // Expose GITHUB_TOKEN from .env to the prerendered pages
-    serverEnv(),
   ],
 
   // Image optimization

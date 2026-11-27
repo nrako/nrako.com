@@ -6,15 +6,15 @@ import PostHeader from '@/components/PostHeader.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
 import PostLinks from '@/components/PostLinks.astro'
 import { defaultOptions as options, getPosts } from '@/lib/blogData'
-import { getPostAtVersion, type CommitInfo } from '@/lib/githubVersioning'
+import { getPostAtVersion, type CommitInfo } from '@/lib/gitVersioning'
 import { latestVersion, postLinks, postPath } from '@/lib/permalinks'
 
 interface Props {
   versions: CommitInfo[]
 }
 
-// One static page per committed version of every post. The versions come from
-// the GitHub commit history, so a build without GITHUB_TOKEN generates none.
+// One static page per committed version of every post, read from the git
+// history of the repository the site is built from.
 export async function getStaticPaths() {
   const posts = await getPosts(options)
 
@@ -41,7 +41,7 @@ const post = await getPostAtVersion(slug, sha, options)
 // The version is listed in the commit history, so failing to load it is a
 // build error rather than a page to publish.
 if (!post) {
-  throw new Error(`Could not load version ${sha} of post "${slug}" from GitHub`)
+  throw new Error(`Could not load version ${sha} of post "${slug}" from git`)
 }
 
 post.versions = versions
@@ -72,30 +72,14 @@ if (displayMessages) {
     class="post prose mx-auto max-w-(--column)"
   >
     <PostHeader post={post}>
-      <dialog
-        role="alertdialog"
-        open
-        class="post-messages not-prose"
-      >
-        You are looking at version{' '}
-        <a
+      <p class="version-notice not-prose">
+        You are looking at version <a
           href={`https://github.com/${options.versioning?.repoOwner}/${options.versioning?.repoName}/commit/${sha}`}
-        >
-          {sha}
-        </a>{
-          isLatest ? (
-            <>
-              , the latest version. Click <a href={postPath(post.slug)}>here</a>{' '}
-              to go to the post.
-            </>
-          ) : (
-            <>
-              . Click <a href={postPath(post.slug)}>here</a> to go back to the
-              latest version.
-            </>
-          )
-        }
-      </dialog>
+          >{sha}</a
+        >{isLatest ? ', the latest version. ' : '. '}<a href={postPath(post.slug)}
+          >{isLatest ? 'Go to the post' : 'Go to the latest version'}</a
+        >.
+      </p>
     </PostHeader>
     <div class="post-body">
       <div

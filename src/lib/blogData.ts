@@ -6,8 +6,12 @@ import { parseHTML } from 'linkedom'
 import type { PageFrontmatter } from 'myst-frontmatter'
 
 import { CODE_COLOR_REPLACEMENTS, CODE_THEMES } from './codeThemes.ts'
-import type { CommitInfo } from './githubVersioning.ts'
-import { getCommitHistory, isDraftVersion } from './githubVersioning.ts'
+import type { CommitInfo, VersioningOptions } from './gitVersioning.ts'
+import {
+  assertPublished,
+  getCommitHistory,
+  isDraftVersion,
+} from './gitVersioning.ts'
 import type { Messages, PostFrontmatter } from './processor.ts'
 import processor from './processor.ts'
 import { fetchPage } from './quotes.ts'
@@ -50,14 +54,8 @@ export interface BlogOptions {
    * or `never`
    */
   showAuthors: 'always' | 'only_in_posts' | 'never'
-  versioning:
-    | {
-        provider: 'github'
-        mainBranch: string
-        repoOwner: string
-        repoName: string
-      }
-    | undefined
+  /** Where the history of the posts is read, none when absent */
+  versioning: VersioningOptions | undefined
 }
 
 export interface Post {
@@ -89,8 +87,12 @@ export const defaultOptions: BlogOptions = {
   },
   showAuthors: 'only_in_posts',
   versioning: {
-    provider: 'github',
-    mainBranch: 'main',
+    // Pushed commits only: a permalink names a commit that stays
+    ref: 'refs/remotes/origin/main',
+    // Under `posts/` whatever `POSTS_DIR` says: fixtures have no history
+    postsPath: 'posts',
+    // `pnpm run deploy` builds with `DEPLOY=1`: no draft is published
+    published: process.env.DEPLOY === '1',
     repoOwner: 'nrako',
     repoName: 'nrako.com',
   },
@@ -103,6 +105,9 @@ export const defaultOptions: BlogOptions = {
 export async function getPosts(
   options: BlogOptions = defaultOptions,
 ): Promise<Post[]> {
+  // A build to deploy fails on a post that is not committed and pushed
+  if (options.versioning) await assertPublished(options.versioning)
+
   // Git does not track empty directories: with nothing published, the
   // content directory does not exist in a fresh clone.
   if (!existsSync(options.contentDir)) return []
@@ -171,14 +176,18 @@ export async function getPost(
     readingTimeMinutes: calculateReadingTime(html),
   }
 
-  // Fetch versions from GitHub (only at build time or in dev)
-  const githubToken = import.meta.env?.GITHUB_TOKEN || process.env.GITHUB_TOKEN
-  if (githubToken && options.versioning) {
-    metadata.versions = await getCommitHistory(slug, options)
+  // The versions are read from git (only at build time or in dev)
+  if (options.versioning) {
+    metadata.versions = await getCommitHistory(slug, options.versioning)
 
     if (
       metadata.versions.length > 0 &&
-      (await isDraftVersion(slug, text, metadata.versions[0], options))
+      (await isDraftVersion(
+        slug,
+        text,
+        metadata.versions[0],
+        options.versioning,
+      ))
     ) {
       metadata.versions.unshift({
         sha: 'draft',
